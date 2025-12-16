@@ -1,0 +1,24 @@
+# Node dependencies in root (if any)
+node_modules/
+
+# Env files
+*.env
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VSCode / IDE
+.vscode/
+.idea/
+
+# Build artifacts
+dist/
+build/
+
+# Optional: ignore subfolder node_modules if you prefer
+client/node_modules/
+server/node_modules/
