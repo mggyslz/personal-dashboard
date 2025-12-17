@@ -5,6 +5,7 @@ interface Reminder {
   id: number;
   text: string;
   date: string;
+  time: string;
   completed: number;
 }
 
@@ -12,6 +13,7 @@ export default function Reminders() {
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [newReminder, setNewReminder] = useState('');
   const [newDate, setNewDate] = useState('');
+  const [newTime, setNewTime] = useState('09:00');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,9 +39,11 @@ export default function Reminders() {
       await api.createReminder({
         text: newReminder,
         date: newDate,
+        time: newTime,
       });
       setNewReminder('');
       setNewDate('');
+      setNewTime('09:00');
       loadReminders();
     } catch (error) {
       console.error('Error creating reminder:', error);
@@ -85,12 +89,20 @@ export default function Reminders() {
           placeholder="Add a reminder..."
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
         />
-        <input
-          type="date"
-          value={newDate}
-          onChange={(e) => setNewDate(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
-        />
+        <div className="flex gap-2">
+          <input
+            type="date"
+            value={newDate}
+            onChange={(e) => setNewDate(e.target.value)}
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
+          />
+          <input
+            type="time"
+            value={newTime}
+            onChange={(e) => setNewTime(e.target.value)}
+            className="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
+          />
+        </div>
         <button
           type="submit"
           className="w-full bg-gray-700 text-white py-2 rounded-lg hover:bg-gray-800 transition"
@@ -126,7 +138,7 @@ export default function Reminders() {
                     {reminder.text}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    {new Date(reminder.date).toLocaleDateString()}
+                    {new Date(reminder.date).toLocaleDateString()} at {reminder.time}
                   </p>
                 </div>
               </div>

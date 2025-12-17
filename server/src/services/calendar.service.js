@@ -1,42 +1,39 @@
+const remindersRepo = require('../db/repositories/reminders.repo');
+
 class CalendarService {
   /**
-   * Get calendar events
-   * NOTE: This is a mock implementation. 
-   * For real Google Calendar integration, you'll need to set up OAuth2
+   * Get calendar events from reminders
    */
   async getEvents() {
-    // Mock events for now
-    return this.getMockEvents();
+    // Get all reminders and convert them to calendar events
+    const reminders = await remindersRepo.findAll();
+    const reminderEvents = reminders.map(reminder => this.convertReminderToEvent(reminder));
+    
+    return reminderEvents;
   }
 
-  getMockEvents() {
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+  convertReminderToEvent(reminder) {
+    // Parse date and time
+    const [hours, minutes] = (reminder.time || '09:00').split(':');
+    
+    // IMPORTANT: Use the date string directly to avoid timezone issues
+    const dateStr = reminder.date; // e.g., "2024-12-21"
+    const eventDate = new Date(`${dateStr}T${reminder.time || '09:00'}:00`);
+    
+    // End time is 1 hour after start by default
+    const endDate = new Date(eventDate);
+    endDate.setHours(endDate.getHours() + 1);
 
-    return [
-      {
-        id: '1',
-        title: 'Team Meeting',
-        start: new Date(today.setHours(10, 0, 0)),
-        end: new Date(today.setHours(11, 0, 0)),
-        description: 'Weekly sync with team'
-      },
-      {
-        id: '2',
-        title: 'Lunch with Client',
-        start: new Date(today.setHours(12, 30, 0)),
-        end: new Date(today.setHours(13, 30, 0)),
-        description: 'Business lunch'
-      },
-      {
-        id: '3',
-        title: 'Project Review',
-        start: new Date(tomorrow.setHours(14, 0, 0)),
-        end: new Date(tomorrow.setHours(15, 30, 0)),
-        description: 'Quarterly project review'
-      }
-    ];
+    return {
+      id: `reminder-${reminder.id}`,
+      title: reminder.text,
+      start: eventDate.toISOString(),
+      end: endDate.toISOString(),
+      description: reminder.completed ? 'Completed' : 'Pending',
+      type: 'reminder',
+      completed: reminder.completed,
+      reminderId: reminder.id
+    };
   }
 }
 

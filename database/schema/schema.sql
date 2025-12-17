@@ -13,10 +13,11 @@ CREATE TABLE IF NOT EXISTS entries (
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Reminders table
+-- Reminders table (now with time field)
 CREATE TABLE IF NOT EXISTS reminders (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   date TEXT NOT NULL,
+  time TEXT DEFAULT '09:00', -- New field for time (HH:MM format)
   text TEXT NOT NULL,
   completed INTEGER DEFAULT 0,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,

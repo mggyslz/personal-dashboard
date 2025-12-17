@@ -3,7 +3,7 @@ const remindersRepo = require('../db/repositories/reminders.repo');
 class RemindersController {
   async create(req, res) {
     try {
-      const { text, date } = req.body;
+      const { text, date, time } = req.body;
 
       if (!text || !date) {
         return res.status(400).json({ 
@@ -11,7 +11,7 @@ class RemindersController {
         });
       }
 
-      const reminder = await remindersRepo.create({ text, date });
+      const reminder = await remindersRepo.create({ text, date, time: time || '09:00' });
       res.status(201).json(reminder);
     } catch (error) {
       console.error('Create reminder error:', error);
@@ -41,7 +41,7 @@ class RemindersController {
 
   async update(req, res) {
     try {
-      const { text, date, completed } = req.body;
+      const { text, date, time, completed } = req.body;
       const { id } = req.params;
 
       if (!text || !date) {
@@ -53,6 +53,7 @@ class RemindersController {
       const reminder = await remindersRepo.update(id, {
         text,
         date,
+        time: time || '09:00',
         completed: completed ? 1 : 0
       });
 

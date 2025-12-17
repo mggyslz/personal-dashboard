@@ -2,17 +2,17 @@ const db = require('../sqlite');
 
 class RemindersRepository {
   async create(reminder) {
-    const { date, text } = reminder;
+    const { date, time, text } = reminder;
     const sql = `
-      INSERT INTO reminders (date, text, completed)
-      VALUES (?, ?, 0)
+      INSERT INTO reminders (date, time, text, completed)
+      VALUES (?, ?, ?, 0)
     `;
-    const result = await db.run(sql, [date, text]);
+    const result = await db.run(sql, [date, time || '09:00', text]);
     return this.findById(result.id);
   }
 
   async findAll() {
-    const sql = 'SELECT * FROM reminders ORDER BY date ASC';
+    const sql = 'SELECT * FROM reminders ORDER BY date ASC, time ASC';
     return await db.all(sql);
   }
 
@@ -25,20 +25,20 @@ class RemindersRepository {
     const sql = `
       SELECT * FROM reminders 
       WHERE completed = 0 
-      ORDER BY date ASC
+      ORDER BY date ASC, time ASC
     `;
     return await db.all(sql);
   }
 
   async update(id, reminder) {
-    const { date, text, completed } = reminder;
+    const { date, time, text, completed } = reminder;
     const sql = `
       UPDATE reminders 
-      SET date = ?, text = ?, completed = ?,
+      SET date = ?, time = ?, text = ?, completed = ?,
           updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `;
-    await db.run(sql, [date, text, completed, id]);
+    await db.run(sql, [date, time || '09:00', text, completed, id]);
     return this.findById(id);
   }
 

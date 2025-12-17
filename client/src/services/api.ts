@@ -9,6 +9,7 @@ interface CreateEntryDto {
 interface CreateReminderDto {
   text: string;
   date: string;
+  time?: string;
 }
 
 class ApiService {
