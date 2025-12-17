@@ -1,18 +1,21 @@
 const Sentiment = require('sentiment');
 const sentiment = new Sentiment();
+const nlp = require('compromise');
+const natural = require('natural');
+const stopword = require('stopword');
 
 class AIService {
   /**
    * Analyze journal text for mood, themes, and insights
    */
-  async analyze(text) {
+  async analyze(text, previousEntries = []) {
     if (!text || text.trim().length === 0) {
       throw new Error('Text cannot be empty');
     }
 
     const mood = this.analyzeMood(text);
     const themes = this.extractThemes(text);
-    const insights = this.generateInsights(text, mood, themes);
+    const insights = this.generateInsights(text, mood, themes, previousEntries);
 
     return {
       mood,
@@ -36,70 +39,86 @@ class AIService {
   }
 
   /**
-   * Extract key themes/keywords from text
+   * Extract key themes/keywords using compromise + TF-IDF
    */
   extractThemes(text) {
-    // Common stop words to filter out
-    const stopWords = new Set([
-      'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
-      'of', 'with', 'by', 'from', 'as', 'is', 'was', 'are', 'were', 'been',
-      'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would',
-      'could', 'should', 'may', 'might', 'must', 'can', 'i', 'you', 'he',
-      'she', 'it', 'we', 'they', 'my', 'your', 'his', 'her', 'its', 'our',
-      'their', 'this', 'that', 'these', 'those', 'am', 'very', 'just',
-      'so', 'than', 'too', 'about', 'me', 'him', 'them', 'us'
-    ]);
+    const doc = nlp(text);
 
-    // Tokenize and clean
-    const words = text
-      .toLowerCase()
-      .replace(/[^\w\s]/g, ' ')
-      .split(/\s+/)
-      .filter(word => word.length > 3 && !stopWords.has(word));
+    // Extract nouns and noun phrases
+    const nouns = doc.nouns().out('array');
+    const phrases = doc.nouns().out('phrases');
 
-    // Count word frequency
-    const wordFreq = {};
-    words.forEach(word => {
-      wordFreq[word] = (wordFreq[word] || 0) + 1;
+    // Combine words and phrases, remove stopwords
+    const words = stopword.removeStopwords([...nouns, ...phrases].map(w => w.toLowerCase()))
+      .filter(word => word.length > 3);
+
+    // Count frequency
+    const freq = {};
+    words.forEach(w => {
+      freq[w] = (freq[w] || 0) + 1;
     });
 
-    // Get top 5 themes
-    const themes = Object.entries(wordFreq)
+    // Top 5 themes
+    return Object.entries(freq)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)
       .map(([word]) => word);
-
-    return themes;
   }
 
   /**
-   * Generate insights based on analysis
+   * Generate verbose insights
    */
   generateInsights(text, mood, themes) {
     const insights = [];
 
     // Mood-based insight
     if (mood.includes('Positive')) {
-      insights.push('You seem to be in a good mental space today.');
+      insights.push('You seem to be in a good mental space today. Keep embracing this energy!');
     } else if (mood.includes('Negative')) {
-      insights.push('Consider what might be causing these feelings.');
+      insights.push('You might be facing some challenges today. Reflect on what triggered these feelings.');
     } else {
-      insights.push('Your emotions seem balanced today.');
+      insights.push('Your emotions seem balanced today. Maintain this steady mindset.');
     }
 
     // Theme-based insight
     if (themes.length > 0) {
-      insights.push(`Key focus areas: ${themes.slice(0, 3).join(', ')}.`);
+      insights.push(`Key focus areas: ${themes.slice(0, 5).join(', ')}.`);
     }
 
     // Length-based insight
     const wordCount = text.split(/\s+/).length;
     if (wordCount > 200) {
-      insights.push('You had a lot to express today.');
+      insights.push('You had a lot to express today, which shows deep reflection.');
     } else if (wordCount < 50) {
-      insights.push('Consider expanding on your thoughts more.');
+      insights.push('Consider elaborating a bit more to capture your thoughts fully.');
     }
 
+    // Dynamic reflective prompts
+    const reflectionPrompts = [
+      'What went well today and why?',
+      'Which challenges taught you something new?',
+      'How can you apply what you learned tomorrow?',
+      'What energized you today?',
+      'Is there something small you can do to improve tomorrow?'
+    ];
+
+    // If negative mood, pick prompts that encourage action
+    const negativePrompts = [
+      'Identify one small step to improve your mindset.',
+      'What could have made today feel better?',
+      'Which challenge could you approach differently tomorrow?'
+    ];
+
+    const promptsPool = mood.includes('Negative') ? negativePrompts : reflectionPrompts;
+
+    // Pick 1-2 random prompts
+    const selectedPrompts = promptsPool
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 2);
+
+    insights.push(...selectedPrompts);
+
+    // Return insights as a single string
     return insights.join(' ');
   }
 }

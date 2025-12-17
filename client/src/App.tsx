@@ -18,8 +18,9 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <header className="mb-6">
+    <div className="h-screen flex flex-col bg-gray-100">
+      {/* Header */}
+      <header className="p-4 bg-white shadow">
         <h1 className="text-4xl font-bold text-gray-800">{greeting}, Miggy!</h1>
         <p className="text-gray-600">
           {new Date().toLocaleDateString('en-US', {
@@ -31,20 +32,26 @@ function App() {
         </p>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
-        <Weather />
-        <Calendar />
-        <News />
-      </div>
+      {/* Main content */}
+      <main className="flex-1 p-4 overflow-auto space-y-4">
+        {/* Top row: Weather, Calendar, News */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <Weather />
+          <Calendar />
+          <News />
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <Reminders />
-        <Quote />
-      </div>
+        {/* Middle row: Reminders and Quote */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Reminders />
+          <Quote />
+        </div>
 
-      <div className="mb-4">
-        <Journal />
-      </div>
+        {/* Bottom row: Journal */}
+        <div>
+          <Journal />
+        </div>
+      </main>
     </div>
   );
 }
