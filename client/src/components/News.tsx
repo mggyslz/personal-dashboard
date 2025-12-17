@@ -30,16 +30,16 @@ export default function News() {
 
   if (loading) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-semibold mb-4">News</h2>
+      <div className="bg-white p-6 rounded-lg shadow-sm">
+        <h2 className="text-lg font-semibold mb-4 text-gray-800">News</h2>
         <p className="text-gray-500">Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow">
-      <h2 className="text-xl font-semibold mb-4">Latest News</h2>
+    <div className="bg-white p-6 rounded-lg shadow-sm">
+      <h2 className="text-lg font-semibold mb-4 text-gray-800">Latest News</h2>
 
       {articles.length === 0 ? (
         <p className="text-gray-500">No news available</p>
@@ -48,18 +48,17 @@ export default function News() {
           {articles.slice(0, 3).map((article) => (
             <div
               key={article.url}
-              className="border-b pb-2 last:border-0"
+              className="border-b pb-3 last:border-0"
             >
               <a
                 href={article.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline font-medium"
+                className="text-gray-800 hover:text-gray-600 font-medium block mb-1"
               >
                 {article.title}
               </a>
-
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500">
                 {article.source}
               </p>
             </div>

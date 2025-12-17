@@ -1,4 +1,3 @@
-/* Reset some defaults */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -6,11 +5,14 @@
 }
 
 html, body, #root {
-  height: 100%;       /* full viewport height */
-  width: 100%;        /* full width */
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  background-color: #f3f4f6; /* light gray background (Tailwind bg-gray-100) */
-  color: #111827;     /* dark text color */
+  height: 100%;
+  width: 100%;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
 }
 
 a {
@@ -19,22 +21,14 @@ a {
 }
 
 button {
-  border-radius: 0.5rem;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1rem;
-  font-weight: 500;
-  font-family: inherit;
+  border: none;
+  background: none;
   cursor: pointer;
-  transition: border-color 0.25s, background-color 0.25s;
-}
-
-button:hover {
-  border-color: #6366f1; /* Tailwind indigo-500 */
+  font-family: inherit;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 700;
+  font-weight: 600;
 }
 
 img {
@@ -46,12 +40,20 @@ ul, ol {
   list-style: none;
 }
 
-/* Optional: Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
+  background: #d1d5db;
   border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
 }

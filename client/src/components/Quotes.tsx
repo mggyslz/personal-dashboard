@@ -1,144 +1,80 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 
-interface Reminder {
-  id: number;
+interface QuoteData {
   text: string;
-  date: string;
-  completed: number;
+  author: string;
 }
 
-export default function Reminders() {
-  const [reminders, setReminders] = useState<Reminder[]>([]);
-  const [newReminder, setNewReminder] = useState('');
-  const [newDate, setNewDate] = useState('');
+export default function Quote() {
+  const [quote, setQuote] = useState<QuoteData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadReminders();
+    loadQuote();
   }, []);
 
-  const loadReminders = async () => {
+  const loadQuote = async () => {
     try {
-      const data = await api.getReminders();
-      setReminders(data);
+      const data = await api.getDailyQuote();
+      setQuote(data);
     } catch (error) {
-      console.error('Error loading reminders:', error);
+      console.error('Error loading quote:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAdd = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newReminder.trim() || !newDate) return;
-
+  const refreshQuote = async () => {
+    setLoading(true);
     try {
-      await api.createReminder({
-        text: newReminder,
-        date: newDate,
-      });
-      setNewReminder('');
-      setNewDate('');
-      loadReminders();
+      const data = await api.getRandomQuote();
+      setQuote(data);
     } catch (error) {
-      console.error('Error creating reminder:', error);
-    }
-  };
-
-  const handleToggle = async (id: number) => {
-    try {
-      await api.toggleReminder(id);
-      loadReminders();
-    } catch (error) {
-      console.error('Error toggling reminder:', error);
-    }
-  };
-
-  const handleDelete = async (id: number) => {
-    try {
-      await api.deleteReminder(id);
-      loadReminders();
-    } catch (error) {
-      console.error('Error deleting reminder:', error);
+      console.error('Error loading quote:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   if (loading) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-semibold mb-4">Reminders</h2>
+      <div className="bg-white p-6 rounded-lg shadow-sm">
+        <h2 className="text-lg font-semibold mb-4 text-gray-800">Quote of the Day</h2>
         <p className="text-gray-500">Loading...</p>
       </div>
     );
   }
 
+  if (!quote) {
+    return (
+      <div className="bg-white p-6 rounded-lg shadow-sm">
+        <h2 className="text-lg font-semibold mb-4 text-gray-800">Quote of the Day</h2>
+        <p className="text-gray-500">Unable to load quote</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-white p-6 rounded-lg shadow">
-      <h2 className="text-xl font-semibold mb-4">Reminders</h2>
-
-      <form onSubmit={handleAdd} className="mb-4 space-y-2">
-        <input
-          type="text"
-          value={newReminder}
-          onChange={(e) => setNewReminder(e.target.value)}
-          placeholder="Add a reminder..."
-          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <input
-          type="date"
-          value={newDate}
-          onChange={(e) => setNewDate(e.target.value)}
-          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+    <div className="bg-white p-6 rounded-lg shadow-sm">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold text-gray-800">Quote of the Day</h2>
         <button
-          type="submit"
-          className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition"
+          onClick={refreshQuote}
+          className="text-gray-600 hover:text-gray-800 text-sm font-medium"
+          disabled={loading}
         >
-          Add Reminder
+          Refresh
         </button>
-      </form>
-
-      <div className="space-y-2 max-h-64 overflow-y-auto">
-        {reminders.length === 0 ? (
-          <p className="text-gray-500">No reminders yet</p>
-        ) : (
-          reminders.map((reminder) => (
-            <div
-              key={reminder.id}
-              className="flex items-center justify-between p-2 border rounded hover:bg-gray-50"
-            >
-              <div className="flex items-center space-x-2 flex-1">
-                <input
-                  type="checkbox"
-                  checked={reminder.completed === 1}
-                  onChange={() => handleToggle(reminder.id)}
-                  className="w-4 h-4"
-                />
-                <div className="flex-1">
-                  <p
-                    className={`${
-                      reminder.completed === 1
-                        ? 'line-through text-gray-500'
-                        : 'text-gray-800'
-                    }`}
-                  >
-                    {reminder.text}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {new Date(reminder.date).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => handleDelete(reminder.id)}
-                className="text-red-500 hover:text-red-700 px-2"
-              >
-                ×
-              </button>
-            </div>
-          ))
-        )}
+      </div>
+      
+      <div className="space-y-3">
+        <p className="text-gray-700 text-lg italic leading-relaxed">
+          "{quote.text}"
+        </p>
+        <p className="text-gray-600 text-sm font-medium text-right">
+          — {quote.author}
+        </p>
       </div>
     </div>
   );

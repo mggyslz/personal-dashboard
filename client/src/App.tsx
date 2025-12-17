@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import Weather from './components/Weather.tsx';
-import Calendar from './components/Calendar.tsx';
-import News from './components/News.tsx';
-import Reminders from './components/Reminders.tsx';
-import Quote from './components/Quotes.tsx';
-import Journal from './components/Journal.tsx';
+import Weather from './components/Weather';
+import Calendar from './components/Calendar';
+import News from './components/News';
+import Reminders from './components/Reminders';
+import Quote from './components/Quotes';  
+import Journal from './components/Journal';
 import './App.css';
 
 function App() {
@@ -18,11 +18,10 @@ function App() {
   }, []);
 
   return (
-    <div className="h-screen flex flex-col bg-gray-100">
-      {/* Header */}
-      <header className="p-4 bg-white shadow">
-        <h1 className="text-4xl font-bold text-gray-800">{greeting}, Miggy!</h1>
-        <p className="text-gray-600">
+    <div className="min-h-screen flex flex-col bg-gray-100">
+      <header className="p-6 bg-white shadow-sm">
+        <h1 className="text-3xl font-bold text-gray-800">{greeting}, Miggy!</h1>
+        <p className="text-gray-600 mt-1">
           {new Date().toLocaleDateString('en-US', {
             weekday: 'long',
             year: 'numeric',
@@ -32,24 +31,22 @@ function App() {
         </p>
       </header>
 
-      {/* Main content */}
-      <main className="flex-1 p-4 overflow-auto space-y-4">
-        {/* Top row: Weather, Calendar, News */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <Weather />
-          <Calendar />
-          <News />
-        </div>
+      <main className="flex-1 p-6 overflow-auto">
+        <div className="max-w-7xl mx-auto space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Weather />
+            <Calendar />
+            <News />
+          </div>
 
-        {/* Middle row: Reminders and Quote */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <Reminders />
-          <Quote />
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Reminders />
+            <Quote />
+          </div>
 
-        {/* Bottom row: Journal */}
-        <div>
-          <Journal />
+          <div>
+            <Journal />
+          </div>
         </div>
       </main>
     </div>

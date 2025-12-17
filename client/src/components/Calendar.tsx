@@ -37,24 +37,24 @@ export default function Calendar() {
 
   if (loading) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-semibold mb-4">Calendar</h2>
+      <div className="bg-white p-6 rounded-lg shadow-sm">
+        <h2 className="text-lg font-semibold mb-4 text-gray-800">Calendar</h2>
         <p className="text-gray-500">Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow">
-      <h2 className="text-xl font-semibold mb-4">Upcoming Events</h2>
+    <div className="bg-white p-6 rounded-lg shadow-sm">
+      <h2 className="text-lg font-semibold mb-4 text-gray-800">Upcoming Events</h2>
       {events.length === 0 ? (
         <p className="text-gray-500">No upcoming events</p>
       ) : (
         <div className="space-y-3">
           {events.slice(0, 3).map((event) => (
-            <div key={event.id} className="border-l-4 border-blue-500 pl-3">
+            <div key={event.id} className="border-l-4 border-gray-600 pl-3 py-1">
               <h3 className="font-semibold text-gray-800">{event.title}</h3>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 mt-1">
                 {formatTime(event.start)} - {formatTime(event.end)}
               </p>
             </div>

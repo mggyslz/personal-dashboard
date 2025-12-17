@@ -66,16 +66,16 @@ export default function Reminders() {
 
   if (loading) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-semibold mb-4">Reminders</h2>
+      <div className="bg-white p-6 rounded-lg shadow-sm">
+        <h2 className="text-lg font-semibold mb-4 text-gray-800">Reminders</h2>
         <p className="text-gray-500">Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow">
-      <h2 className="text-xl font-semibold mb-4">Reminders</h2>
+    <div className="bg-white p-6 rounded-lg shadow-sm">
+      <h2 className="text-lg font-semibold mb-4 text-gray-800">Reminders</h2>
 
       <form onSubmit={handleAdd} className="mb-4 space-y-2">
         <input
@@ -83,17 +83,17 @@ export default function Reminders() {
           value={newReminder}
           onChange={(e) => setNewReminder(e.target.value)}
           placeholder="Add a reminder..."
-          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
         />
         <input
           type="date"
           value={newDate}
           onChange={(e) => setNewDate(e.target.value)}
-          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
         />
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition"
+          className="w-full bg-gray-700 text-white py-2 rounded-lg hover:bg-gray-800 transition"
         >
           Add Reminder
         </button>
@@ -106,14 +106,14 @@ export default function Reminders() {
           reminders.map((reminder) => (
             <div
               key={reminder.id}
-              className="flex items-center justify-between p-2 border rounded hover:bg-gray-50"
+              className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
             >
-              <div className="flex items-center space-x-2 flex-1">
+              <div className="flex items-center space-x-3 flex-1">
                 <input
                   type="checkbox"
                   checked={reminder.completed === 1}
                   onChange={() => handleToggle(reminder.id)}
-                  className="w-4 h-4"
+                  className="w-4 h-4 accent-gray-700"
                 />
                 <div className="flex-1">
                   <p
@@ -125,14 +125,14 @@ export default function Reminders() {
                   >
                     {reminder.text}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 mt-1">
                     {new Date(reminder.date).toLocaleDateString()}
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => handleDelete(reminder.id)}
-                className="text-red-500 hover:text-red-700 px-2"
+                className="text-gray-400 hover:text-gray-600 px-2 text-xl"
               >
                 ×
               </button>
