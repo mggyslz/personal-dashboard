@@ -20,7 +20,7 @@ function App() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
       <header className="p-6 bg-white shadow-sm">
-        <h1 className="text-3xl font-bold text-gray-800">{greeting}, Miggy!</h1>
+        <h1 className="text-3xl font-bold text-gray-800">{greeting}, Mggy!</h1>
         <p className="text-gray-600 mt-1">
           {new Date().toLocaleDateString('en-US', {
             weekday: 'long',

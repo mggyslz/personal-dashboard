@@ -1,67 +1,67 @@
 const express = require('express');
 const router = express.Router();
 
-// Mock quotes data
-const quotes = [
-  {
-    text: "The only way to do great work is to love what you do.",
-    author: "Steve Jobs"
-  },
-  {
-    text: "Believe you can and you're halfway there.",
-    author: "Theodore Roosevelt"
-  },
-  {
-    text: "Success is not final, failure is not fatal: it is the courage to continue that counts.",
-    author: "Winston Churchill"
-  },
-  {
-    text: "The future belongs to those who believe in the beauty of their dreams.",
-    author: "Eleanor Roosevelt"
-  },
-  {
-    text: "It does not matter how slowly you go as long as you do not stop.",
-    author: "Confucius"
-  },
-  {
-    text: "Everything you've ever wanted is on the other side of fear.",
-    author: "George Addair"
-  },
-  {
-    text: "Believe in yourself. You are braver than you think, more talented than you know, and capable of more than you imagine.",
-    author: "Roy T. Bennett"
-  },
-  {
-    text: "I learned that courage was not the absence of fear, but the triumph over it.",
-    author: "Nelson Mandela"
-  },
-  {
-    text: "The only impossible journey is the one you never begin.",
-    author: "Tony Robbins"
-  },
-  {
-    text: "Your limitation—it's only your imagination.",
-    author: "Unknown"
-  }
-];
+// Cache for daily quote
+let dailyQuoteCache = {
+  quote: null,
+  date: null
+};
 
-router.get('/', (req, res) => {
+// Fetch a random programming quote from API
+async function fetchRandomQuote() {
   try {
-    // Return a random quote
-    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-    res.json(randomQuote);
+    const response = await fetch('https://programming-quotesapi.vercel.app/api/random');
+    
+    if (!response.ok) {
+      throw new Error(`API returned status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    // Transform the response to match our format
+    return {
+      text: data.quote,
+      author: data.author
+    };
+  } catch (error) {
+    console.error('Error fetching quote from API:', error);
+    // Return a fallback quote if API fails
+    return {
+      text: "Code is like humor. When you have to explain it, it's bad.",
+      author: "Cory House"
+    };
+  }
+}
+
+// Get random quote endpoint
+router.get('/', async (req, res) => {
+  try {
+    const quote = await fetchRandomQuote();
+    res.json(quote);
   } catch (error) {
     console.error('Quotes route error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-router.get('/daily', (req, res) => {
+// Get daily quote endpoint (same quote for the whole day)
+router.get('/daily', async (req, res) => {
   try {
-    // Return the same quote for the current day
-    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-    const dailyQuote = quotes[dayOfYear % quotes.length];
-    res.json(dailyQuote);
+    const today = new Date().toDateString();
+    
+    // Check if we have a cached quote for today
+    if (dailyQuoteCache.date === today && dailyQuoteCache.quote) {
+      return res.json(dailyQuoteCache.quote);
+    }
+    
+    // Fetch new quote and cache it
+    const quote = await fetchRandomQuote();
+    dailyQuoteCache = {
+      quote: quote,
+      date: today
+    };
+    
+    res.json(quote);
   } catch (error) {
     console.error('Daily quote route error:', error);
     res.status(500).json({ error: error.message });
