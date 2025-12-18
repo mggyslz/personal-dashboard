@@ -384,3 +384,6 @@ class AIService {
 }
 
 module.exports = new AIService(); 
+
+
+// TODO: Integrate Ollama (Mistral) as an optional layer, keeping sentiment and heuristics as the fallback.

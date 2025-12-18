@@ -6,54 +6,66 @@ class NewsService {
     this.baseUrl = 'https://newsapi.org/v2';
   }
 
-  async getTopHeadlines(country = 'ph', category = 'general') {
+  async getTopHeadlines(country = 'us', category = 'technology', pageSize = 10) {
     try {
       if (!this.apiKey) {
-        return this.getMockNews();
+        throw new Error('News API key not configured');
       }
 
       const response = await axios.get(`${this.baseUrl}/top-headlines`, {
         params: {
           country: country,
           category: category,
-          pageSize: 5,
+          pageSize: pageSize,
           apiKey: this.apiKey
         }
       });
 
-      return response.data.articles.map(article => ({
-        title: article.title,
-        description: article.description,
-        url: article.url,
-        source: article.source.name,
-        publishedAt: article.publishedAt,
-        image: article.urlToImage
-      }));
+      return this.formatArticles(response.data.articles);
     } catch (error) {
       console.error('News API error:', error.message);
-      return this.getMockNews();
+      throw new Error(`Failed to fetch news: ${error.message}`);
     }
   }
 
-  getMockNews() {
-    return [
-      {
-        title: 'Technology Advances in AI',
-        description: 'Recent developments in artificial intelligence.',
-        url: '#',
-        source: 'Tech News',
-        publishedAt: new Date().toISOString(),
-        image: null
-      },
-      {
-        title: 'Market Update',
-        description: 'Stock market shows positive trends.',
-        url: '#',
-        source: 'Financial Times',
-        publishedAt: new Date().toISOString(),
-        image: null
+  async searchNews(query, language = 'en', pageSize = 10) {
+    try {
+      if (!this.apiKey) {
+        throw new Error('News API key not configured');
       }
-    ];
+
+      const response = await axios.get(`${this.baseUrl}/everything`, {
+        params: {
+          q: query,
+          language: language,
+          pageSize: pageSize,
+          sortBy: 'relevancy',
+          apiKey: this.apiKey
+        }
+      });
+
+      return this.formatArticles(response.data.articles);
+    } catch (error) {
+      console.error('News search error:', error.message);
+      throw new Error(`Failed to search news: ${error.message}`);
+    }
+  }
+
+  formatArticles(articles) {
+    if (!articles || !Array.isArray(articles)) {
+      return [];
+    }
+
+    return articles
+      .filter(article => article.title && article.title !== '[Removed]')
+      .map(article => ({
+        title: article.title || 'No title available',
+        description: article.description || 'No description available',
+        url: article.url || '#',
+        source: article.source?.name || 'Unknown source',
+        publishedAt: article.publishedAt || new Date().toISOString(),
+        image: article.urlToImage || null
+      }));
   }
 }
 

@@ -124,12 +124,15 @@ class ApiService {
   }
 
   // News
-  async getNews(country?: string, category?: string) {
+  
+  async getNews(country?: string, category?: string, pageSize?: number) {
     const params = new URLSearchParams();
     if (country) params.append('country', country);
     if (category) params.append('category', category);
+    if (pageSize) params.append('pageSize', pageSize.toString());
+    
     const query = params.toString() ? `?${params.toString()}` : '';
-    return this.request(`/news${query}`);
+    return this.request<NewsArticle[]>(`/news${query}`);
   }
 
   // Quotes

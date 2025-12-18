@@ -25,18 +25,6 @@ export default function Quote() {
     }
   };
 
-  const refreshQuote = async () => {
-    setLoading(true);
-    try {
-      const data = await api.getRandomQuote();
-      setQuote(data);
-    } catch (error) {
-      console.error('Error loading quote:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   if (loading) {
     return (
       <div className="bg-white p-6 rounded-lg shadow-sm">
@@ -57,16 +45,7 @@ export default function Quote() {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">Quote of the Day</h2>
-        <button
-          onClick={refreshQuote}
-          className="text-gray-600 hover:text-gray-800 text-sm font-medium"
-          disabled={loading}
-        >
-          Refresh
-        </button>
-      </div>
+      <h2 className="text-lg font-semibold mb-4 text-gray-800">Quote of the Day</h2>
       
       <div className="space-y-3">
         <p className="text-gray-700 text-lg italic leading-relaxed">
