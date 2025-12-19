@@ -5,6 +5,7 @@ import News from './components/News';
 import Reminders from './components/Reminders';
 import Quote from './components/Quotes';  
 import Journal from './components/Journal';
+import Spotify from './components/Spotify';
 import './App.css';
 
 function App() {
@@ -44,8 +45,9 @@ function App() {
             <Quote />
           </div>
 
-          <div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Journal />
+            <Spotify />
           </div>
         </div>
       </main>
