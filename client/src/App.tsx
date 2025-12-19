@@ -11,46 +11,59 @@ import './App.css';
 function App() {
   const [greeting, setGreeting] = useState('');
 
-  useEffect(() => {
-    const hour = new Date().getHours();
-    if (hour < 12) setGreeting('Good Morning');
-    else if (hour < 18) setGreeting('Good Afternoon');
-    else setGreeting('Good Evening');
-  }, []);
+    useEffect(() => {
+      const hour = new Date().getHours();
+
+    if (hour < 12) 
+      setGreeting("Rise & grind!");
+    else if (hour === 12) 
+      setGreeting("Midday hustle!");
+    else if (hour < 18) 
+      setGreeting("Keep pushing!");
+    else 
+      setGreeting("Evening chill.");
+    }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100">
-      <header className="p-6 bg-white shadow-sm">
-        <h1 className="text-3xl font-bold text-gray-800">{greeting}, Mggy!</h1>
-        <p className="text-gray-600 mt-1">
-          {new Date().toLocaleDateString('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
-        </p>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
+      <div className="max-w-[1600px] mx-auto">
+        <header className="px-8 py-12">
+          <h1 className="text-5xl font-light text-gray-800 mb-2">{greeting}, Mggy</h1>
+          <p className="text-gray-500 text-lg font-light">
+            {new Date().toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </p>
+        </header>
 
-      <main className="flex-1 p-6 overflow-auto">
-        <div className="max-w-7xl mx-auto space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Weather />
-            <Calendar />
-            <News />
-          </div>
+        <main className="px-8 pb-12">
+          <div className="space-y-8">
+            {/* Top Row - Weather, Calendar, Quote */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Weather />
+              <Calendar />
+              <Quote />
+            </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Reminders />
-            <Quote />
-          </div>
+            {/* Middle Row - Reminders and Journal */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Reminders />
+              <Journal />
+            </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Journal />
-            <Spotify />
+            {/* Bottom Row - News and Spotify */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <News />
+              </div>
+              <Spotify />
+            </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

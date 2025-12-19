@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
+import { Bell, Plus, X } from 'lucide-react';
 
 interface Reminder {
   id: number;
@@ -15,6 +16,7 @@ export default function Reminders() {
   const [newDate, setNewDate] = useState('');
   const [newTime, setNewTime] = useState('09:00');
   const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     loadReminders();
@@ -44,6 +46,7 @@ export default function Reminders() {
       setNewReminder('');
       setNewDate('');
       setNewTime('09:00');
+      setShowForm(false);
       loadReminders();
     } catch (error) {
       console.error('Error creating reminder:', error);
@@ -70,83 +73,96 @@ export default function Reminders() {
 
   if (loading) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow-sm">
-        <h2 className="text-lg font-semibold mb-4 text-gray-800">Reminders</h2>
-        <p className="text-gray-500">Loading...</p>
+      <div className="bg-white/60 backdrop-blur-sm p-8 rounded-3xl border border-gray-200/50 shadow-sm">
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+          <div className="h-20 bg-gray-200 rounded"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm">
-      <h2 className="text-lg font-semibold mb-4 text-gray-800">Reminders</h2>
-
-      <form onSubmit={handleAdd} className="mb-4 space-y-2">
-        <input
-          type="text"
-          value={newReminder}
-          onChange={(e) => setNewReminder(e.target.value)}
-          placeholder="Add a reminder..."
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
-        />
-        <div className="flex gap-2">
-          <input
-            type="date"
-            value={newDate}
-            onChange={(e) => setNewDate(e.target.value)}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
-          />
-          <input
-            type="time"
-            value={newTime}
-            onChange={(e) => setNewTime(e.target.value)}
-            className="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
-          />
+    <div className="bg-white/60 backdrop-blur-sm p-8 rounded-3xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all">
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-2">
+          <Bell className="text-gray-400" size={20} strokeWidth={1.5} />
+          <h2 className="text-lg font-light text-gray-700">Reminders</h2>
         </div>
         <button
-          type="submit"
-          className="w-full bg-gray-700 text-white py-2 rounded-lg hover:bg-gray-800 transition"
+          onClick={() => setShowForm(!showForm)}
+          className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
         >
-          Add Reminder
+          {showForm ? <X size={18} strokeWidth={1.5} className="text-gray-600" /> : <Plus size={18} strokeWidth={1.5} className="text-gray-600" />}
         </button>
-      </form>
+      </div>
 
-      <div className="space-y-2 max-h-64 overflow-y-auto">
+      {showForm && (
+        <form onSubmit={handleAdd} className="mb-6 space-y-3">
+          <input
+            type="text"
+            value={newReminder}
+            onChange={(e) => setNewReminder(e.target.value)}
+            placeholder="What do you need to remember?"
+            className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent font-light"
+          />
+          <div className="flex gap-3">
+            <input
+              type="date"
+              value={newDate}
+              onChange={(e) => setNewDate(e.target.value)}
+              className="flex-1 px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent font-light"
+            />
+            <input
+              type="time"
+              value={newTime}
+              onChange={(e) => setNewTime(e.target.value)}
+              className="w-32 px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent font-light"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full bg-gray-800 text-white py-3 rounded-xl hover:bg-gray-900 transition-colors font-light"
+          >
+            Add Reminder
+          </button>
+        </form>
+      )}
+
+      <div className="space-y-2 max-h-80 overflow-y-auto">
         {reminders.length === 0 ? (
-          <p className="text-gray-500">No reminders yet</p>
+          <p className="text-gray-400 font-light text-center py-8">No reminders yet</p>
         ) : (
           reminders.map((reminder) => (
             <div
               key={reminder.id}
-              className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+              className="flex items-center gap-4 p-4 rounded-xl bg-gray-50/50 hover:bg-gray-100/80 transition-colors group"
             >
-              <div className="flex items-center space-x-3 flex-1">
-                <input
-                  type="checkbox"
-                  checked={reminder.completed === 1}
-                  onChange={() => handleToggle(reminder.id)}
-                  className="w-4 h-4 accent-gray-700"
-                />
-                <div className="flex-1">
-                  <p
-                    className={`${
-                      reminder.completed === 1
-                        ? 'line-through text-gray-500'
-                        : 'text-gray-800'
-                    }`}
-                  >
-                    {reminder.text}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {new Date(reminder.date).toLocaleDateString()} at {reminder.time}
-                  </p>
-                </div>
+              <input
+                type="checkbox"
+                checked={reminder.completed === 1}
+                onChange={() => handleToggle(reminder.id)}
+                className="w-5 h-5 rounded-lg accent-gray-800 cursor-pointer"
+              />
+              <div className="flex-1 min-w-0">
+                <p
+                  className={`font-light ${
+                    reminder.completed === 1
+                      ? 'line-through text-gray-400'
+                      : 'text-gray-800'
+                  }`}
+                >
+                  {reminder.text}
+                </p>
+                <p className="text-xs text-gray-400 mt-1 font-light">
+                  {new Date(reminder.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at {reminder.time}
+                </p>
               </div>
               <button
                 onClick={() => handleDelete(reminder.id)}
-                className="text-gray-400 hover:text-gray-600 px-2 text-xl"
+                className="opacity-0 group-hover:opacity-100 p-2 hover:bg-gray-200 rounded-lg transition-all"
               >
-                ×
+                <X size={16} strokeWidth={1.5} className="text-gray-400" />
               </button>
             </div>
           ))

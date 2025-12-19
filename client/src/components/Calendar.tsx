@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
+import { Calendar as CalendarIcon, List } from 'lucide-react';
 
 interface CalendarEvent {
   id: string;
@@ -16,7 +17,7 @@ export default function Calendar() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [view, setView] = useState<'month' | 'list'>('month');
+  const [view, setView] = useState<'month' | 'list'>('list');
 
   useEffect(() => {
     loadEvents();
@@ -44,7 +45,6 @@ export default function Calendar() {
     return { daysInMonth, startingDayOfWeek, year, month };
   };
 
-  // FIX: Use local date comparison to avoid timezone issues
   const getEventsForDate = (date: Date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -52,7 +52,6 @@ export default function Calendar() {
     const dateStr = `${year}-${month}-${day}`;
     
     return events.filter(event => {
-      // Extract just the date part from ISO string
       const eventDateStr = event.start.split('T')[0];
       return eventDateStr === dateStr;
     });
@@ -75,12 +74,10 @@ export default function Calendar() {
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-    // Add empty cells for days before month starts
     for (let i = 0; i < startingDayOfWeek; i++) {
-      days.push(<div key={`empty-${i}`} className="h-24 bg-gray-50"></div>);
+      days.push(<div key={`empty-${i}`} className="h-20 bg-transparent"></div>);
     }
 
-    // Add cells for each day of the month
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -90,35 +87,20 @@ export default function Calendar() {
       days.push(
         <div
           key={day}
-          className={`h-24 border border-gray-200 p-1 overflow-hidden ${
-            isToday ? 'bg-blue-50' : 'bg-white'
-          } hover:bg-gray-50`}
+          className={`h-20 rounded-xl p-2 ${
+            isToday ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50/50 border border-transparent'
+          } hover:bg-gray-100/80 transition-colors`}
         >
-          <div className={`text-sm font-semibold mb-1 ${isToday ? 'text-blue-600' : 'text-gray-700'}`}>
+          <div className={`text-sm font-light mb-1 ${isToday ? 'text-blue-600 font-medium' : 'text-gray-600'}`}>
             {day}
           </div>
-          <div className="space-y-0.5">
-            {dayEvents.slice(0, 2).map(event => (
-              <div
-                key={event.id}
-                className={`text-xs px-1 py-0.5 rounded truncate ${
-                  event.type === 'reminder'
-                    ? event.completed
-                      ? 'bg-gray-200 text-gray-600 line-through'
-                      : 'bg-blue-100 text-blue-700'
-                    : 'bg-green-100 text-green-700'
-                }`}
-                title={event.title}
-              >
-                {formatTime(event.start)} {event.title}
-              </div>
-            ))}
-            {dayEvents.length > 2 && (
-              <div className="text-xs text-gray-500 px-1">
-                +{dayEvents.length - 2} more
-              </div>
-            )}
-          </div>
+          {dayEvents.slice(0, 1).map(event => (
+            <div
+              key={event.id}
+              className="w-2 h-2 rounded-full bg-blue-400"
+              title={event.title}
+            />
+          ))}
         </div>
       );
     }
@@ -127,44 +109,38 @@ export default function Calendar() {
   };
 
   const renderListView = () => {
-    const sortedEvents = [...events].sort((a, b) => 
-      new Date(a.start).getTime() - new Date(b.start).getTime()
-    );
+    const upcomingEvents = [...events]
+      .filter(event => new Date(event.start) >= new Date())
+      .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+      .slice(0, 5);
 
     return (
-      <div className="space-y-2 max-h-96 overflow-y-auto">
-        {sortedEvents.length === 0 ? (
-          <p className="text-gray-500">No upcoming events</p>
+      <div className="space-y-3">
+        {upcomingEvents.length === 0 ? (
+          <p className="text-gray-400 font-light text-center py-8">No upcoming events</p>
         ) : (
-          sortedEvents.map((event) => {
-            // FIX: Parse date correctly to avoid timezone shift
+          upcomingEvents.map((event) => {
             const eventDate = new Date(event.start);
             const localDateStr = eventDate.toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
+              month: 'short',
               day: 'numeric'
             });
 
             return (
               <div
                 key={event.id}
-                className={`border-l-4 pl-3 py-2 ${
-                  event.type === 'reminder'
-                    ? event.completed
-                      ? 'border-gray-400 bg-gray-50'
-                      : 'border-blue-500 bg-blue-50'
-                    : 'border-green-500 bg-green-50'
-                }`}
+                className="flex items-start gap-4 p-3 rounded-xl bg-gray-50/50 hover:bg-gray-100/80 transition-colors"
               >
-                <h3 className={`font-semibold text-gray-800 ${event.completed ? 'line-through' : ''}`}>
-                  {event.title}
-                </h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  {localDateStr} • {formatTime(event.start)} - {formatTime(event.end)}
-                </p>
-                {event.description && (
-                  <p className="text-xs text-gray-500 mt-1">{event.description}</p>
-                )}
+                <div className="text-center min-w-[50px]">
+                  <div className="text-xs text-gray-500 font-light">{localDateStr.split(' ')[0]}</div>
+                  <div className="text-2xl font-light text-gray-700">{localDateStr.split(' ')[1]}</div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-normal text-gray-800 truncate">{event.title}</h3>
+                  <p className="text-sm text-gray-500 font-light">
+                    {formatTime(event.start)}
+                  </p>
+                </div>
               </div>
             );
           })
@@ -175,25 +151,28 @@ export default function Calendar() {
 
   if (loading) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow-sm">
-        <h2 className="text-lg font-semibold mb-4 text-gray-800">Calendar</h2>
-        <p className="text-gray-500">Loading...</p>
+      <div className="bg-white/60 backdrop-blur-sm p-8 rounded-3xl border border-gray-200/50 shadow-sm">
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+          <div className="h-32 bg-gray-200 rounded"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">Calendar</h2>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setView(view === 'month' ? 'list' : 'month')}
-            className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg"
-          >
-            {view === 'month' ? 'List' : 'Month'}
-          </button>
+    <div className="bg-white/60 backdrop-blur-sm p-8 rounded-3xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all">
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-2">
+          <CalendarIcon className="text-gray-400" size={20} strokeWidth={1.5} />
+          <h2 className="text-lg font-light text-gray-700">Calendar</h2>
         </div>
+        <button
+          onClick={() => setView(view === 'month' ? 'list' : 'month')}
+          className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+        >
+          {view === 'month' ? <List size={18} strokeWidth={1.5} className="text-gray-600" /> : <CalendarIcon size={18} strokeWidth={1.5} className="text-gray-600" />}
+        </button>
       </div>
 
       {view === 'month' ? (
@@ -201,24 +180,24 @@ export default function Calendar() {
           <div className="flex justify-between items-center mb-4">
             <button
               onClick={() => changeMonth(-1)}
-              className="px-3 py-1 hover:bg-gray-100 rounded"
+              className="px-3 py-1 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 font-light"
             >
               ←
             </button>
-            <h3 className="font-semibold text-gray-800">
+            <h3 className="font-light text-gray-700">
               {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
             </h3>
             <button
               onClick={() => changeMonth(1)}
-              className="px-3 py-1 hover:bg-gray-100 rounded"
+              className="px-3 py-1 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 font-light"
             >
               →
             </button>
           </div>
 
-          <div className="grid grid-cols-7 gap-0">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-              <div key={day} className="text-center text-sm font-semibold text-gray-600 py-2 bg-gray-100">
+          <div className="grid grid-cols-7 gap-2">
+            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+              <div key={i} className="text-center text-xs font-light text-gray-400 py-2">
                 {day}
               </div>
             ))}

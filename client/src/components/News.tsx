@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
-import { Search, Calendar, ExternalLink, RefreshCw, Newspaper, Globe, Filter } from 'lucide-react';
+import { Search, Calendar, ExternalLink, RefreshCw, Newspaper, Globe } from 'lucide-react';
 
 interface NewsArticle {
   title: string;
@@ -46,27 +46,9 @@ export default function News() {
       setFilteredArticles(data);
     } catch (error) {
       console.error('Error loading news:', error);
-      setError('Failed to load news. Please check your API key and try again.');
+      setError('Failed to load news');
       setArticles([]);
       setFilteredArticles([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSearch = async () => {
-    if (!searchTerm.trim()) {
-      loadNews();
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    try {
-      loadNews();
-    } catch (error) {
-      console.error('Search error:', error);
-      setError('Failed to search news');
     } finally {
       setLoading(false);
     }
@@ -89,8 +71,7 @@ export default function News() {
       
       return date.toLocaleDateString('en-US', {
         month: 'short',
-        day: 'numeric',
-        year: 'numeric'
+        day: 'numeric'
       });
     } catch {
       return 'Recently';
@@ -113,106 +94,62 @@ export default function News() {
     { value: 'ph', label: 'Philippines' },
     { value: 'in', label: 'India' },
     { value: 'ca', label: 'Canada' },
-    { value: 'au', label: 'Australia' },
-    { value: 'jp', label: 'Japan' },
-    { value: 'kr', label: 'South Korea' }
+    { value: 'au', label: 'Australia' }
   ];
 
   if (loading && articles.length === 0) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
-        <div className="animate-pulse">
-          <div className="h-7 bg-gray-200 rounded w-1/4 mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/2 mb-6"></div>
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="border-b pb-4 last:border-0">
-                <div className="h-5 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/4"></div>
-              </div>
-            ))}
-          </div>
+      <div className="bg-white/60 backdrop-blur-sm p-8 rounded-3xl border border-gray-200/50 shadow-sm">
+        <div className="animate-pulse space-y-4">
+          <div className="h-6 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-32 bg-gray-200 rounded"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-100 rounded-lg">
-            <Newspaper className="text-blue-600" size={24} />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800">Latest News</h2>
-            <p className="text-sm text-gray-500">Stay updated with current events worldwide</p>
-          </div>
+    <div className="bg-white/60 backdrop-blur-sm p-8 rounded-3xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all">
+      <div className="flex justify-between items-start mb-6">
+        <div className="flex items-center gap-2">
+          <Newspaper className="text-gray-400" size={20} strokeWidth={1.5} />
+          <h2 className="text-lg font-light text-gray-700">Latest News</h2>
         </div>
         
         <button
           onClick={loadNews}
           disabled={loading}
-          className="inline-flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow"
+          className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl disabled:opacity-50 transition-colors"
         >
-          <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
-          {loading ? 'Refreshing...' : 'Refresh News'}
+          <RefreshCw size={16} strokeWidth={1.5} className={`${loading ? 'animate-spin' : ''} text-gray-600`} />
         </button>
       </div>
 
-      {/* Error Message */}
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-700">{error}</p>
-          <button
-            onClick={loadNews}
-            className="mt-2 text-sm text-red-600 hover:text-red-800 font-medium"
-          >
-            Try again
-          </button>
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl">
+          <p className="text-red-600 font-light">{error}</p>
         </div>
       )}
 
-      {/* Search and Filter Controls */}
       <div className="mb-6 space-y-4">
-        {/* Search Bar */}
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search news by title, description, or source..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-            />
-          </div>
-          <button
-            onClick={handleSearch}
-            disabled={loading}
-            className="px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 transition-colors"
-          >
-            Search
-          </button>
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} strokeWidth={1.5} />
+          <input
+            type="text"
+            placeholder="Search news..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-12 pr-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent font-light"
+          />
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap gap-3 items-center">
-          <div className="flex items-center gap-2 text-gray-600">
-            <Filter size={16} />
-            <span className="text-sm font-medium">Filters:</span>
-          </div>
-          
-          {/* Country Selector */}
+        <div className="flex gap-3">
           <div className="flex items-center gap-2">
-            <Globe size={16} className="text-gray-400" />
+            <Globe size={16} strokeWidth={1.5} className="text-gray-400" />
             <select
               value={country}
               onChange={(e) => setCountry(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm"
+              className="px-3 py-2 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200 font-light"
             >
               {countries.map((c) => (
                 <option key={c.value} value={c.value}>
@@ -222,11 +159,10 @@ export default function News() {
             </select>
           </div>
 
-          {/* Category Selector */}
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm"
+            className="px-3 py-2 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200 font-light"
           >
             {categories.map((cat) => (
               <option key={cat.value} value={cat.value}>
@@ -237,148 +173,58 @@ export default function News() {
         </div>
       </div>
 
-      {/* Results Info */}
-      {articles.length > 0 && (
-        <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <p className="text-sm text-gray-600">
-            {searchTerm ? (
-              <>
-                Found <span className="font-semibold text-blue-600">{filteredArticles.length}</span> news matching "{searchTerm}"
-              </>
-            ) : (
-              <>
-                Showing <span className="font-semibold text-blue-600">{filteredArticles.length}</span> latest news from {countries.find(c => c.value === country)?.label}
-              </>
-            )}
-          </p>
-          {searchTerm && (
-            <button
-              onClick={() => {
-                setSearchTerm('');
-                loadNews();
-              }}
-              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-            >
-              Clear search & show all
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* News Articles */}
       {filteredArticles.length === 0 && !loading ? (
         <div className="text-center py-12">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-            <Search size={24} className="text-gray-400" />
-          </div>
-          <p className="text-gray-500 mb-2">No news articles found</p>
-          <p className="text-sm text-gray-400 mb-4">
-            {searchTerm 
-              ? 'Try a different search term or clear the search'
-              : 'Try changing the country or category filters'}
-          </p>
-          <button
-            onClick={() => {
-              setSearchTerm('');
-              setCountry('us');
-              setCategory('technology');
-              loadNews();
-            }}
-            className="text-blue-600 hover:text-blue-800 font-medium"
-          >
-            Reset filters
-          </button>
+          <p className="text-gray-400 font-light">No articles found</p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {filteredArticles.map((article, index) => (
-            <div
-              key={`${article.url}-${article.publishedAt}-${index}`}
-              className="group border border-gray-200 rounded-xl p-4 hover:border-blue-300 hover:shadow-md transition-all duration-200"
+        <div className="space-y-4 max-h-[600px] overflow-y-auto">
+          {filteredArticles.slice(0, 10).map((article, index) => (
+            <a
+              key={`${article.url}-${index}`}
+              href={article.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block group"
             >
-              <div className="flex flex-col sm:flex-row gap-4">
-                {/* Article Image */}
-                {article.image && (
-                  <div className="sm:w-40 sm:flex-shrink-0">
-                    <a
-                      href={article.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block"
-                    >
-                      <img
-                        src={article.image}
-                        alt={article.title}
-                        className="w-full h-40 sm:h-full object-cover rounded-lg group-hover:opacity-90 transition-opacity"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none';
-                        }}
-                      />
-                    </a>
-                  </div>
-                )}
+              <div className="border border-gray-200 rounded-2xl p-5 hover:border-gray-300 hover:shadow-sm transition-all">
+                <div className="flex gap-4">
+                  {article.image && (
+                    <img
+                      src={article.image}
+                      alt={article.title}
+                      className="w-24 h-24 object-cover rounded-xl flex-shrink-0"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  )}
 
-                {/* Article Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="flex-1 min-w-0">
-                      <a
-                        href={article.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group block"
-                      >
-                        <h3 className="text-lg font-semibold text-gray-800 group-hover:text-blue-600 line-clamp-2 mb-2">
-                          {article.title}
-                        </h3>
-                        <p className="text-gray-600 line-clamp-3 mb-3">
-                          {article.description}
-                        </p>
-                      </a>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-normal text-gray-800 group-hover:text-blue-600 line-clamp-2 mb-2 transition-colors">
+                      {article.title}
+                    </h3>
+                    <p className="text-sm text-gray-500 line-clamp-2 mb-3 font-light">
+                      {article.description}
+                    </p>
+
+                    <div className="flex items-center gap-3 text-xs text-gray-400">
+                      <span className="font-light">{article.source}</span>
+                      <span>•</span>
+                      <div className="flex items-center gap-1">
+                        <Calendar size={12} strokeWidth={1.5} />
+                        <span className="font-light">{formatDate(article.publishedAt)}</span>
+                      </div>
                     </div>
-                    <ExternalLink size={16} className="text-gray-400 mt-1 flex-shrink-0 group-hover:text-blue-500" />
                   </div>
 
-                  {/* Metadata */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
-                        {article.source}
-                      </span>
-                      <span className="flex items-center gap-1 text-xs text-gray-500">
-                        <Calendar size={12} />
-                        {formatDate(article.publishedAt)}
-                      </span>
-                    </div>
-                    <a
-                      href={article.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 font-medium group/link"
-                    >
-                      Read full story
-                      <ExternalLink size={14} className="group-hover/link:translate-x-0.5 transition-transform" />
-                    </a>
-                  </div>
+                  <ExternalLink size={16} strokeWidth={1.5} className="text-gray-300 group-hover:text-blue-500 flex-shrink-0 transition-colors" />
                 </div>
               </div>
-            </div>
+            </a>
           ))}
         </div>
       )}
-
-      {/* No Articles Message */}
-      {articles.length === 0 && !loading && !error && (
-        <div className="text-center py-12">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-50 flex items-center justify-center">
-            <Newspaper size={24} className="text-blue-500" />
-          </div>
-          <p className="text-gray-500 mb-2">No news articles available</p>
-          <p className="text-sm text-gray-400 mb-4">
-            Check your API key configuration or try a different country/category
-          </p>
-        </div>
-      )}
-    </div>
+    </div> // ← This closing div was missing
   );
 }
