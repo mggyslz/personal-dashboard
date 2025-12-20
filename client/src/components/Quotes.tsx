@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
-import { Quote as QuoteIcon } from 'lucide-react';
+// Import necessary icons: Quote for the main display, and RotateCw for refresh
+import { Quote as QuoteIcon, RotateCw } from 'lucide-react'; 
 
 interface QuoteData {
   text: string;
@@ -9,24 +10,43 @@ interface QuoteData {
 
 export default function Quote() {
   const [quote, setQuote] = useState<QuoteData | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Use a separate state for initial load vs. manual refresh loading
+  const [initialLoading, setInitialLoading] = useState(true); 
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
+  // Load the initial daily quote on component mount
   useEffect(() => {
-    loadQuote();
+    loadQuote('daily');
   }, []);
 
-  const loadQuote = async () => {
+  /**
+   * Loads a quote, either the daily one or a completely random one.
+   * @param type 'daily' or 'random'
+   */
+  const loadQuote = async (type: 'daily' | 'random') => {
+    const setLoadingState = type === 'daily' ? setInitialLoading : setIsRefreshing;
+    
+    setLoadingState(true);
+    
     try {
-      const data = await api.getDailyQuote();
+      let data;
+      if (type === 'daily') {
+        data = await api.getDailyQuote(); // Uses the /quotes/daily endpoint
+      } else {
+        data = await api.getRandomQuote(); // Uses the /quotes endpoint
+      }
+      
       setQuote(data);
     } catch (error) {
       console.error('Error loading quote:', error);
+      // Keep the existing quote if refresh fails
     } finally {
-      setLoading(false);
+      setLoadingState(false);
     }
   };
 
-  if (loading) {
+  // Combined loading check for initial render
+  if (initialLoading) {
     return (
       <div className="bg-white/60 backdrop-blur-sm p-8 rounded-3xl border border-gray-200/50 shadow-sm">
         <div className="animate-pulse space-y-4">
@@ -46,14 +66,33 @@ export default function Quote() {
   }
 
   return (
-    <div className="bg-white/60 backdrop-blur-sm p-8 rounded-3xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all">
+    <div className="bg-white/60 backdrop-blur-sm p-8 rounded-3xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all relative">
+      
+      {/* Refresh Button */}
+      <button
+        onClick={() => loadQuote('random')}
+        disabled={isRefreshing}
+        className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+        title="Get a random quote"
+      >
+        <RotateCw 
+          size={18} 
+          // Animate the icon if refreshing
+          className={isRefreshing ? 'animate-spin' : ''} 
+        />
+      </button>
+
       <QuoteIcon className="text-gray-300 mb-4" size={24} strokeWidth={1.5} />
-      <p className="text-gray-700 text-lg font-light leading-relaxed mb-4">
-        "{quote.text}"
-      </p>
-      <p className="text-gray-500 text-sm font-light">
-        — {quote.author}
-      </p>
+      
+      {/* Apply a slight opacity change while refreshing for visual feedback */}
+      <div className={isRefreshing ? 'opacity-50 transition-opacity duration-300' : ''}>
+        <p className="text-gray-700 text-lg font-light leading-relaxed mb-4">
+          "{quote.text}"
+        </p>
+        <p className="text-gray-500 text-sm font-light">
+          — {quote.author}
+        </p>
+      </div>
     </div>
   );
 }

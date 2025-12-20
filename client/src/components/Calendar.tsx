@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { Calendar as CalendarIcon, List } from 'lucide-react';
+import { eventEmitter } from '../utils/eventEmitter';
 
 interface CalendarEvent {
   id: string;
@@ -21,6 +22,18 @@ export default function Calendar() {
 
   useEffect(() => {
     loadEvents();
+    
+    // Listen for reminder added events
+    const handleReminderAdded = () => {
+      loadEvents();
+    };
+    
+    eventEmitter.on('reminderAdded', handleReminderAdded);
+    
+    // Cleanup
+    return () => {
+      eventEmitter.off('reminderAdded', handleReminderAdded);
+    };
   }, []);
 
   const loadEvents = async () => {
@@ -87,9 +100,7 @@ export default function Calendar() {
       days.push(
         <div
           key={day}
-          className={`h-20 rounded-xl p-2 ${
-            isToday ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50/50 border border-transparent'
-          } hover:bg-gray-100/80 transition-colors`}
+          className={`h-20 rounded-xl p-2 ${isToday ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50/50 border border-transparent'} hover:bg-gray-100/80 transition-colors`}
         >
           <div className={`text-sm font-light mb-1 ${isToday ? 'text-blue-600 font-medium' : 'text-gray-600'}`}>
             {day}

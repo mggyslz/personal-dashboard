@@ -1,58 +1,68 @@
+// server/src/routes/quotes.routes.js (The FINAL, Environment-Proof Fix)
+
 const express = require('express');
 const router = express.Router();
+const https = require('https'); // ⬅️ Using built-in module now
 
-// Cache for daily quote
-let dailyQuoteCache = {
-  quote: {
-    text: "First, solve the problem. Then, write the code.",
-    author: "John Johnson"
-  },
-  date: new Date().toDateString()
-};
-
-// Fetch a random programming quote from API
+// Fetch a random quote from ZenQuotes API using the built-in 'https' module
 async function fetchRandomQuote() {
-  const response = await fetch('https://programming-quotesapi.vercel.app/api/random');
+  const url = 'https://zenquotes.io/api/random';
   
-  if (!response.ok) {
-    throw new Error(`API returned status: ${response.status}`);
-  }
-  
-  const data = await response.json();
-  
-  // Transform the response to match our format
-  return {
-    text: data.quote,
-    author: data.author
-  };
+  return new Promise((resolve, reject) => {
+    const req = https.get(url, (res) => {
+      let data = '';
+      
+      if (res.statusCode !== 200) {
+        return reject(new Error(`ZenQuotes API returned status: ${res.statusCode}`));
+      }
+
+      // Concatenate data chunks
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+
+      // Once all data is received
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(data);
+          
+          if (!Array.isArray(json) || json.length === 0) {
+            return reject(new Error('Invalid response format from ZenQuotes API.'));
+          }
+          
+          // Transform the response to match the expected format
+          resolve({
+            text: json[0].q,
+            author: json[0].a
+          });
+        } catch (e) {
+          reject(new Error('Failed to parse external API response.'));
+        }
+      });
+    }).on('error', (e) => {
+      reject(e);
+    });
+    req.end(); 
+  });
 }
 
-// Get daily quote endpoint (same quote for the whole day)
+router.get('/', async (req, res) => {
+  try {
+    const quote = await fetchRandomQuote();
+    return res.json(quote);
+  } catch (error) {
+    console.error('Random quote route error:', error.message);
+    return res.status(500).json({}); // Return empty object on failure
+  }
+});
+
 router.get('/daily', async (req, res) => {
   try {
-    const today = new Date().toDateString();
-    
-    // Check if we have a cached quote for today
-    if (dailyQuoteCache.date === today && dailyQuoteCache.quote) {
-      console.log('Returning cached quote');
-      return res.json(dailyQuoteCache.quote);
-    }
-    
-    // Only fetch if date changed
-    console.log('Fetching new quote from API');
     const quote = await fetchRandomQuote();
-    dailyQuoteCache = {
-      quote: quote,
-      date: today
-    };
-    
-    res.json(quote);
+    return res.json(quote);
   } catch (error) {
     console.error('Daily quote route error:', error.message);
-    
-    // Always return the cached quote if API fails
-    console.log('API failed, returning cached quote');
-    return res.json(dailyQuoteCache.quote);
+    return res.status(500).json({}); // Return empty object on failure
   }
 });
 

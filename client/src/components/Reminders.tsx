@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { Bell, Plus, X } from 'lucide-react';
+import { eventEmitter } from '../utils/eventEmitter';
 
 interface Reminder {
   id: number;
@@ -48,6 +49,9 @@ export default function Reminders() {
       setNewTime('09:00');
       setShowForm(false);
       loadReminders();
+      
+      // Emit event to notify calendar
+      eventEmitter.emit('reminderAdded');
     } catch (error) {
       console.error('Error creating reminder:', error);
     }
@@ -57,6 +61,8 @@ export default function Reminders() {
     try {
       await api.toggleReminder(id);
       loadReminders();
+      // Emit event to notify calendar
+      eventEmitter.emit('reminderAdded');
     } catch (error) {
       console.error('Error toggling reminder:', error);
     }
@@ -66,6 +72,8 @@ export default function Reminders() {
     try {
       await api.deleteReminder(id);
       loadReminders();
+      // Emit event to notify calendar
+      eventEmitter.emit('reminderAdded');
     } catch (error) {
       console.error('Error deleting reminder:', error);
     }
@@ -146,11 +154,10 @@ export default function Reminders() {
               />
               <div className="flex-1 min-w-0">
                 <p
-                  className={`font-light ${
-                    reminder.completed === 1
+                  className={`font-light ${reminder.completed === 1
                       ? 'line-through text-gray-400'
                       : 'text-gray-800'
-                  }`}
+                    }`}
                 >
                   {reminder.text}
                 </p>
