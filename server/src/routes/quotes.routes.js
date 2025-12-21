@@ -1,10 +1,12 @@
-// server/src/routes/quotes.routes.js (The FINAL, Environment-Proof Fix)
-
 const express = require('express');
 const router = express.Router();
-const https = require('https'); // ⬅️ Using built-in module now
+const https = require('https');
 
-// Fetch a random quote from ZenQuotes API using the built-in 'https' module
+// In-memory cache for daily quotes (resets when server restarts)
+let dailyQuoteCache = null;
+let dailyQuoteDate = null;
+
+// Fetch a random quote from ZenQuotes API
 async function fetchRandomQuote() {
   const url = 'https://zenquotes.io/api/random';
   
@@ -16,12 +18,10 @@ async function fetchRandomQuote() {
         return reject(new Error(`ZenQuotes API returned status: ${res.statusCode}`));
       }
 
-      // Concatenate data chunks
       res.on('data', (chunk) => {
         data += chunk;
       });
 
-      // Once all data is received
       res.on('end', () => {
         try {
           const json = JSON.parse(data);
@@ -30,7 +30,6 @@ async function fetchRandomQuote() {
             return reject(new Error('Invalid response format from ZenQuotes API.'));
           }
           
-          // Transform the response to match the expected format
           resolve({
             text: json[0].q,
             author: json[0].a
@@ -46,23 +45,52 @@ async function fetchRandomQuote() {
   });
 }
 
-router.get('/', async (req, res) => {
+// Helper to check if cache is still valid for today
+function isDailyCacheValid() {
+  if (!dailyQuoteDate) return false;
+  
+  const today = new Date().toDateString();
+  const cacheDate = new Date(dailyQuoteDate).toDateString();
+  
+  return today === cacheDate;
+}
+
+// Daily quote endpoint with server-side caching
+router.get('/daily', async (req, res) => {
+  try {
+    // Return cached quote if valid
+    if (isDailyCacheValid() && dailyQuoteCache) {
+      return res.json(dailyQuoteCache);
+    }
+    
+    // Fetch new quote and cache it
+    const quote = await fetchRandomQuote();
+    
+    // Cache the quote
+    dailyQuoteCache = quote;
+    dailyQuoteDate = new Date();
+    
+    return res.json(quote);
+  } catch (error) {
+    console.error('Daily quote route error:', error.message);
+    
+    // Try to return cached quote even if outdated
+    if (dailyQuoteCache) {
+      return res.json(dailyQuoteCache);
+    }
+    
+    return res.status(500).json({});
+  }
+});
+
+// Random quote endpoint (always fresh)
+router.get('/random', async (req, res) => {
   try {
     const quote = await fetchRandomQuote();
     return res.json(quote);
   } catch (error) {
     console.error('Random quote route error:', error.message);
-    return res.status(500).json({}); // Return empty object on failure
-  }
-});
-
-router.get('/daily', async (req, res) => {
-  try {
-    const quote = await fetchRandomQuote();
-    return res.json(quote);
-  } catch (error) {
-    console.error('Daily quote route error:', error.message);
-    return res.status(500).json({}); // Return empty object on failure
+    return res.status(500).json({});
   }
 });
 

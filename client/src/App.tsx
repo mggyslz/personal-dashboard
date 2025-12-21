@@ -5,64 +5,114 @@ import News from './components/News';
 import Reminders from './components/Reminders';
 import Quote from './components/Quotes';
 import Journal from './components/Journal';
-import Spotify from './components/Spotify';
 import Clock from './components/Clock';
+import Sidebar from './components/Sidebar';
 import './App.css';
 
 function App() {
   const [greeting, setGreeting] = useState('');
+  const [timeOfDay, setTimeOfDay] = useState('');
 
   useEffect(() => {
     const hour = new Date().getHours();
-
-    if (hour < 12) setGreeting('Good Morning');
-    else if (hour === 12) setGreeting('Good Noon');
-    else if (hour < 18) setGreeting('Good Afternoon');
-    else setGreeting('Good Evening');
+    
+    if (hour < 12) {
+      setGreeting('Good Morning');
+      setTimeOfDay('morning');
+    } else if (hour < 18) {
+      setGreeting('Good Afternoon');
+      setTimeOfDay('afternoon');
+    } else {
+      setGreeting('Good Evening');
+      setTimeOfDay('evening');
+    }
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
-      <div className="max-w-[1600px] mx-auto">
-        <header className="px-8 py-12">
-          <h1 className="text-5xl font-light text-gray-800 mb-2">
-            {greeting}, Miguel
-          </h1>
-          <p className="text-gray-500 text-lg font-light">
-            {new Date().toLocaleDateString('en-US', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </p>
-        </header>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
+      <Sidebar />
 
-        <main className="px-8 pb-12">
-          <div className="space-y-8">
-            {/* Top Row — Time, Weather, Calendar, Quote */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              <Clock />
-              <Weather />
-              <Calendar />
-              <Quote />
+      {/* Main Content - Apple-like Layout */}
+      <div className="ml-20">
+        {/* Dynamic Background */}
+        <div className={`absolute inset-0 -z-10 transition-all duration-1000 ease-in-out ${
+          timeOfDay === 'morning' 
+            ? 'bg-gradient-to-br from-blue-50 via-cyan-50/30 to-white' 
+            : timeOfDay === 'afternoon'
+            ? 'bg-gradient-to-br from-amber-50/40 via-orange-50/20 to-white'
+            : 'bg-gradient-to-br from-indigo-50/30 via-violet-50/20 to-gray-50'
+        }`} />
+
+        {/* Subtle Grid Pattern */}
+        <div className="absolute inset-0 -z-10 opacity-5 bg-[linear-gradient(90deg,#80808012_1px,transparent_1px),linear-gradient(180deg,#80808012_1px,transparent_1px)] bg-[size:48px_48px]" />
+
+        <div className="max-w-[1800px] mx-auto px-6">
+          {/* Header - Apple Style */}
+          <header className="pt-12 pb-8 px-4">
+            <div className="flex items-baseline gap-4">
+              <h1 className="text-6xl font-light tracking-tight text-gray-900">
+                {greeting}
+              </h1>
+              <span className="text-6xl font-thin text-gray-400">,</span>
+              <h2 className="text-6xl font-thin text-gray-700">Miguel</h2>
+            </div>
+            <p className="text-gray-500 text-lg font-light mt-2 tracking-wide">
+              {new Date().toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </p>
+          </header>
+
+          {/* Main Dashboard Grid */}
+          <main className="pb-16">
+            {/* Top Row - Essential Widgets */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+              {/* Clock - Left Side */}
+              <div className="lg:col-span-3">
+                <Clock />
+              </div>
+
+              {/* Weather - Center */}
+              <div className="lg:col-span-3">
+                <Weather />
+              </div>
+
+              {/* Calendar - Right */}
+              <div className="lg:col-span-6">
+                <Calendar />
+              </div>
             </div>
 
-            {/* Middle Row — Reminders & Journal */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Reminders />
-              <Journal />
+            {/* Middle Row - Productivity */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+              {/* Reminders */}
+              <div className="lg:col-span-4">
+                <Reminders />
+              </div>
+
+              {/* Journal */}
+              <div className="lg:col-span-5">
+                <Journal />
+              </div>
+
+              {/* Quote */}
+              <div className="lg:col-span-3">
+                <Quote />
+              </div>
             </div>
 
-            {/* Bottom Row — News & Spotify */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
+            {/* Bottom Row - News Full Width */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* News - Takes full width */}
+              <div className="lg:col-span-12">
                 <News />
               </div>
-              <Spotify />
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     </div>
   );
