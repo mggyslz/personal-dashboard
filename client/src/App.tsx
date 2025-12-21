@@ -7,6 +7,7 @@ import Quote from './components/Quotes';
 import Journal from './components/Journal';
 import Clock from './components/Clock';
 import Sidebar from './components/Sidebar';
+import Notes from './components/Notes'; // Add this import
 import './App.css';
 
 function App() {
@@ -105,10 +106,18 @@ function App() {
             </div>
 
             {/* Bottom Row - News Full Width */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
               {/* News - Takes full width */}
               <div className="lg:col-span-12">
                 <News />
+              </div>
+            </div>
+
+            {/* Additional Row - Notes Full Width */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Notes - Takes full width below News */}
+              <div className="lg:col-span-12">
+                <Notes />
               </div>
             </div>
           </main>

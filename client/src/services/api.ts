@@ -1,21 +1,51 @@
-// client/src/services/api.ts
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
+/* =========================
+   DTOs
+========================= */
+
+// Journal
 interface CreateEntryDto {
   text: string;
   date: string;
 }
 
+// Reminders
 interface CreateReminderDto {
   text: string;
   date: string;
   time?: string;
 }
 
+// Notes
+interface CreateNoteDto {
+  title: string;
+  content?: string;
+  category?: string;
+  color?: string;
+  pinned?: boolean;
+}
+
+interface UpdateNoteDto {
+  title?: string;
+  content?: string;
+  category?: string;
+  color?: string;
+  pinned?: boolean;
+}
+
+/* =========================
+   API Service
+========================= */
+
 class ApiService {
-  private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  private async request<T>(
+    endpoint: string,
+    options?: RequestInit
+  ): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
-    
+
     try {
       const response = await fetch(url, {
         ...options,
@@ -36,7 +66,10 @@ class ApiService {
     }
   }
 
-  // Journal Entries
+  /* =========================
+     Journal Entries
+  ========================= */
+
   async getEntries() {
     return this.request('/entries');
   }
@@ -69,7 +102,10 @@ class ApiService {
     return this.request('/entries/stats/mood');
   }
 
-  // Reminders
+  /* =========================
+     Reminders
+  ========================= */
+
   async getReminders() {
     return this.request('/reminders');
   }
@@ -104,7 +140,52 @@ class ApiService {
     });
   }
 
-  // AI Analysis
+  /* =========================
+     Notes
+  ========================= */
+
+  async getNotes() {
+    return this.request('/notes');
+  }
+
+  async getNote(id: number) {
+    return this.request(`/notes/${id}`);
+  }
+
+  async createNote(data: CreateNoteDto) {
+    return this.request('/notes', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateNote(id: number, data: UpdateNoteDto) {
+    return this.request(`/notes/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteNote(id: number) {
+    return this.request(`/notes/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async togglePinNote(id: number) {
+    return this.request(`/notes/${id}/toggle-pin`, {
+      method: 'PATCH',
+    });
+  }
+
+  async getNotesByCategory(category: string) {
+    return this.request(`/notes/category/${category}`);
+  }
+
+  /* =========================
+     AI Analysis
+  ========================= */
+
   async analyzeText(text: string) {
     return this.request('/analyze', {
       method: 'POST',
@@ -112,30 +193,45 @@ class ApiService {
     });
   }
 
-  // Weather
+  /* =========================
+     Weather
+  ========================= */
+
   async getWeather(city?: string) {
     const query = city ? `?city=${city}` : '';
     return this.request(`/weather${query}`);
   }
 
-  // Calendar
+  /* =========================
+     Calendar
+  ========================= */
+
   async getCalendarEvents() {
     return this.request('/calendar');
   }
 
-  // News
-  
-  async getNews(country?: string, category?: string, pageSize?: number) {
+  /* =========================
+     News
+  ========================= */
+
+  async getNews(
+    country?: string,
+    category?: string,
+    pageSize?: number
+  ) {
     const params = new URLSearchParams();
     if (country) params.append('country', country);
     if (category) params.append('category', category);
     if (pageSize) params.append('pageSize', pageSize.toString());
-    
+
     const query = params.toString() ? `?${params.toString()}` : '';
-    return this.request<NewsArticle[]>(`/news${query}`);
+    return this.request(`/news${query}`);
   }
 
-  // Quotes
+  /* =========================
+     Quotes
+  ========================= */
+
   async getRandomQuote() {
     return this.request('/quotes');
   }
