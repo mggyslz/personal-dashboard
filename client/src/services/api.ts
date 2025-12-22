@@ -35,6 +35,19 @@ interface UpdateNoteDto {
   pinned?: boolean;
 }
 
+// AI Summary
+interface SummaryRequestDto {
+  text: string;
+  maxLength?: number;
+}
+
+interface SummaryResponseDto {
+  summary: string;
+  originalLength: number;
+  summaryLength: number;
+  readTimeSaved: number; // in minutes
+}
+
 /* =========================
    API Service
 ========================= */
@@ -182,6 +195,10 @@ class ApiService {
     return this.request(`/notes/category/${category}`);
   }
 
+  async getCategories() {
+    return this.request('/notes/categories');
+  }
+
   /* =========================
      AI Analysis
   ========================= */
@@ -190,6 +207,13 @@ class ApiService {
     return this.request('/analyze', {
       method: 'POST',
       body: JSON.stringify({ text }),
+    });
+  }
+
+  async summarizeNote(text: string, maxLength: number = 150) {
+    return this.request<SummaryResponseDto>('/notes/summarize', {
+      method: 'POST',
+      body: JSON.stringify({ text, maxLength }),
     });
   }
 

@@ -7,7 +7,8 @@ import Quote from './components/Quotes';
 import Journal from './components/Journal';
 import Clock from './components/Clock';
 import Sidebar from './components/Sidebar';
-import Notes from './components/Notes'; // Add this import
+import Notes from './components/Notes';
+import Pomodoro from './components/Pomodoro';
 import './App.css';
 
 function App() {
@@ -113,11 +114,16 @@ function App() {
               </div>
             </div>
 
-            {/* Additional Row - Notes Full Width */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              {/* Notes - Takes full width below News */}
-              <div className="lg:col-span-12">
+            {/* Row for Notes and Pomodoro Side by Side */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+              {/* Notes - Half width on large screens */}
+              <div className="lg:col-span-6">
                 <Notes />
+              </div>
+
+              {/* Pomodoro Timer - Half width on large screens */}
+              <div className="lg:col-span-6">
+                <Pomodoro />
               </div>
             </div>
           </main>

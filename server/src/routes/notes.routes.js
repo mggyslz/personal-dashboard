@@ -10,5 +10,6 @@ router.get('/:id', notesController.getOne.bind(notesController));
 router.put('/:id', notesController.update.bind(notesController));
 router.patch('/:id/toggle-pin', notesController.togglePin.bind(notesController));
 router.delete('/:id', notesController.delete.bind(notesController));
+router.post('/summarize', notesController.summarize.bind(notesController));
 
 module.exports = router;
