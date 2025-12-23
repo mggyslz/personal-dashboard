@@ -653,11 +653,13 @@ export default function Notes() {
 
         <div>
           <h4 className="text-sm font-medium text-gray-500 mb-4">All Notes</h4>
-          <div className="grid grid-cols-1 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 h-full flex flex-col">
             {regularNotes.map(note => (
               <div
                 key={note.id}
-                className="group relative bg-white rounded-lg p-4 border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all duration-200 cursor-pointer"
+                className="group relative bg-white rounded-lg p-4 border border-gray-200 
+             hover:border-gray-300 hover:shadow-sm transition-all duration-200 
+             cursor-pointer h-full flex flex-col"
                 style={{ borderLeftColor: note.color, borderLeftWidth: '4px' }}
                 onClick={() => setExpandedNote(note)}
               >

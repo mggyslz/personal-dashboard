@@ -5,10 +5,9 @@ import {
   Youtube,
   Code,
   Settings,
-  Grid,
 } from 'lucide-react';
 
-import { SiOpenai, SiSpotify } from 'react-icons/si';
+import { SiOpenai, SiSpotify, SiGithub } from 'react-icons/si';
 
 const socialLinks = [
   { icon: MessageCircle, url: 'https://messenger.com', label: 'Messenger', color: 'text-blue-500 hover:text-blue-600' },
@@ -16,10 +15,9 @@ const socialLinks = [
   { icon: Instagram, url: 'https://instagram.com', label: 'Instagram', color: 'text-pink-500 hover:text-pink-600' },
   { icon: Youtube, url: 'https://youtube.com', label: 'YouTube', color: 'text-red-500 hover:text-red-600' },
   { icon: Code, url: 'https://leetcode.com', label: 'LeetCode', color: 'text-orange-500 hover:text-orange-600' },
-
-  // ✅ REAL brand logos
-  { icon: SiOpenai, url: 'https://chat.openai.com', label: 'ChatGPT', color: 'text-white-500 hover:text-green-600' },
+  { icon: SiOpenai, url: 'https://chat.openai.com', label: 'ChatGPT', color: 'text-green-500 hover:text-green-600' },
   { icon: SiSpotify, url: 'https://open.spotify.com', label: 'Spotify', color: 'text-green-500 hover:text-green-600' },
+  { icon: SiGithub, url: 'https://github.com/mggyslz', label: 'GitHub', color: 'text-gray-800 hover:text-black' },
 ];
 
 export default function Sidebar() {
@@ -37,19 +35,8 @@ export default function Sidebar() {
           </div>
         </div>
 
-        {/* Navigation */}
+        {/* Social Links */}
         <div className="flex-1 flex flex-col items-center gap-2">
-          {/* Dashboard */}
-          <button className="group relative p-3 rounded-2xl hover:bg-white/30 transition-all hover:scale-105">
-            <Grid className="w-[22px] h-[22px] text-gray-700 group-hover:text-gray-900" />
-            <span className="absolute left-full ml-4 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-              Dashboard
-            </span>
-          </button>
-
-          <div className="h-px w-8 bg-gradient-to-r from-transparent via-gray-300/50 to-transparent my-2" />
-
-          {/* Social Links */}
           <nav className="flex flex-col gap-2">
             {socialLinks.map((link, index) => {
               const Icon = link.icon;
