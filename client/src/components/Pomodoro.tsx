@@ -113,18 +113,19 @@ export default function Pomodoro() {
 
   return (
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-50 to-rose-100/50 flex items-center justify-center">
-              <Timer size={24} strokeWidth={1.5} className="text-rose-600" />
-            </div>
-            <h1 className="text-2xl md:text-3xl font-light text-gray-800">Pomodoro Timer</h1>
-          </div>
-        </div>
         <div className="bg-white/80 backdrop-blur-sm rounded-3xl border border-gray-200/50 shadow-lg">
+          {/* Header INSIDE the box */}
+          <div className="p-6 md:p-8">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-50 to-rose-100/50 flex items-center justify-center">
+                <Timer size={24} strokeWidth={1.5} className="text-rose-600" />
+              </div>
+              <h1 className="text-2xl md:text-3xl font-light text-gray-800">
+                Pomodoro Timer
+              </h1>
+            </div>
+          </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 md:p-8">
-            
             {/* Left Column - Timer Display */}
             <div className="flex flex-col items-center justify-center p-4 md:p-8">
               {/* Progress Circle */}
