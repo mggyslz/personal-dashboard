@@ -3,6 +3,7 @@ import { api } from '../services/api';
 import Clock from '../components/Clock';
 import Weather from '../components/Weather';
 import Quote from '../components/Quotes';
+import TimeTracker from '../components/TimeTracker'; // Added import
 import { 
   Calendar as CalendarIcon, 
   BookOpen, 
@@ -103,51 +104,6 @@ export default function Dashboard() {
       setLoading(false);
     }
   };
-
-  const quickAccessItems = [
-    {
-      to: '/calendar',
-      icon: CalendarIcon,
-      title: 'Calendar',
-      description: 'Manage events & reminders',
-      color: 'bg-blue-50 text-blue-600 border-blue-200'
-    },
-    {
-      to: '/journal',
-      icon: BookOpen,
-      title: 'Journal',
-      description: 'Write & reflect',
-      color: 'bg-green-50 text-green-600 border-green-200'
-    },
-    {
-      to: '/news',
-      icon: Newspaper,
-      title: 'News',
-      description: 'Latest updates',
-      color: 'bg-purple-50 text-purple-600 border-purple-200'
-    },
-    {
-      to: '/notes',
-      icon: FileText,
-      title: 'Notes',
-      description: 'Quick notes & ideas',
-      color: 'bg-amber-50 text-amber-600 border-amber-200'
-    },
-    {
-      to: '/pomodoro',
-      icon: Timer,
-      title: 'Pomodoro',
-      description: 'Focus timer',
-      color: 'bg-rose-50 text-rose-600 border-rose-200'
-    },
-    {
-      to: '/settings',
-      icon: Settings,
-      title: 'Settings',
-      description: 'App preferences',
-      color: 'bg-gray-50 text-gray-600 border-gray-200'
-    },
-  ];
 
   const productivityStats = [
     {
@@ -274,37 +230,100 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Quick Access Grid with Professional Icons */}
-      <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 border border-gray-200/50 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-light text-gray-700">Quick Access</h3>
-          <span className="text-sm text-gray-400 font-light">
-            Navigate to features
-          </span>
+
+      {/* Time Tracker and Mini Calendar Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Time Tracker - Left Side */}
+        <div className="lg:col-span-1">
+          <TimeTracker />
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {quickAccessItems.map((item, index) => {
-            const Icon = item.icon;
-            return (
-              <a
-                key={index}
-                href={item.to}
-                className="group flex flex-col items-center justify-center p-6 rounded-2xl border hover:shadow-md transition-all duration-200 hover:scale-[1.02]"
-                style={{ 
-                  backgroundColor: item.color.split(' ')[0],
-                  borderColor: item.color.split(' ')[2],
-                  color: item.color.split(' ')[1]
-                }}
-              >
-                <div className="p-3 rounded-xl bg-white/50 mb-3 group-hover:scale-110 transition-transform duration-200">
-                  <Icon size={24} />
+        {/* Mini Calendar - Right Side */}
+        <div className="bg-white/60 backdrop-blur-sm p-6 rounded-3xl border border-gray-200/50 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <CalendarIcon className="text-gray-400" size={18} />
+            <h3 className="text-lg font-light text-gray-700">Today's Calendar</h3>
+          </div>
+          
+          <div className="text-center mb-4">
+            <div className="text-2xl font-light text-gray-900 mb-1">
+              {new Date().getDate()}
+            </div>
+            <div className="text-sm text-gray-600 font-light">
+              {new Date().toLocaleDateString('en-US', { 
+                month: 'long', 
+                year: 'numeric'
+              })}
+            </div>
+            <div className="text-xs text-gray-400 mt-1">
+              {new Date().toLocaleDateString('en-US', { weekday: 'long' })}
+            </div>
+          </div>
+          
+          {/* Small Calendar Grid */}
+          <div className="grid grid-cols-7 gap-1 mb-4">
+            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+              <div key={i} className="text-center text-xs font-light text-gray-400 py-1">
+                {day}
+              </div>
+            ))}
+            
+            {/* Calculate days in month */}
+            {(() => {
+              const today = new Date();
+              const year = today.getFullYear();
+              const month = today.getMonth();
+              const firstDay = new Date(year, month, 1);
+              const lastDay = new Date(year, month + 1, 0);
+              const daysInMonth = lastDay.getDate();
+              const startingDayOfWeek = firstDay.getDay();
+              const days = [];
+              
+              // Empty days for the start of the month
+              for (let i = 0; i < startingDayOfWeek; i++) {
+                days.push(<div key={`empty-${i}`} className="h-6"></div>);
+              }
+              
+              // Days of the month
+              for (let day = 1; day <= daysInMonth; day++) {
+                const isToday = day === today.getDate();
+                days.push(
+                  <div
+                    key={day}
+                    className={`h-6 flex items-center justify-center rounded-lg text-xs transition-colors ${
+                      isToday
+                        ? 'bg-blue-100 text-blue-700 font-medium'
+                        : 'text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    {day}
+                  </div>
+                );
+              }
+              
+              return days;
+            })()}
+          </div>
+          
+          {/* Upcoming events */}
+          <div className="pt-4 border-t border-gray-200/50">
+            <h4 className="text-sm font-light text-gray-700 mb-3">Upcoming</h4>
+            <div className="space-y-2">
+              {quickStats.upcomingEvents > 0 ? (
+                <div className="text-sm text-gray-600 font-light">
+                  {quickStats.upcomingEvents} event{quickStats.upcomingEvents !== 1 ? 's' : ''} today
                 </div>
-                <h4 className="font-medium mb-1">{item.title}</h4>
-                <p className="text-xs text-center opacity-75">{item.description}</p>
+              ) : (
+                <div className="text-sm text-gray-400 font-light">No events today</div>
+              )}
+              <a 
+                href="/calendar" 
+                className="inline-block text-sm text-blue-600 hover:text-blue-800 font-light"
+              >
+                View full calendar →
               </a>
-            );
-          })}
+            </div>
+          </div>
         </div>
       </div>
 
