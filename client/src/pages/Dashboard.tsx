@@ -3,7 +3,7 @@ import { api } from '../services/api';
 import Clock from '../components/Clock';
 import Weather from '../components/Weather';
 import Quote from '../components/Quotes';
-import TimeTracker from '../components/TimeTracker'; // Added import
+import TimeTracker from '../components/TimeTracker';
 import { 
   Calendar as CalendarIcon, 
   BookOpen, 
@@ -109,7 +109,7 @@ export default function Dashboard() {
     {
       label: 'Productivity Today',
       value: `${Math.min(100, Math.round((quickStats.completedTasks / Math.max(quickStats.totalReminders, 1)) * 100))}%`,
-      description: 'Tasks completed',
+      description: 'Reminders completed',
       icon: TrendingUp,
       color: 'bg-emerald-50 text-emerald-600 border-emerald-200'
     },

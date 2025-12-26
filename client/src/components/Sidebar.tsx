@@ -10,15 +10,16 @@ import {
 import { SiOpenai, SiSpotify, SiGithub } from 'react-icons/si';
 
 const socialLinks = [
-  { icon: MessageCircle, url: 'https://messenger.com', label: 'Messenger', color: 'text-blue-500 hover:text-blue-600' },
-  { icon: Facebook, url: 'https://facebook.com', label: 'Facebook', color: 'text-blue-600 hover:text-blue-700' },
-  { icon: Instagram, url: 'https://instagram.com', label: 'Instagram', color: 'text-pink-500 hover:text-pink-600' },
-  { icon: Youtube, url: 'https://youtube.com', label: 'YouTube', color: 'text-red-500 hover:text-red-600' },
-  { icon: Code, url: 'https://leetcode.com', label: 'LeetCode', color: 'text-orange-500 hover:text-orange-600' },
-  { icon: SiOpenai, url: 'https://chat.openai.com', label: 'ChatGPT', color: 'text-green-500 hover:text-green-600' },
-  { icon: SiSpotify, url: 'https://open.spotify.com', label: 'Spotify', color: 'text-green-500 hover:text-green-600' },
-  { icon: SiGithub, url: 'https://github.com/mggyslz', label: 'GitHub', color: 'text-gray-800 hover:text-black' },
+  { icon: MessageCircle, url: 'https://messenger.com', label: 'Messenger', hover: 'group-hover:text-blue-600' },
+  { icon: Facebook, url: 'https://facebook.com', label: 'Facebook', hover: 'group-hover:text-blue-700' },
+  { icon: Instagram, url: 'https://instagram.com', label: 'Instagram', hover: 'group-hover:text-pink-600' },
+  { icon: Youtube, url: 'https://youtube.com', label: 'YouTube', hover: 'group-hover:text-red-600' },
+  { icon: Code, url: 'https://leetcode.com', label: 'LeetCode', hover: 'group-hover:text-orange-600' },
+  { icon: SiOpenai, url: 'https://chat.openai.com', label: 'ChatGPT', hover: 'group-hover:text-green-600' },
+  { icon: SiSpotify, url: 'https://open.spotify.com', label: 'Spotify', hover: 'group-hover:text-green-600' },
+  { icon: SiGithub, url: 'https://github.com/mggyslz', label: 'GitHub', hover: 'group-hover:text-black' },
 ];
+
 
 export default function Sidebar() {
   return (
@@ -31,7 +32,7 @@ export default function Sidebar() {
         {/* Brand */}
         <div className="mb-8">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center shadow-lg">
-            <span className="text-xs font-semibold text-white">M</span>
+            <span className="text-xs font-semibold text-white">MZ</span>
           </div>
         </div>
 
@@ -47,11 +48,10 @@ export default function Sidebar() {
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group relative p-3 rounded-2xl hover:bg-white/30 transition-all hover:scale-105"
+                  className="group relative p-3 rounded-2xl hover:bg-white/30 transition-all duration-200 hover:scale-105"
                   title={link.label}
                 >
-                  <Icon className={`w-[22px] h-[22px] transition-colors ${link.color}`} />
-
+                  <Icon className={`w-[22px] h-[22px] text-gray-500 transition-colors ${link.hover} `} />
                   {/* Tooltip */}
                   <span className="absolute left-full ml-4 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                     {link.label}
