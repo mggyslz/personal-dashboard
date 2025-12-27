@@ -6,7 +6,7 @@ import CalendarPage from './pages/CalendarPage';
 import JournalPage from './pages/JournalPage';
 import NewsPage from './pages/NewsPage';
 import NotesPage from './pages/NotesPage';
-import PomodoroPage from './pages/PomodoroPage';
+import ProductivityPage from './pages/ProductivityPage';
 import './App.css';
 
 function App() {
@@ -48,7 +48,7 @@ function MainContent() {
       case '/journal': return 'Journal';
       case '/news': return 'News';
       case '/notes': return 'Notes';
-      case '/pomodoro': return 'Pomodoro';
+      case '/productivity': return 'Productivity';
       default: return 'Dashboard';
     }
   };
@@ -87,7 +87,7 @@ function MainContent() {
                 <NavLink to="/journal" label="Journal" />
                 <NavLink to="/news" label="News" />
                 <NavLink to="/notes" label="Notes" />
-                <NavLink to="/pomodoro" label="Pomodoro" />
+                <NavLink to="/productivity" label="Productivity" />
               </nav>
             </div>
           </div>
@@ -115,7 +115,7 @@ function MainContent() {
             <Route path="/journal" element={<JournalPage />} />
             <Route path="/news" element={<NewsPage />} />
             <Route path="/notes" element={<NotesPage />} />
-            <Route path="/pomodoro" element={<PomodoroPage />} />
+            <Route path="/productivity" element={<ProductivityPage />} />
           </Routes>
         </main>
       </div>
