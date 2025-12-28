@@ -48,6 +48,28 @@ interface SummaryResponseDto {
   readTimeSaved: number; // in minutes
 }
 
+interface CreateDeepWorkSessionDto {
+  task: string;
+  duration?: number;
+  time_left?: number;
+  is_active?: boolean;
+  is_task_locked?: boolean;
+}
+
+interface UpdateDeepWorkSessionDto {
+  task?: string;
+  duration?: number;
+  time_left?: number;
+  is_active?: boolean;
+  is_task_locked?: boolean;
+  session_output?: string;
+  completed?: boolean;
+}
+
+interface CompleteSessionDto {
+  session_output: string;
+}
+
 /* =========================
    API Service
 ========================= */
@@ -153,6 +175,52 @@ class ApiService {
     });
   }
 
+  /* =========================
+    Deep Work Sessions
+  ========================= */
+
+  async createDeepWorkSession(data: CreateDeepWorkSessionDto) {
+    return this.request('/deepwork/sessions', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getActiveSession() {
+    return this.request('/deepwork/sessions/active');
+  }
+
+  async updateDeepWorkSession(id: number, data: UpdateDeepWorkSessionDto) {
+    return this.request(`/deepwork/sessions/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async completeSession(id: number, data: CompleteSessionDto) {
+    return this.request(`/deepwork/sessions/${id}/complete`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getDeepWorkStats() {
+    return this.request('/deepwork/stats');
+  }
+
+  async getCompletedSessions() {
+    return this.request('/deepwork/sessions/completed');
+  }
+
+  async deleteDeepWorkSession(id: number) {
+    return this.request(`/deepwork/sessions/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async getDeepWorkSessions() {
+    return this.request('/deepwork/sessions');
+  }
   /* =========================
      Notes
   ========================= */
