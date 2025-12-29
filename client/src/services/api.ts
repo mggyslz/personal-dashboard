@@ -108,6 +108,64 @@ interface ToggleCompleteDto {
   completed: boolean;
 }
 
+interface OutputEntryDto {
+  id: string;
+  date: string;
+  type: string;
+  count: number;
+  notes?: string;
+  unit?: string;
+  color?: string;
+  target?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+interface OutputTypeDto {
+  id: string;
+  name: string;
+  unit: string;
+  target: number;
+  color: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface OutputStatsDto {
+  date: string;
+  totalOutput: number;
+  streak: number;
+  entriesCount: number;
+  typeStats: {
+    [key: string]: {
+      todayTotal: number;
+      entriesCount: number;
+      target: number;
+      percentage: number;
+    };
+  };
+}
+
+interface CreateOutputEntryDto {
+  date: string;
+  type: string;
+  count: number;
+  notes?: string;
+}
+
+interface CreateOutputTypeDto {
+  name: string;
+  unit: string;
+  target: number;
+  color?: string;
+}
+
+interface UpdateOutputTypeDto {
+  name?: string;
+  unit?: string;
+  target?: number;
+  color?: string;
+}
 
 /* =========================
    API Service
@@ -308,6 +366,65 @@ async deleteMITTask(id: number) {
     method: 'DELETE',
   });
 }
+/* =========================
+   Output Tracker
+========================= */
+
+async getOutputEntries(limit: number = 50) {
+  const query = `?limit=${limit}`;
+  return this.request<OutputEntryDto[]>(`/output/entries${query}`);
+}
+
+async getOutputEntry(id: string) {
+  return this.request<OutputEntryDto>(`/output/entries/${id}`);
+}
+
+async createOutputEntry(data: CreateOutputEntryDto) {
+  return this.request<OutputEntryDto>('/output/entries', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+async deleteOutputEntry(id: string) {
+  return this.request(`/output/entries/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+async getOutputTypes() {
+  return this.request<OutputTypeDto[]>('/output/types');
+}
+
+async createOutputType(data: CreateOutputTypeDto) {
+  return this.request<OutputTypeDto>('/output/types', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+async updateOutputType(id: string, data: UpdateOutputTypeDto) {
+  return this.request<OutputTypeDto>(`/output/types/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+async deleteOutputType(id: string) {
+  return this.request(`/output/types/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+async getOutputStats(date?: string) {
+  const query = date ? `?date=${date}` : '';
+  return this.request<OutputStatsDto>(`/output/stats${query}`);
+}
+
+async getOutputStreak() {
+  return this.request<number>('/output/streak');
+}
+
   /* =========================
      Notes
   ========================= */

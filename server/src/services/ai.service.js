@@ -5,7 +5,7 @@ class AIService {
     this.ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     this.modelName = 'gemini-2.5-flash';
     this.analysisCache = new Map();
-    this.cacheTTL = 10 * 60 * 1000; // 10 minutes cache
+    this.cacheTTL = 10 * 60 * 1000; 
     this.recentInsights = new Set();
     this.maxRecentInsights = 30;
     this.recentResponseTypes = [];

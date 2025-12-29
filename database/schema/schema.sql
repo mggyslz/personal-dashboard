@@ -77,6 +77,46 @@ CREATE TABLE IF NOT EXISTS deep_work_stats (
 );
 
 -- =========================
+-- Output Types table
+-- =========================
+CREATE TABLE IF NOT EXISTS output_types (
+  id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+  name TEXT NOT NULL UNIQUE,
+  unit TEXT NOT NULL,
+  target INTEGER NOT NULL DEFAULT 1,
+  color TEXT DEFAULT 'blue',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =========================
+-- Output Entries table
+-- =========================
+CREATE TABLE IF NOT EXISTS output_entries (
+  id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+  date TEXT NOT NULL,
+  type TEXT NOT NULL,
+  count INTEGER NOT NULL DEFAULT 1,
+  notes TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (type) REFERENCES output_types(name) ON DELETE CASCADE
+);
+
+-- =========================
+-- Output Daily Stats table
+-- =========================
+CREATE TABLE IF NOT EXISTS output_daily_stats (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  date TEXT NOT NULL UNIQUE,
+  total_output INTEGER DEFAULT 0,
+  streak_days INTEGER DEFAULT 0,
+  entries_count INTEGER DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- =========================
 -- MIT Daily tasks table
 -- =========================
 CREATE TABLE IF NOT EXISTS mit_tasks (
@@ -116,3 +156,8 @@ CREATE INDEX IF NOT EXISTS idx_deep_work_stats_date ON deep_work_stats(date);
 CREATE INDEX IF NOT EXISTS idx_mit_tasks_date ON mit_tasks(date);
 CREATE INDEX IF NOT EXISTS idx_mit_tasks_completed ON mit_tasks(completed);
 CREATE INDEX IF NOT EXISTS idx_mit_tasks_completed_date ON mit_tasks(completed, date);
+
+CREATE INDEX IF NOT EXISTS idx_output_entries_date ON output_entries(date);
+CREATE INDEX IF NOT EXISTS idx_output_entries_type ON output_entries(type);
+CREATE INDEX IF NOT EXISTS idx_output_entries_date_type ON output_entries(date, type);
+CREATE INDEX IF NOT EXISTS idx_output_daily_stats_date ON output_daily_stats(date);
