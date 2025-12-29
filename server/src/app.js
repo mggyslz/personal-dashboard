@@ -11,6 +11,7 @@ const calendarRoutes = require('./routes/calendar.routes');
 const newsRoutes = require('./routes/news.routes');
 const quotesRoutes = require('./routes/quotes.routes');
 const deepWorkRoutes = require('./routes/deepwork.routes');
+const mitDailyRoutes = require('./routes/mitdaily.routes');
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.use('/api/calendar', calendarRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/quotes', quotesRoutes);
 app.use('/api/deepwork', deepWorkRoutes);
+app.use('/api/mit', mitDailyRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });

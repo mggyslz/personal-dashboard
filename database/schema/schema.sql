@@ -76,6 +76,27 @@ CREATE TABLE IF NOT EXISTS deep_work_stats (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+-- =========================
+-- MIT Daily tasks table
+-- =========================
+CREATE TABLE IF NOT EXISTS mit_tasks (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  date TEXT NOT NULL UNIQUE,
+  task TEXT NOT NULL,
+  completed INTEGER DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =========================
+-- MIT Daily streaks table
+-- =========================
+CREATE TABLE IF NOT EXISTS mit_streaks (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  current_streak INTEGER DEFAULT 0,
+  longest_streak INTEGER DEFAULT 0,
+  last_updated DATE DEFAULT CURRENT_DATE
+);
 
 -- =========================
 -- Indexes for performance
@@ -91,3 +112,7 @@ CREATE INDEX IF NOT EXISTS idx_notes_pinned ON notes(pinned);
 CREATE INDEX IF NOT EXISTS idx_deep_work_sessions_active ON deep_work_sessions(is_active);
 CREATE INDEX IF NOT EXISTS idx_deep_work_sessions_completed ON deep_work_sessions(completed);
 CREATE INDEX IF NOT EXISTS idx_deep_work_stats_date ON deep_work_stats(date);
+
+CREATE INDEX IF NOT EXISTS idx_mit_tasks_date ON mit_tasks(date);
+CREATE INDEX IF NOT EXISTS idx_mit_tasks_completed ON mit_tasks(completed);
+CREATE INDEX IF NOT EXISTS idx_mit_tasks_completed_date ON mit_tasks(completed, date);

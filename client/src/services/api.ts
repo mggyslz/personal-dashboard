@@ -70,6 +70,45 @@ interface CompleteSessionDto {
   session_output: string;
 }
 
+interface MITDailyTaskDto {
+  date: string;
+  task: string;
+  completed: boolean;
+  exists?: boolean;
+}
+
+interface MITDailyStreakDto {
+  current_streak: number;
+  longest_streak: number;
+  streak_percentage: number;
+  last_30_days: Array<{
+    date: string;
+    completed: boolean | null;
+    has_task: boolean;
+  }>;
+  weekly_stats: Array<{
+    week_number: string;
+    total_days: number;
+    completed_days: number;
+    completion_rate: number;
+  }>;
+  monthly_stats: Array<{
+    month: string;
+    total_tasks: number;
+    completed_tasks: number;
+    completion_rate: number;
+  }>;
+}
+
+interface SetMITTaskDto {
+  task: string;
+}
+
+interface ToggleCompleteDto {
+  completed: boolean;
+}
+
+
 /* =========================
    API Service
 ========================= */
@@ -221,6 +260,54 @@ class ApiService {
   async getDeepWorkSessions() {
     return this.request('/deepwork/sessions');
   }
+
+/* =========================
+   MIT Daily
+========================= */
+
+async getTodayMITTask() {
+  return this.request<MITDailyTaskDto>('/mit/today');
+}
+
+async setTodayMITTask(data: SetMITTaskDto) {
+  return this.request<MITDailyTaskDto>('/mit/today', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+async toggleMITComplete(id: number, data: ToggleCompleteDto) {
+  return this.request<MITDailyTaskDto>(`/mit/${id}/complete`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+async getMITHistory(limit: number = 30) {
+  const query = `?limit=${limit}`;
+  return this.request<{
+    history: MITDailyTaskDto[];
+    streak: { current_streak: number; longest_streak: number };
+  }>(`/mit/history${query}`);
+}
+
+async getMITStreakStats() {
+  return this.request<MITDailyStreakDto>('/mit/streak');
+}
+
+async getMITWeeklyStats() {
+  return this.request('/mit/weekly');
+}
+
+async getMITMonthlyStats() {
+  return this.request('/mit/monthly');
+}
+
+async deleteMITTask(id: number) {
+  return this.request(`/mit/${id}`, {
+    method: 'DELETE',
+  });
+}
   /* =========================
      Notes
   ========================= */
