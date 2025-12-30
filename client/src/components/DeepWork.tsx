@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Play, Pause, RotateCcw, Target, CheckCircle, Clock, Save, History, Check, X } from 'lucide-react';
-import { api } from '../services/api'; // Import your API service
 
 const SPRINT_DURATIONS = {
   '60-min': 60 * 60,
@@ -23,7 +22,6 @@ interface DeepWorkSession {
   updated_at: string;
 }
 
-// Helper to format date
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -46,7 +44,17 @@ export default function DeepWorkSprint() {
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [allSessions, setAllSessions] = useState<DeepWorkSession[]>([]);
 
-  // Load active session on component mount
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastUpdateTimeRef = useRef<number>(Date.now());
+  const isActiveRef = useRef(isActive);
+  const timeLeftRef = useRef(timeLeft);
+
+  // Keep refs in sync with state
+  useEffect(() => {
+    isActiveRef.current = isActive;
+    timeLeftRef.current = timeLeft;
+  }, [isActive, timeLeft]);
+
   useEffect(() => {
     loadActiveSession();
     loadStats();
@@ -56,17 +64,32 @@ export default function DeepWorkSprint() {
   const loadActiveSession = async () => {
     try {
       setIsLoading(true);
-      const session = await api.getActiveSession();
+      const mockSession = JSON.parse(sessionStorage.getItem('activeDeepWorkSession') || 'null');
 
-      if (session && session.id) {
-        setCurrentSessionId(session.id);
-        setTask(session.task || '');
-        setTimeLeft(session.time_left || SPRINT_DURATIONS['60-min']);
-        setIsActive(session.is_active || false);
-        setIsTaskLocked(session.is_task_locked || false);
+      if (mockSession && mockSession.id) {
+        const savedTimestamp = parseInt(sessionStorage.getItem('deepWorkLastTick') || '0');
+        const now = Date.now();
+        const elapsedSeconds = mockSession.is_active && savedTimestamp > 0 
+          ? Math.floor((now - savedTimestamp) / 1000) 
+          : 0;
 
-        // Find matching duration
-        const sessionDuration = session.duration || SPRINT_DURATIONS['60-min'];
+        const adjustedTimeLeft = Math.max(0, mockSession.time_left - elapsedSeconds);
+
+        setCurrentSessionId(mockSession.id);
+        setTask(mockSession.task || '');
+        setTimeLeft(adjustedTimeLeft);
+        timeLeftRef.current = adjustedTimeLeft;
+        setIsActive(mockSession.is_active && adjustedTimeLeft > 0);
+        isActiveRef.current = mockSession.is_active && adjustedTimeLeft > 0;
+        setIsTaskLocked(mockSession.is_task_locked || false);
+
+        if (adjustedTimeLeft <= 0 && mockSession.is_active) {
+          setShowOutputCheck(true);
+          setIsActive(false);
+          isActiveRef.current = false;
+        }
+
+        const sessionDuration = mockSession.duration || SPRINT_DURATIONS['60-min'];
         const durationKey = Object.keys(SPRINT_DURATIONS).find(
           key => SPRINT_DURATIONS[key as SprintDuration] === sessionDuration
         ) as SprintDuration;
@@ -83,7 +106,7 @@ export default function DeepWorkSprint() {
 
   const loadStats = async () => {
     try {
-      const stats = await api.getDeepWorkStats();
+      const stats = JSON.parse(sessionStorage.getItem('deepWorkStats') || '{"total_sprints":0}');
       setCompletedSprints(stats.total_sprints || 0);
     } catch (error) {
       console.error('Error loading stats:', error);
@@ -92,13 +115,20 @@ export default function DeepWorkSprint() {
 
   const loadAllSessions = async () => {
     try {
-      const sessions = await api.getDeepWorkSessions();
+      const sessions = JSON.parse(sessionStorage.getItem('allDeepWorkSessions') || '[]');
       setAllSessions(sessions || []);
     } catch (error) {
       console.error('Error loading sessions:', error);
       setAllSessions([]);
     }
   };
+
+  const saveSessionState = useCallback((sessionData: any) => {
+    sessionStorage.setItem('activeDeepWorkSession', JSON.stringify(sessionData));
+    if (sessionData.is_active) {
+      sessionStorage.setItem('deepWorkLastTick', Date.now().toString());
+    }
+  }, []);
 
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
@@ -111,46 +141,81 @@ export default function DeepWorkSprint() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Timer useEffect
+  const completeSessionTimer = useCallback(() => {
+    setIsActive(false);
+    isActiveRef.current = false;
+    setShowOutputCheck(true);
+    
+    if (currentSessionId) {
+      const sessionData = {
+        id: currentSessionId,
+        task,
+        duration: SPRINT_DURATIONS[duration],
+        time_left: 0,
+        is_active: false,
+        is_task_locked: isTaskLocked,
+      };
+      saveSessionState(sessionData);
+    }
+  }, [currentSessionId, task, duration, isTaskLocked, saveSessionState]);
+
+  // Improved timer logic
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    const updateTimer = () => {
+      if (!isActiveRef.current || timeLeftRef.current <= 0) {
+        return;
+      }
 
-    if (isActive && timeLeft > 0 && currentSessionId) {
-      interval = setInterval(() => {
-        setTimeLeft((prev) => {
-          const newTimeLeft = prev - 1;
+      const now = Date.now();
+      const elapsedSeconds = Math.floor((now - lastUpdateTimeRef.current) / 1000);
+      
+      if (elapsedSeconds >= 1) {
+        lastUpdateTimeRef.current = now;
+        
+        setTimeLeft(prev => {
+          const newTimeLeft = Math.max(0, prev - elapsedSeconds);
+          timeLeftRef.current = newTimeLeft;
 
-          // Update session in backend every 10 seconds
-          if (newTimeLeft % 10 === 0 && currentSessionId) {
-            updateSessionTime(newTimeLeft);
+          if (currentSessionId) {
+            const sessionData = {
+              id: currentSessionId,
+              task,
+              duration: SPRINT_DURATIONS[duration],
+              time_left: newTimeLeft,
+              is_active: newTimeLeft > 0,
+              is_task_locked: isTaskLocked,
+            };
+            saveSessionState(sessionData);
           }
 
-          if (newTimeLeft <= 1) {
-            clearInterval(interval);
+          if (newTimeLeft <= 0) {
             completeSessionTimer();
             return 0;
           }
+
           return newTimeLeft;
         });
-      }, 1000);
+      }
+
+      // Schedule next update
+      timerRef.current = setTimeout(updateTimer, 100);
+    };
+
+    if (isActive && timeLeft > 0) {
+      lastUpdateTimeRef.current = Date.now();
+      timerRef.current = setTimeout(updateTimer, 100);
+    } else if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
     }
 
     return () => {
-      if (interval) clearInterval(interval);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
     };
-  }, [isActive, timeLeft, currentSessionId]);
-
-  const updateSessionTime = async (newTimeLeft: number) => {
-    if (!currentSessionId) return;
-
-    try {
-      await api.updateDeepWorkSession(currentSessionId, {
-        time_left: newTimeLeft
-      });
-    } catch (error) {
-      console.error('Error updating session time:', error);
-    }
-  };
+  }, [isActive, timeLeft, currentSessionId, task, duration, isTaskLocked, saveSessionState, completeSessionTimer]);
 
   const startSprint = async () => {
     if (task.trim()) {
@@ -158,26 +223,41 @@ export default function DeepWorkSprint() {
         let sessionId = currentSessionId;
 
         if (!sessionId) {
-          // Create new session
-          const session = await api.createDeepWorkSession({
+          sessionId = Date.now();
+          setCurrentSessionId(sessionId);
+          
+          const newSession = {
+            id: sessionId,
             task,
             duration: SPRINT_DURATIONS[duration],
             time_left: SPRINT_DURATIONS[duration],
             is_active: true,
-            is_task_locked: true
-          });
-          sessionId = session.id;
-          setCurrentSessionId(sessionId);
-        } else {
-          // Update existing session
-          await api.updateDeepWorkSession(sessionId, {
-            is_active: true,
-            is_task_locked: true
-          });
+            is_task_locked: true,
+            session_output: '',
+            completed: false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+          
+          const sessions = JSON.parse(sessionStorage.getItem('allDeepWorkSessions') || '[]');
+          sessions.push(newSession);
+          sessionStorage.setItem('allDeepWorkSessions', JSON.stringify(sessions));
         }
+
+        const sessionData = {
+          id: sessionId,
+          task,
+          duration: SPRINT_DURATIONS[duration],
+          time_left: timeLeft,
+          is_active: true,
+          is_task_locked: true,
+        };
+        saveSessionState(sessionData);
 
         setIsTaskLocked(true);
         setIsActive(true);
+        isActiveRef.current = true;
+        lastUpdateTimeRef.current = Date.now();
         await loadAllSessions();
       } catch (error) {
         console.error('Error starting sprint:', error);
@@ -190,33 +270,47 @@ export default function DeepWorkSprint() {
     if (!currentSessionId) return;
 
     try {
-      await api.updateDeepWorkSession(currentSessionId, {
+      const sessionData = {
+        id: currentSessionId,
+        task,
+        duration: SPRINT_DURATIONS[duration],
+        time_left: timeLeftRef.current,
         is_active: false,
-        time_left: timeLeft
-      });
+        is_task_locked: isTaskLocked,
+      };
+      saveSessionState(sessionData);
+      
       setIsActive(false);
+      isActiveRef.current = false;
       await loadAllSessions();
     } catch (error) {
       console.error('Error pausing sprint:', error);
     }
   };
 
-  const completeSessionTimer = () => {
-    setIsActive(false);
-    setShowOutputCheck(true);
-  };
-
   const resetSprint = async () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+
     if (currentSessionId) {
       try {
-        await api.deleteDeepWorkSession(currentSessionId);
+        const sessions = JSON.parse(sessionStorage.getItem('allDeepWorkSessions') || '[]');
+        const filtered = sessions.filter((s: any) => s.id !== currentSessionId);
+        sessionStorage.setItem('allDeepWorkSessions', JSON.stringify(filtered));
       } catch (error) {
         console.error('Error deleting session:', error);
       }
     }
 
+    sessionStorage.removeItem('activeDeepWorkSession');
+    sessionStorage.removeItem('deepWorkLastTick');
+
     setIsActive(false);
+    isActiveRef.current = false;
     setTimeLeft(SPRINT_DURATIONS[duration]);
+    timeLeftRef.current = SPRINT_DURATIONS[duration];
     setIsTaskLocked(false);
     setShowOutputCheck(false);
     setSessionOutput('');
@@ -228,16 +322,18 @@ export default function DeepWorkSprint() {
     if (!isActive && !isTaskLocked) {
       setDuration(newDuration);
       setTimeLeft(SPRINT_DURATIONS[newDuration]);
+      timeLeftRef.current = SPRINT_DURATIONS[newDuration];
 
       if (currentSessionId) {
-        try {
-          await api.updateDeepWorkSession(currentSessionId, {
-            duration: SPRINT_DURATIONS[newDuration],
-            time_left: SPRINT_DURATIONS[newDuration]
-          });
-        } catch (error) {
-          console.error('Error updating duration:', error);
-        }
+        const sessionData = {
+          id: currentSessionId,
+          task,
+          duration: SPRINT_DURATIONS[newDuration],
+          time_left: SPRINT_DURATIONS[newDuration],
+          is_active: false,
+          is_task_locked: false,
+        };
+        saveSessionState(sessionData);
       }
     }
   };
@@ -245,11 +341,21 @@ export default function DeepWorkSprint() {
   const submitOutput = async () => {
     if (sessionOutput.trim() && currentSessionId) {
       try {
-        await api.completeSession(currentSessionId, {
-          session_output: sessionOutput.trim()
-        });
+        const sessions = JSON.parse(sessionStorage.getItem('allDeepWorkSessions') || '[]');
+        const updatedSessions = sessions.map((s: any) => 
+          s.id === currentSessionId 
+            ? { ...s, completed: true, session_output: sessionOutput.trim(), updated_at: new Date().toISOString() }
+            : s
+        );
+        sessionStorage.setItem('allDeepWorkSessions', JSON.stringify(updatedSessions));
 
-        // Refresh stats and sessions
+        const stats = JSON.parse(sessionStorage.getItem('deepWorkStats') || '{"total_sprints":0}');
+        stats.total_sprints = (stats.total_sprints || 0) + 1;
+        sessionStorage.setItem('deepWorkStats', JSON.stringify(stats));
+
+        sessionStorage.removeItem('activeDeepWorkSession');
+        sessionStorage.removeItem('deepWorkLastTick');
+
         await loadStats();
         await loadAllSessions();
 
@@ -257,6 +363,7 @@ export default function DeepWorkSprint() {
         setTask('');
         setIsTaskLocked(false);
         setTimeLeft(SPRINT_DURATIONS[duration]);
+        timeLeftRef.current = SPRINT_DURATIONS[duration];
         setCurrentSessionId(null);
         setSessionOutput('');
       } catch (error) {
@@ -270,22 +377,44 @@ export default function DeepWorkSprint() {
     if (task.trim()) {
       try {
         if (currentSessionId) {
-          // Update existing session
-          await api.updateDeepWorkSession(currentSessionId, {
+          const sessions = JSON.parse(sessionStorage.getItem('allDeepWorkSessions') || '[]');
+          const updatedSessions = sessions.map((s: any) =>
+            s.id === currentSessionId
+              ? { ...s, task, duration: SPRINT_DURATIONS[duration], time_left: timeLeft, updated_at: new Date().toISOString() }
+              : s
+          );
+          sessionStorage.setItem('allDeepWorkSessions', JSON.stringify(updatedSessions));
+          
+          const sessionData = {
+            id: currentSessionId,
             task,
             duration: SPRINT_DURATIONS[duration],
-            time_left: timeLeft
-          });
+            time_left: timeLeft,
+            is_active: false,
+            is_task_locked: false,
+          };
+          saveSessionState(sessionData);
         } else {
-          // Create new session without starting it
-          const session = await api.createDeepWorkSession({
+          const sessionId = Date.now();
+          const newSession = {
+            id: sessionId,
             task,
             duration: SPRINT_DURATIONS[duration],
             time_left: SPRINT_DURATIONS[duration],
             is_active: false,
-            is_task_locked: false
-          });
-          setCurrentSessionId(session.id);
+            is_task_locked: false,
+            session_output: '',
+            completed: false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+          
+          const sessions = JSON.parse(sessionStorage.getItem('allDeepWorkSessions') || '[]');
+          sessions.push(newSession);
+          sessionStorage.setItem('allDeepWorkSessions', JSON.stringify(sessions));
+          
+          setCurrentSessionId(sessionId);
+          saveSessionState(newSession);
         }
 
         await loadAllSessions();
@@ -306,19 +435,19 @@ export default function DeepWorkSprint() {
   const continueSession = async (session: DeepWorkSession) => {
     if (session.completed) return;
 
-    // Reset current state
     setIsActive(false);
+    isActiveRef.current = false;
     setShowOutputCheck(false);
     setSessionOutput('');
 
-    // Load session data
     setCurrentSessionId(session.id);
     setTask(session.task || '');
     setTimeLeft(session.time_left || SPRINT_DURATIONS['60-min']);
+    timeLeftRef.current = session.time_left || SPRINT_DURATIONS['60-min'];
     setIsActive(session.is_active || false);
+    isActiveRef.current = session.is_active || false;
     setIsTaskLocked(session.is_task_locked || false);
 
-    // Find matching duration
     const sessionDuration = session.duration || SPRINT_DURATIONS['60-min'];
     const durationKey = Object.keys(SPRINT_DURATIONS).find(
       key => SPRINT_DURATIONS[key as SprintDuration] === sessionDuration
@@ -326,6 +455,15 @@ export default function DeepWorkSprint() {
     if (durationKey) {
       setDuration(durationKey);
     }
+
+    saveSessionState({
+      id: session.id,
+      task: session.task,
+      duration: session.duration,
+      time_left: session.time_left,
+      is_active: session.is_active,
+      is_task_locked: session.is_task_locked,
+    });
     
     setShowHistoryModal(false);
   };
@@ -334,9 +472,10 @@ export default function DeepWorkSprint() {
     if (!window.confirm('Are you sure you want to permanently delete this session? This action cannot be undone.')) return;
 
     try {
-      await api.deleteDeepWorkSession(id);
+      const sessions = JSON.parse(sessionStorage.getItem('allDeepWorkSessions') || '[]');
+      const filtered = sessions.filter((s: any) => s.id !== id);
+      sessionStorage.setItem('allDeepWorkSessions', JSON.stringify(filtered));
 
-      // If deleting current session, reset main state
       if (currentSessionId === id) {
         resetSprint();
       } else {
@@ -408,11 +547,8 @@ export default function DeepWorkSprint() {
           </div>
         </div>
 
-        {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 md:p-8">
-          {/* Left Column - Timer & Task */}
           <div className="flex flex-col space-y-8">
-            {/* Session Status */}
             <div className={`p-6 rounded-2xl border ${isActive ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -427,7 +563,6 @@ export default function DeepWorkSprint() {
               </div>
             </div>
 
-            {/* Task Input */}
             <div className="bg-white rounded-2xl border border-gray-200 p-6">
               <h3 className="text-lg font-light text-gray-700 mb-4">Session Task</h3>
               <textarea
@@ -452,7 +587,6 @@ export default function DeepWorkSprint() {
               </div>
             </div>
 
-            {/* Duration Selection */}
             <div className="bg-white rounded-2xl border border-gray-200 p-6">
               <h3 className="text-lg font-light text-gray-700 mb-4">Sprint Duration</h3>
               <div className="grid grid-cols-3 gap-3">
@@ -475,9 +609,7 @@ export default function DeepWorkSprint() {
             </div>
           </div>
 
-          {/* Right Column - Controls & Output */}
           <div className="flex flex-col space-y-8">
-            {/* Session Controls */}
             <div className="bg-white rounded-2xl border border-gray-200 p-6">
               <h3 className="text-lg font-light text-gray-700 mb-4">Session Control</h3>
               <div className="flex flex-col sm:flex-row gap-4">
@@ -513,7 +645,6 @@ export default function DeepWorkSprint() {
               </div>
             </div>
 
-            {/* Output Verification */}
             {showOutputCheck && (
               <div className="bg-white rounded-2xl border border-blue-200 p-6">
                 <div className="flex items-center gap-3 mb-4">
@@ -545,7 +676,6 @@ export default function DeepWorkSprint() {
               </div>
             )}
 
-            {/* Progress Stats */}
             <div className="bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-2xl border border-gray-200 p-6">
               <div className="grid grid-cols-2 gap-4">
                 <div className="text-center p-4 bg-white rounded-xl border border-gray-200">
@@ -573,7 +703,6 @@ export default function DeepWorkSprint() {
               </div>
             </div>
 
-            {/* Methodology Note */}
             <div className="p-6 bg-gradient-to-r from-indigo-50/60 to-indigo-100/40 rounded-2xl border border-indigo-200/50">
               <div className="flex items-start gap-4">
                 <Target size={20} strokeWidth={1.5} className="text-indigo-500 mt-0.5 flex-shrink-0" />
@@ -590,7 +719,6 @@ export default function DeepWorkSprint() {
         </div>
       </div>
 
-      {/* History Modal */}
       {showHistoryModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
@@ -604,7 +732,6 @@ export default function DeepWorkSprint() {
               </button>
             </div>
             <div className="p-6 md:p-8 max-h-[calc(90vh-100px)] overflow-y-auto space-y-8">
-              {/* Incomplete/Saved Sessions */}
               {incompleteSessions.length > 0 && (
                 <div>
                   <h3 className="text-lg font-medium text-gray-700 mb-4 border-b pb-2">
@@ -640,7 +767,6 @@ export default function DeepWorkSprint() {
                 </div>
               )}
 
-              {/* Completed Sessions */}
               <div>
                 <h3 className={`text-lg font-medium text-gray-700 mb-4 border-b pb-2 ${incompleteSessions.length > 0 ? 'mt-8' : ''}`}>
                   Completed Sprints ({completedSessions.length})

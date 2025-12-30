@@ -1,25 +1,105 @@
 import { useState } from 'react';
-import { Plus, Edit2, Trash2, Save, X, Clipboard, Check, Maximize2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, Clipboard, Check, Maximize2, Code } from 'lucide-react';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus, vs } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface CodeSnippet {
   id: number;
   title: string;
   code: string;
   language?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export default function CodeEmbedManager() {
-  const [snippets, setSnippets] = useState<CodeSnippet[]>([]);
+  const [snippets, setSnippets] = useState<CodeSnippet[]>([
+    {
+      id: 1,
+      title: 'React Hook Example',
+      code: `function Example() {
+  const [count, setCount] = useState(0);
+  
+  useEffect(() => {
+    document.title = \`You clicked \${count} times\`;
+  }, [count]);
+  
+  return (
+    <div>
+      <p>You clicked {count} times</p>
+      <button onClick={() => setCount(count + 1)}>
+        Click me
+      </button>
+    </div>
+  );
+}`,
+      language: 'javascript',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    {
+      id: 2,
+      title: 'API Fetch Utility',
+      code: `async function fetchData(url, options = {}) {
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      ...options,
+    });
+    
+    if (!response.ok) {
+      throw new Error(\`HTTP error! status: \${response.status}\`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Fetch error:', error);
+    throw error;
+  }
+}`,
+      language: 'javascript',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
+  ]);
+  
   const [showNew, setShowNew] = useState(false);
   const [editingSnippet, setEditingSnippet] = useState<CodeSnippet | null>(null);
   const [expandedSnippet, setExpandedSnippet] = useState<CodeSnippet | null>(null);
-  const [newSnippet, setNewSnippet] = useState({ title: '', code: '', language: 'javascript' });
+  const [newSnippet, setNewSnippet] = useState({ 
+    title: '', 
+    code: '', 
+    language: 'javascript'
+  });
   const [copiedId, setCopiedId] = useState<number | null>(null);
 
   const languageOptions = [
     'javascript', 'typescript', 'python', 'java', 'cpp', 'csharp',
     'go', 'rust', 'php', 'ruby', 'swift', 'kotlin', 'html', 'css', 'sql'
   ];
+
+  // Color mapping for each language
+  const languageColors: Record<string, string> = {
+    javascript: '#F7DF1E',
+    typescript: '#3178C6',
+    python: '#3776AB',
+    java: '#007396',
+    cpp: '#00599C',
+    csharp: '#239120',
+    go: '#00ADD8',
+    rust: '#000000',
+    php: '#777BB4',
+    ruby: '#CC342D',
+    swift: '#FA7343',
+    kotlin: '#7F52FF',
+    html: '#E34F26',
+    css: '#1572B6',
+    sql: '#4479A1',
+    default: '#6B7280'
+  };
 
   const handleCreateSnippet = () => {
     if (!newSnippet.title.trim()) return;
@@ -28,15 +108,21 @@ export default function CodeEmbedManager() {
       title: newSnippet.title,
       code: newSnippet.code,
       language: newSnippet.language,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
     setSnippets([snippet, ...snippets]);
-    setNewSnippet({ title: '', code: '', language: 'javascript' });
+    resetForm();
     setShowNew(false);
   };
 
   const handleUpdateSnippet = () => {
     if (!editingSnippet) return;
-    setSnippets(snippets.map(s => s.id === editingSnippet.id ? editingSnippet : s));
+    const updatedSnippet = {
+      ...editingSnippet,
+      updated_at: new Date().toISOString()
+    };
+    setSnippets(snippets.map(s => s.id === updatedSnippet.id ? updatedSnippet : s));
     setEditingSnippet(null);
   };
 
@@ -55,25 +141,30 @@ export default function CodeEmbedManager() {
     setNewSnippet({ title: '', code: '', language: 'javascript' });
   };
 
+  const getLanguageColor = (language?: string) => {
+    const lang = language || 'default';
+    return languageColors[lang.toLowerCase()] || languageColors.default;
+  };
+
   return (
-    <div className="h-full bg-white/95 rounded-xl p-8 border border-gray-200/80">
+    <div className="h-full bg-white rounded-xl p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center border border-gray-200">
-            <div className="text-gray-600 font-mono text-sm">{'<>'}</div>
+            <Code size={20} className="text-gray-600" />
           </div>
           <div>
-            <h3 className="text-lg font-medium text-gray-800">Code Snippets</h3>
-            <p className="text-sm text-gray-500">Manage your reusable code blocks</p>
+            <h1 className="text-2xl font-bold text-gray-900">Code Snippets</h1>
+            <p className="text-gray-500 mt-1">Manage your reusable code blocks</p>
           </div>
         </div>
         <button
           onClick={() => setShowNew(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-all duration-200 font-medium"
+          className="flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-all font-medium"
         >
           <Plus size={18} />
-          <span className="text-sm">Add Snippet</span>
+          New Snippet
         </button>
       </div>
 
@@ -83,12 +174,19 @@ export default function CodeEmbedManager() {
           <div className="bg-white rounded-xl border border-gray-200 shadow-xl w-full max-w-4xl p-6 max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
-                  <div className="text-gray-600 font-mono text-sm">{'<>'}</div>
+                <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center"
+                      style={{ backgroundColor: getLanguageColor(expandedSnippet.language) + '20' }}>
+                  <Code className="text-gray-600" size={16} />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">{expandedSnippet.title}</h3>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200 mt-1">
+                  <span 
+                    className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium text-gray-700 border border-gray-200 mt-1"
+                    style={{ 
+                      backgroundColor: getLanguageColor(expandedSnippet.language) + '20',
+                      borderColor: getLanguageColor(expandedSnippet.language) + '40'
+                    }}
+                  >
                     {expandedSnippet.language}
                   </span>
                 </div>
@@ -102,19 +200,30 @@ export default function CodeEmbedManager() {
             </div>
 
             <div className="space-y-4">
-              <div className="bg-gray-900 rounded-lg p-6 border border-gray-800 overflow-x-auto">
-                <div className="text-gray-100 font-mono text-sm whitespace-pre">
+              <div className="rounded-lg border border-gray-200 overflow-hidden bg-gray-50">
+                <SyntaxHighlighter
+                  language={expandedSnippet.language || 'javascript'}
+                  style={vs}
+                  customStyle={{
+                    margin: 0,
+                    padding: '1.5rem',
+                    fontSize: '0.875rem',
+                    backgroundColor: '#f9fafb',
+                    borderRadius: '0.5rem'
+                  }}
+                  showLineNumbers
+                >
                   {expandedSnippet.code}
-                </div>
+                </SyntaxHighlighter>
               </div>
 
               <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                 <button
                   onClick={() => handleCopy(expandedSnippet.code, expandedSnippet.id)}
-                  className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
                 >
                   {copiedId === expandedSnippet.id ? <Check size={14} /> : <Clipboard size={14} />}
-                  {copiedId === expandedSnippet.id ? 'Copied' : 'Copy Code'}
+                  {copiedId === expandedSnippet.id ? 'Copied!' : 'Copy Code'}
                 </button>
                 <div className="flex gap-2">
                   <button
@@ -122,7 +231,7 @@ export default function CodeEmbedManager() {
                       setEditingSnippet(expandedSnippet);
                       setExpandedSnippet(null);
                     }}
-                    className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
                   >
                     <Edit2 size={14} />
                     Edit
@@ -132,7 +241,7 @@ export default function CodeEmbedManager() {
                       setExpandedSnippet(null);
                       handleDeleteSnippet(expandedSnippet.id);
                     }}
-                    className="flex items-center gap-2 px-3 py-1.5 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
                   >
                     <Trash2 size={14} />
                     Delete
@@ -146,72 +255,86 @@ export default function CodeEmbedManager() {
 
       {/* New Snippet Modal */}
       {showNew && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl border border-gray-200 shadow-xl w-full max-w-2xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">New Code Snippet</h3>
-              <button
-                onClick={() => {
-                  setShowNew(false);
-                  resetForm();
-                }}
-                className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <div className="space-y-5">
-              <input
-                type="text"
-                placeholder="Title"
-                value={newSnippet.title}
-                onChange={e => setNewSnippet({ ...newSnippet, title: e.target.value })}
-                className="w-full px-4 py-3 bg-white rounded-lg border border-gray-300 focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 text-gray-900 placeholder-gray-400"
-                autoFocus
-              />
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Language
-                </label>
-                <select
-                  value={newSnippet.language}
-                  onChange={e => setNewSnippet({ ...newSnippet, language: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-white rounded-lg border border-gray-300 focus:outline-none focus:border-gray-400 text-gray-900"
-                >
-                  {languageOptions.map(lang => (
-                    <option key={lang} value={lang}>
-                      {lang.charAt(0).toUpperCase() + lang.slice(1)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              <textarea
-                placeholder="Code..."
-                rows={8}
-                value={newSnippet.code}
-                onChange={e => setNewSnippet({ ...newSnippet, code: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-900 text-gray-100 rounded-lg border border-gray-700 focus:outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500 font-mono resize-none placeholder-gray-400"
-              />
-              
-              <div className="flex justify-end gap-3 pt-5 border-t border-gray-100">
-                <button
-                  onClick={() => {
-                    setShowNew(false);
-                    resetForm();
-                  }}
-                  className="px-4 py-2.5 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors font-medium"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleCreateSnippet}
-                  disabled={!newSnippet.title.trim()}
-                  className="px-4 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                >
-                  Create Snippet
-                </button>
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => {
+            setShowNew(false);
+            resetForm();
+          }}></div>
+          <div className="absolute right-0 top-0 bottom-0 w-[800px] bg-white border-l border-gray-200 shadow-xl">
+            <div className="h-full overflow-y-auto">
+              <div className="p-8">
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className="text-2xl font-bold text-gray-900">New Code Snippet</h2>
+                  <button
+                    onClick={() => {
+                      setShowNew(false);
+                      resetForm();
+                    }}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+
+                <div className="space-y-6">
+                  <input
+                    type="text"
+                    value={newSnippet.title}
+                    onChange={(e) => setNewSnippet({...newSnippet, title: e.target.value})}
+                    placeholder="Snippet Title"
+                    className="w-full px-4 py-4 bg-white rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 text-xl font-medium text-gray-900 placeholder-gray-400"
+                    autoFocus
+                  />
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Language
+                    </label>
+                    <select
+                      value={newSnippet.language}
+                      onChange={(e) => setNewSnippet({...newSnippet, language: e.target.value})}
+                      className="w-full px-4 py-3 bg-white rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 text-gray-900"
+                    >
+                      {languageOptions.map(lang => (
+                        <option key={lang} value={lang}>
+                          {lang.charAt(0).toUpperCase() + lang.slice(1)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="rounded-lg border border-gray-300 overflow-hidden">
+                    <div className="px-4 py-3 bg-gray-50 border-b border-gray-300">
+                      <span className="text-sm font-medium text-gray-700">Code</span>
+                    </div>
+                    <textarea
+                      value={newSnippet.code}
+                      onChange={(e) => setNewSnippet({...newSnippet, code: e.target.value})}
+                      placeholder="Paste your code here..."
+                      rows={12}
+                      className="w-full px-4 py-4 bg-white text-gray-900 rounded-b-lg focus:outline-none resize-none font-mono text-sm leading-relaxed placeholder-gray-400"
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-4 pt-8 border-t border-gray-100">
+                    <button
+                      onClick={() => {
+                        setShowNew(false);
+                        resetForm();
+                      }}
+                      className="px-6 py-3 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors font-medium"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleCreateSnippet}
+                      disabled={!newSnippet.title.trim()}
+                      className="px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    >
+                      Create Snippet
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -220,153 +343,200 @@ export default function CodeEmbedManager() {
 
       {/* Edit Snippet Modal */}
       {editingSnippet && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl border border-gray-200 shadow-xl w-full max-w-2xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">Edit Snippet</h3>
-              <button onClick={() => setEditingSnippet(null)} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500">
-                <X size={20} />
-              </button>
-            </div>
-            <div className="space-y-5">
-              <input
-                type="text"
-                value={editingSnippet.title}
-                onChange={e => setEditingSnippet({ ...editingSnippet, title: e.target.value })}
-                className="w-full px-4 py-3 bg-white rounded-lg border border-gray-300 focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 text-gray-900"
-                autoFocus
-              />
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Language
-                </label>
-                <select
-                  value={editingSnippet.language || 'javascript'}
-                  onChange={e => setEditingSnippet({ ...editingSnippet, language: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-white rounded-lg border border-gray-300 focus:outline-none focus:border-gray-400 text-gray-900"
-                >
-                  {languageOptions.map(lang => (
-                    <option key={lang} value={lang}>
-                      {lang.charAt(0).toUpperCase() + lang.slice(1)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              <textarea
-                value={editingSnippet.code}
-                onChange={e => setEditingSnippet({ ...editingSnippet, code: e.target.value })}
-                rows={8}
-                className="w-full px-4 py-3 bg-gray-900 text-gray-100 rounded-lg border border-gray-700 focus:outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500 font-mono resize-none"
-              />
-              
-              <div className="flex justify-end gap-3 pt-5 border-t border-gray-100">
-                <button
-                  onClick={() => setEditingSnippet(null)}
-                  className="px-4 py-2.5 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors font-medium"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleUpdateSnippet}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
-                >
-                  <Save size={16} /> Save Changes
-                </button>
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setEditingSnippet(null)}></div>
+          <div className="absolute right-0 top-0 bottom-0 w-[800px] bg-white border-l border-gray-200 shadow-xl">
+            <div className="h-full overflow-y-auto">
+              <div className="p-8">
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className="text-2xl font-bold text-gray-900">Edit Code Snippet</h2>
+                  <button
+                    onClick={() => setEditingSnippet(null)}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+
+                <div className="space-y-6">
+                  <input
+                    type="text"
+                    value={editingSnippet.title}
+                    onChange={(e) => setEditingSnippet({...editingSnippet, title: e.target.value})}
+                    className="w-full px-4 py-4 bg-white rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 text-xl font-medium text-gray-900"
+                    autoFocus
+                  />
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Language
+                    </label>
+                    <select
+                      value={editingSnippet.language || 'javascript'}
+                      onChange={(e) => setEditingSnippet({...editingSnippet, language: e.target.value})}
+                      className="w-full px-4 py-3 bg-white rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 text-gray-900"
+                    >
+                      {languageOptions.map(lang => (
+                        <option key={lang} value={lang}>
+                          {lang.charAt(0).toUpperCase() + lang.slice(1)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="rounded-lg border border-gray-300 overflow-hidden">
+                    <div className="px-4 py-3 bg-gray-50 border-b border-gray-300">
+                      <span className="text-sm font-medium text-gray-700">Code</span>
+                    </div>
+                    <textarea
+                      value={editingSnippet.code}
+                      onChange={(e) => setEditingSnippet({...editingSnippet, code: e.target.value})}
+                      rows={12}
+                      className="w-full px-4 py-4 bg-white text-gray-900 rounded-b-lg focus:outline-none resize-none font-mono text-sm leading-relaxed"
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-4 pt-8 border-t border-gray-100">
+                    <button
+                      onClick={() => setEditingSnippet(null)}
+                      className="px-6 py-3 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors font-medium"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleUpdateSnippet}
+                      disabled={!editingSnippet.title.trim()}
+                      className="flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    >
+                      <Save size={18} />
+                      Save Changes
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Snippets List - Vertical Layout */}
-      <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+      {/* Code Snippets Grid */}
+      <div className="space-y-8">
         {snippets.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center mb-4 border border-gray-200">
-              <div className="text-gray-400 font-mono text-lg">{'<>'}</div>
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="w-20 h-20 rounded-xl bg-gray-50 flex items-center justify-center mb-6 border border-gray-200">
+              <Code className="text-gray-400" size={32} />
             </div>
-            <h4 className="text-lg font-semibold text-gray-800 mb-2">No code snippets yet</h4>
-            <p className="text-gray-500 text-sm mb-6">Create your first code snippet to get started</p>
+            <h4 className="text-xl font-semibold text-gray-900 mb-3">No code snippets yet</h4>
+            <p className="text-gray-500 mb-8 max-w-md">Save and organize your reusable code snippets for quick access.</p>
             <button
               onClick={() => setShowNew(true)}
-              className="px-4 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-all duration-200 font-medium"
+              className="px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-all font-medium"
             >
-              Create Snippet
+              Create your first snippet
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {snippets.map(snippet => (
               <div
                 key={snippet.id}
                 className="group relative bg-white rounded-lg p-4 border border-gray-200 
-                           hover:border-gray-300 hover:shadow-sm transition-all duration-200 
-                           cursor-pointer h-full flex flex-col"
-                style={{ borderLeftColor: '#6B7280', borderLeftWidth: '4px' }}
+                         hover:border-gray-300 hover:shadow-md transition-all duration-200 
+                         cursor-pointer h-full flex flex-col min-h-[240px]"
+                style={{ 
+                  borderLeftColor: getLanguageColor(snippet.language),
+                  borderLeftWidth: '6px'
+                }}
                 onClick={() => setExpandedSnippet(snippet)}
               >
-                <div className="ml-1">
+                <div className="flex-1">
                   <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900 pr-8">{snippet.title}</h4>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
-                          {snippet.language || 'javascript'}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
+                    <h4 className="font-semibold text-gray-900 text-lg pr-10">{snippet.title}</h4>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-3 top-3" onClick={e => e.stopPropagation()}>
                       <button
                         onClick={() => handleCopy(snippet.code, snippet.id)}
-                        className="p-1.5 hover:bg-gray-100 rounded transition-colors text-gray-500"
+                        className="p-2 hover:bg-gray-100 rounded transition-colors text-gray-500"
                         title="Copy"
                       >
-                        {copiedId === snippet.id ? <Check size={14} /> : <Clipboard size={14} />}
+                        {copiedId === snippet.id ? <Check size={16} /> : <Clipboard size={16} />}
                       </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); setEditingSnippet(snippet); }}
-                        className="p-1.5 hover:bg-gray-100 rounded transition-colors text-gray-500"
+                        className="p-2 hover:bg-gray-100 rounded transition-colors text-gray-500"
                         title="Edit"
                       >
-                        <Edit2 size={14} />
+                        <Edit2 size={16} />
                       </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); handleDeleteSnippet(snippet.id); }}
-                        className="p-1.5 hover:bg-gray-100 rounded transition-colors text-red-500"
+                        className="p-2 hover:bg-gray-100 rounded transition-colors text-red-500"
                         title="Delete"
                       >
-                        <Trash2 size={14} />
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </div>
                   
-                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 mb-4">
-                    <pre className="text-gray-700 text-sm font-mono overflow-x-auto whitespace-pre-wrap max-h-32 overflow-y-auto">
-                      <code>{snippet.code.length > 300 ? `${snippet.code.substring(0, 300)}...` : snippet.code}</code>
-                    </pre>
+                  <div className="mb-4">
+                    <span 
+                      className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium text-gray-700 border border-gray-200"
+                      style={{ 
+                        backgroundColor: getLanguageColor(snippet.language) + '20',
+                        borderColor: getLanguageColor(snippet.language) + '40'
+                      }}
+                    >
+                      {snippet.language}
+                    </span>
                   </div>
                   
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {snippet.code.length > 300 && (
-                        <button
-                          className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setExpandedSnippet(snippet);
+                  <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 overflow-hidden max-h-32">
+                    <div className="relative">
+                      <div className="absolute top-0 left-0 text-xs font-mono text-gray-400 pr-2 border-r border-gray-300">
+                        {snippet.code.split('\n').map((_, i) => (
+                          <div key={i} className="text-right pr-2">{i + 1}</div>
+                        ))}
+                      </div>
+                      <pre className="text-gray-700 font-mono text-xs pl-10 overflow-x-auto">
+                        <SyntaxHighlighter
+                          language={snippet.language || 'javascript'}
+                          style={vs}
+                          customStyle={{
+                            margin: 0,
+                            padding: 0,
+                            backgroundColor: 'transparent',
+                            fontSize: '0.75rem',
+                            overflow: 'visible'
                           }}
+                          PreTag="div"
                         >
-                          <Maximize2 size={12} />
-                          View full code
-                        </button>
-                      )}
-                    </div>
-                    <div className="text-xs text-gray-400 font-mono">
-                      {snippet.code.length} chars
+                          {snippet.code.length > 150 
+                            ? `${snippet.code.substring(0, 150)}...` 
+                            : snippet.code}
+                        </SyntaxHighlighter>
+                      </pre>
                     </div>
                   </div>
+                </div>
+                
+                <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-2" onClick={e => e.stopPropagation()}>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: getLanguageColor(snippet.language) }}></div>
+                    <span className="text-xs text-gray-500">
+                      {snippet.code.length} chars
+                    </span>
+                  </div>
+                  {snippet.code.length > 150 && (
+                    <button
+                      className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExpandedSnippet(snippet);
+                      }}
+                    >
+                      <Maximize2 size={12} />
+                      View full
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

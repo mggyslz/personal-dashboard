@@ -203,7 +203,7 @@ export default function MITDaily() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       <div className="bg-white/80 backdrop-blur-sm rounded-3xl border border-gray-200/50 shadow-lg">
         <div className="p-6 md:p-8">
           <div className="flex items-center justify-between gap-3">

@@ -15,7 +15,7 @@ const socialLinks = [
   { icon: Instagram, url: 'https://instagram.com', label: 'Instagram', hover: 'group-hover:text-pink-600' },
   { icon: Youtube, url: 'https://youtube.com', label: 'YouTube', hover: 'group-hover:text-red-600' },
   { icon: Code, url: 'https://leetcode.com', label: 'LeetCode', hover: 'group-hover:text-orange-600' },
-  { icon: SiOpenai, url: 'https://chat.openai.com', label: 'ChatGPT', hover: 'group-hover:text-green-600' },
+  { icon: SiOpenai, url: 'https://chat.openai.com', label: 'ChatGPT', hover: 'group-hover:text-purple-600' },
   { icon: SiSpotify, url: 'https://open.spotify.com', label: 'Spotify', hover: 'group-hover:text-green-600' },
   { icon: SiGithub, url: 'https://github.com/mggyslz', label: 'GitHub', hover: 'group-hover:text-black' },
 ];
