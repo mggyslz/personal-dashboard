@@ -3,6 +3,7 @@ import { api } from '../services/api';
 import Clock from '../components/Clock';
 import Weather from '../components/Weather';
 import Quote from '../components/Quotes';
+import useDeepWork from '../hooks/useDeepWork'; // Add this import
 import { 
   Calendar as CalendarIcon, 
   BookOpen, 
@@ -11,7 +12,6 @@ import {
   TrendingUp,
   BarChart3,
   Play,
-  Pause,
   Flame,
   Hash,
   CheckCircle,
@@ -32,9 +32,6 @@ interface DashboardStats {
   outputToday: number;
   outputStreak: number;
   outputTypes: Array<{name: string; todayTotal: number; target: number; color: string}>;
-  deepWorkTimeLeft: number;
-  deepWorkIsActive: boolean;
-  deepWorkTask: string | null;
 }
 
 export default function Dashboard() {
@@ -52,26 +49,22 @@ export default function Dashboard() {
     outputToday: 0,
     outputStreak: 0,
     outputTypes: [],
-    deepWorkTimeLeft: 0,
-    deepWorkIsActive: false,
-    deepWorkTask: null,
   });
   const [loading, setLoading] = useState(true);
   const [todaysDate] = useState(new Date().toISOString().split('T')[0]);
+  
+  // Use the custom hook
+  const { 
+    timeLeft: deepWorkTimeLeft, 
+    isActive: deepWorkIsActive, 
+    task: deepWorkTask, 
+    formatTime, 
+    getProgressPercentage,
+    isLoading: deepWorkLoading 
+  } = useDeepWork();
 
   useEffect(() => {
     fetchDashboardData();
-    // Set up interval for DeepWork timer updates
-    const interval = setInterval(() => {
-      if (quickStats.deepWorkIsActive && quickStats.deepWorkTimeLeft > 0) {
-        setQuickStats(prev => ({
-          ...prev,
-          deepWorkTimeLeft: Math.max(0, prev.deepWorkTimeLeft - 1)
-        }));
-      }
-    }, 1000);
-    
-    return () => clearInterval(interval);
   }, []);
 
   const fetchDashboardData = async () => {
@@ -86,7 +79,6 @@ export default function Dashboard() {
         calendarEvents,
         mitTask,
         outputStats,
-        deepWorkSession,
         mitStreakStats,
         outputTypes
       ] = await Promise.all([
@@ -96,7 +88,6 @@ export default function Dashboard() {
         api.getCalendarEvents(),
         api.getTodayMITTask(),
         api.getOutputStats(todaysDate),
-        api.getActiveSession(),
         api.getMITStreakStats(),
         api.getOutputTypes()
       ]);
@@ -116,7 +107,7 @@ export default function Dashboard() {
           }).length 
         : 0;
 
-      // Get productivity stats from localStorage as fallback
+      // Get productivity stats from localStorage
       const deepWorkSprints = parseInt(localStorage.getItem('completedSprints') || '0');
       const mitStreakLocal = parseInt(localStorage.getItem('mitStreak') || '0');
       const outputStreakLocal = parseInt(localStorage.getItem('outputStreak') || '0');
@@ -141,11 +132,6 @@ export default function Dashboard() {
         };
       });
 
-      // Get DeepWork session data
-      const deepWorkTimeLeft = deepWorkSession?.time_left || 0;
-      const deepWorkIsActive = deepWorkSession?.is_active || false;
-      const deepWorkTask = deepWorkSession?.task || null;
-
       setQuickStats({
         completedTasks: completedReminders,
         activeNotes: activeNotesCount,
@@ -160,9 +146,6 @@ export default function Dashboard() {
         outputToday: outputToday,
         outputStreak: outputStreak,
         outputTypes: outputTypesData,
-        deepWorkTimeLeft: deepWorkTimeLeft,
-        deepWorkIsActive: deepWorkIsActive,
-        deepWorkTask: deepWorkTask,
       });
 
     } catch (error) {
@@ -183,9 +166,6 @@ export default function Dashboard() {
         outputToday: 0,
         outputStreak: parseInt(localStorage.getItem('outputStreak') || '0'),
         outputTypes: [],
-        deepWorkTimeLeft: 0,
-        deepWorkIsActive: false,
-        deepWorkTask: null,
       };
       
       setQuickStats(fallbackStats);
@@ -194,18 +174,7 @@ export default function Dashboard() {
     }
   };
 
-  const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-
-    if (hours > 0) {
-      return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    }
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const getProgressPercentage = (total: number, target: number) => {
+  const getOutputProgressPercentage = (total: number, target: number) => {
     if (target === 0) return 0;
     return Math.min((total / target) * 100, 100);
   };
@@ -293,6 +262,9 @@ export default function Dashboard() {
     );
   }
 
+  // Get DeepWork sprints from localStorage
+  const deepWorkSprints = parseInt(localStorage.getItem('completedSprints') || '0');
+
   return (
     <div className="space-y-6">
       {/* Welcome Section with Real Stats */}
@@ -357,91 +329,90 @@ export default function Dashboard() {
 
       {/* Productivity Tools Widgets */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Deep Work Timer Widget */}
-      <a 
-        href="/productivity#deepwork"
-        className="bg-gradient-to-br from-indigo-50 to-indigo-100/30 rounded-3xl p-6 border border-indigo-200/50 hover:border-indigo-300/50 hover:shadow-sm transition-all cursor-pointer"
-      >
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-indigo-100">
-              <Timer size={18} className="text-indigo-600" />
+        {/* Deep Work Timer Widget - UPDATED */}
+        <a 
+          href="/productivity#deepwork"
+          className="bg-gradient-to-br from-indigo-50 to-indigo-100/30 rounded-3xl p-6 border border-indigo-200/50 hover:border-indigo-300/50 hover:shadow-sm transition-all cursor-pointer"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-indigo-100">
+                <Timer size={18} className="text-indigo-600" />
+              </div>
+              <h3 className="text-lg font-light text-gray-700">Deep Work Sprint</h3>
             </div>
-            <h3 className="text-lg font-light text-gray-700">Deep Work Sprint</h3>
-          </div>
-          <span className={`text-xs px-2 py-1 rounded-full ${quickStats.deepWorkIsActive ? 'bg-green-100 text-green-700 animate-pulse' : 'bg-gray-100 text-gray-600'}`}>
-            {quickStats.deepWorkIsActive ? 'ACTIVE' : 'READY'}
-          </span>
-        </div>
-        
-        {/* Timer Display */}
-        <div className="mb-4">
-          <div className={`text-center py-6 rounded-2xl ${quickStats.deepWorkIsActive ? 'bg-indigo-100/50 border border-indigo-200/50' : 'bg-gray-100/50 border border-gray-200/50'}`}>
-            <div className="text-5xl font-light text-indigo-700 mb-2 font-mono">
-              {formatTime(quickStats.deepWorkTimeLeft)}
-            </div>
-            <div className={`text-sm ${quickStats.deepWorkIsActive ? 'text-indigo-600' : 'text-gray-500'}`}>
-              {quickStats.deepWorkIsActive ? 'Time remaining' : 'Session ready'}
-            </div>
+            <span className={`text-xs px-2 py-1 rounded-full ${deepWorkIsActive ? 'bg-green-100 text-green-700 animate-pulse' : 'bg-gray-100 text-gray-600'}`}>
+              {deepWorkIsActive ? 'ACTIVE' : deepWorkTask ? 'READY' : 'SET TASK'}
+            </span>
           </div>
           
-          {/* Progress bar */}
-          {quickStats.deepWorkTimeLeft > 0 && (
-            <div className="mt-4">
-              <div className="flex justify-between text-xs text-gray-500 mb-1">
-                <span>Progress</span>
-                <span>{Math.round((1 - quickStats.deepWorkTimeLeft / 3600) * 100)}%</span>
+          {/* Timer Display */}
+          <div className="mb-4">
+            <div className={`text-center py-6 rounded-2xl ${deepWorkIsActive ? 'bg-indigo-100/50 border border-indigo-200/50' : 'bg-gray-100/50 border border-gray-200/50'}`}>
+              <div className="text-5xl font-light text-indigo-700 mb-2 font-mono">
+                {deepWorkTimeLeft > 0 ? formatTime(deepWorkTimeLeft) : '--:--'}
               </div>
-              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div 
-                  className={`h-full ${quickStats.deepWorkIsActive ? 'bg-indigo-600' : 'bg-indigo-400'} transition-all duration-1000`}
-                  style={{ 
-                    width: `${(1 - quickStats.deepWorkTimeLeft / 3600) * 100}%`,
-                    background: quickStats.deepWorkIsActive 
-                      ? 'linear-gradient(90deg, #4f46e5, #7c3aed)' 
-                      : '#818cf8'
-                  }}
-                />
+              <div className={`text-sm ${deepWorkIsActive ? 'text-indigo-600' : 'text-gray-500'}`}>
+                {deepWorkIsActive ? 'Time remaining' : deepWorkTask ? 'Session ready' : 'No active session'}
               </div>
             </div>
-          )}
-        </div>
-        
-        {/* Task and Controls */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${quickStats.deepWorkIsActive ? 'animate-pulse bg-green-500' : 'bg-gray-400'}`} />
-              <span className="text-sm text-gray-700">Current Task</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <button className={`p-2 rounded-lg ${quickStats.deepWorkIsActive ? 'bg-red-100 text-red-600 hover:bg-red-200' : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'} transition-colors`}>
-                {quickStats.deepWorkIsActive ? <Pause size={16} /> : <Play size={16} />}
-              </button>
-              <button className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
-                <ClockIcon size={16} />
-              </button>
-            </div>
+            
+            {/* Progress bar - only show if there's a session */}
+            {deepWorkTimeLeft > 0 && (
+              <div className="mt-4">
+                <div className="flex justify-between text-xs text-gray-500 mb-1">
+                  <span>Progress</span>
+                  <span>{Math.round(getProgressPercentage())}%</span>
+                </div>
+                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full ${deepWorkIsActive ? 'bg-indigo-600' : 'bg-indigo-400'} transition-all duration-1000`}
+                    style={{ 
+                      width: `${getProgressPercentage()}%`,
+                      background: deepWorkIsActive 
+                        ? 'linear-gradient(90deg, #4f46e5, #7c3aed)' 
+                        : '#818cf8'
+                    }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
           
-          <p className="text-sm text-gray-600 font-light truncate px-1">
-            {quickStats.deepWorkTask || 'Click to set a task and start your first sprint...'}
-          </p>
-          
-          <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-200/50">
-            <div className="flex items-center gap-1">
-              <Timer size={12} />
-              <span>{quickStats.deepWorkSprints} sprints completed</span>
+          {/* Task and Controls */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${deepWorkIsActive ? 'animate-pulse bg-green-500' : 'bg-gray-400'}`} />
+                <span className="text-sm text-gray-700">Current Task</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <a 
+                  href="/productivity#deepwork"
+                  className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                >
+                  <ClockIcon size={16} />
+                </a>
+              </div>
             </div>
-            <div className={`flex items-center gap-1 ${quickStats.deepWorkIsActive ? 'text-green-600' : 'text-gray-400'}`}>
-              <div className={`w-1.5 h-1.5 rounded-full ${quickStats.deepWorkIsActive ? 'animate-pulse bg-green-500' : 'bg-gray-300'}`} />
-              <span>{quickStats.deepWorkIsActive ? 'Live updating' : 'Paused'}</span>
+            
+            <p className="text-sm text-gray-600 font-light truncate px-1">
+              {deepWorkTask || 'Click to set a task and start your first sprint...'}
+            </p>
+            
+            <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-200/50">
+              <div className="flex items-center gap-1">
+                <Timer size={12} />
+                <span>{deepWorkSprints} sprints completed</span>
+              </div>
+              <div className={`flex items-center gap-1 ${deepWorkIsActive ? 'text-green-600' : 'text-gray-400'}`}>
+                <div className={`w-1.5 h-1.5 rounded-full ${deepWorkIsActive ? 'animate-pulse bg-green-500' : 'bg-gray-300'}`} />
+              </div>
             </div>
           </div>
-        </div>
-      </a>
+        </a>
 
-        {/* MIT Daily Widget */}
+        {/* MIT Daily Widget - keep as is */}
         <a 
           href="/productivity#mit"
           className="bg-gradient-to-br from-amber-50 to-amber-100/30 rounded-3xl p-6 border border-amber-200/50 hover:border-amber-300/50 hover:shadow-sm transition-all cursor-pointer"
@@ -518,7 +489,7 @@ export default function Dashboard() {
           </div>
         </a>
 
-        {/* Output Tracker Widget */}
+        {/* Output Tracker Widget - keep as is */}
         <a 
           href="/productivity#output"
           className="bg-gradient-to-br from-blue-50 to-blue-100/30 rounded-3xl p-6 border border-blue-200/50 hover:border-blue-300/50 hover:shadow-sm transition-all cursor-pointer"
@@ -552,7 +523,7 @@ export default function Dashboard() {
           <div className="space-y-3">
             <h4 className="text-sm font-medium text-gray-700 mb-2">Daily Progress</h4>
             {quickStats.outputTypes.slice(0, 3).map((type, index) => {
-              const percentage = getProgressPercentage(type.todayTotal, type.target);
+              const percentage = getOutputProgressPercentage(type.todayTotal, type.target);
               return (
                 <div key={index}>
                   <div className="flex items-center justify-between mb-1">
@@ -599,7 +570,7 @@ export default function Dashboard() {
         </a>
       </div>
 
-      {/* Calendar Section */}
+      {/* Calendar Section - keep as is */}
       <div className="bg-white/60 backdrop-blur-sm p-6 rounded-3xl border border-gray-200/50 shadow-sm">
         <div className="flex items-center gap-2 mb-4">
           <CalendarIcon className="text-gray-400" size={18} />
