@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { Plus, Edit2, Trash2, Save, X, Clipboard, Check, Maximize2, Code } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { api } from '../services/api'; // Adjust path as needed
+import { Plus, Edit2, Trash2, Save, X, Clipboard, Check, Maximize2, Code, Sparkles } from 'lucide-react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus, vs } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
@@ -7,72 +8,23 @@ interface CodeSnippet {
   id: number;
   title: string;
   code: string;
-  language?: string;
-  created_at?: string;
-  updated_at?: string;
+  language: string;
+  description?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export default function CodeEmbedManager() {
-  const [snippets, setSnippets] = useState<CodeSnippet[]>([
-    {
-      id: 1,
-      title: 'React Hook Example',
-      code: `function Example() {
-  const [count, setCount] = useState(0);
-  
-  useEffect(() => {
-    document.title = \`You clicked \${count} times\`;
-  }, [count]);
-  
-  return (
-    <div>
-      <p>You clicked {count} times</p>
-      <button onClick={() => setCount(count + 1)}>
-        Click me
-      </button>
-    </div>
-  );
-}`,
-      language: 'javascript',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    },
-    {
-      id: 2,
-      title: 'API Fetch Utility',
-      code: `async function fetchData(url, options = {}) {
-  try {
-    const response = await fetch(url, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-      ...options,
-    });
-    
-    if (!response.ok) {
-      throw new Error(\`HTTP error! status: \${response.status}\`);
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('Fetch error:', error);
-    throw error;
-  }
-}`,
-      language: 'javascript',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }
-  ]);
-  
+  const [snippets, setSnippets] = useState<CodeSnippet[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [showNew, setShowNew] = useState(false);
   const [editingSnippet, setEditingSnippet] = useState<CodeSnippet | null>(null);
   const [expandedSnippet, setExpandedSnippet] = useState<CodeSnippet | null>(null);
   const [newSnippet, setNewSnippet] = useState({ 
     title: '', 
     code: '', 
-    language: 'javascript'
+    language: 'javascript',
+    description: ''
   });
   const [copiedId, setCopiedId] = useState<number | null>(null);
 
@@ -81,7 +33,6 @@ export default function CodeEmbedManager() {
     'go', 'rust', 'php', 'ruby', 'swift', 'kotlin', 'html', 'css', 'sql'
   ];
 
-  // Color mapping for each language
   const languageColors: Record<string, string> = {
     javascript: '#F7DF1E',
     typescript: '#3178C6',
@@ -101,34 +52,71 @@ export default function CodeEmbedManager() {
     default: '#6B7280'
   };
 
-  const handleCreateSnippet = () => {
-    if (!newSnippet.title.trim()) return;
-    const snippet: CodeSnippet = {
-      id: Date.now(),
-      title: newSnippet.title,
-      code: newSnippet.code,
-      language: newSnippet.language,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-    setSnippets([snippet, ...snippets]);
-    resetForm();
-    setShowNew(false);
+  useEffect(() => {
+    loadSnippets();
+  }, []);
+
+  const loadSnippets = async () => {
+    try {
+      setIsLoading(true);
+      const data = await api.getCodeSnippets();
+      setSnippets(data);
+    } catch (error) {
+      console.error('Error loading snippets:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleUpdateSnippet = () => {
+  const handleCreateSnippet = async () => {
+    if (!newSnippet.title.trim() || !newSnippet.code.trim()) return;
+    
+    try {
+      const createdSnippet = await api.createCodeSnippet({
+        title: newSnippet.title,
+        code: newSnippet.code,
+        language: newSnippet.language,
+        description: newSnippet.description
+      });
+      
+      setSnippets([createdSnippet, ...snippets]);
+      resetForm();
+      setShowNew(false);
+    } catch (error) {
+      console.error('Error creating snippet:', error);
+      alert('Failed to create snippet');
+    }
+  };
+
+  const handleUpdateSnippet = async () => {
     if (!editingSnippet) return;
-    const updatedSnippet = {
-      ...editingSnippet,
-      updated_at: new Date().toISOString()
-    };
-    setSnippets(snippets.map(s => s.id === updatedSnippet.id ? updatedSnippet : s));
-    setEditingSnippet(null);
+    
+    try {
+      const updatedSnippet = await api.updateCodeSnippet(editingSnippet.id, {
+        title: editingSnippet.title,
+        code: editingSnippet.code,
+        language: editingSnippet.language,
+        description: editingSnippet.description
+      });
+      
+      setSnippets(snippets.map(s => s.id === updatedSnippet.id ? updatedSnippet : s));
+      setEditingSnippet(null);
+    } catch (error) {
+      console.error('Error updating snippet:', error);
+      alert('Failed to update snippet');
+    }
   };
 
-  const handleDeleteSnippet = (id: number) => {
+  const handleDeleteSnippet = async (id: number) => {
     if (!window.confirm('Delete this code snippet?')) return;
-    setSnippets(snippets.filter(s => s.id !== id));
+    
+    try {
+      await api.deleteCodeSnippet(id);
+      setSnippets(snippets.filter(s => s.id !== id));
+    } catch (error) {
+      console.error('Error deleting snippet:', error);
+      alert('Failed to delete snippet');
+    }
   };
 
   const handleCopy = (code: string, id: number) => {
@@ -138,13 +126,32 @@ export default function CodeEmbedManager() {
   };
 
   const resetForm = () => {
-    setNewSnippet({ title: '', code: '', language: 'javascript' });
+    setNewSnippet({ 
+      title: '', 
+      code: '', 
+      language: 'javascript',
+      description: '' 
+    });
   };
 
   const getLanguageColor = (language?: string) => {
-    const lang = language || 'default';
-    return languageColors[lang.toLowerCase()] || languageColors.default;
+    const lang = language?.toLowerCase() || 'default';
+    return languageColors[lang] || languageColors.default;
   };
+
+  if (isLoading) {
+    return (
+      <div className="h-full bg-white rounded-xl p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+          <div className="space-y-3">
+            <div className="h-4 bg-gray-200 rounded"></div>
+            <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full bg-white rounded-xl p-6">
@@ -159,13 +166,15 @@ export default function CodeEmbedManager() {
             <p className="text-gray-500 mt-1">Manage your reusable code blocks</p>
           </div>
         </div>
-        <button
-          onClick={() => setShowNew(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-all font-medium"
-        >
-          <Plus size={18} />
-          New Snippet
-        </button>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setShowNew(true)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-all font-medium"
+          >
+            <Plus size={18} />
+            New Snippet
+          </button>
+        </div>
       </div>
 
       {/* Expanded View Modal */}
@@ -200,6 +209,12 @@ export default function CodeEmbedManager() {
             </div>
 
             <div className="space-y-4">
+              {expandedSnippet.description && (
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <p className="text-gray-700 text-sm">{expandedSnippet.description}</p>
+                </div>
+              )}
+
               <div className="rounded-lg border border-gray-200 overflow-hidden bg-gray-50">
                 <SyntaxHighlighter
                   language={expandedSnippet.language || 'javascript'}
@@ -287,6 +302,19 @@ export default function CodeEmbedManager() {
                   />
                   
                   <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Description (Optional)
+                    </label>
+                    <textarea
+                      value={newSnippet.description}
+                      onChange={(e) => setNewSnippet({...newSnippet, description: e.target.value})}
+                      placeholder="What does this code do?"
+                      rows={2}
+                      className="w-full px-4 py-3 bg-white rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 text-gray-900 placeholder-gray-400 resize-none"
+                    />
+                  </div>
+                  
+                  <div>
                     <label className="block text-sm font-medium text-gray-700 mb-3">
                       Language
                     </label>
@@ -328,7 +356,7 @@ export default function CodeEmbedManager() {
                     </button>
                     <button
                       onClick={handleCreateSnippet}
-                      disabled={!newSnippet.title.trim()}
+                      disabled={!newSnippet.title.trim() || !newSnippet.code.trim()}
                       className="px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                     >
                       Create Snippet
@@ -368,6 +396,18 @@ export default function CodeEmbedManager() {
                   />
                   
                   <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Description (Optional)
+                    </label>
+                    <textarea
+                      value={editingSnippet.description || ''}
+                      onChange={(e) => setEditingSnippet({...editingSnippet, description: e.target.value})}
+                      rows={2}
+                      className="w-full px-4 py-3 bg-white rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 text-gray-900 resize-none"
+                    />
+                  </div>
+                  
+                  <div>
                     <label className="block text-sm font-medium text-gray-700 mb-3">
                       Language
                     </label>
@@ -405,7 +445,7 @@ export default function CodeEmbedManager() {
                     </button>
                     <button
                       onClick={handleUpdateSnippet}
-                      disabled={!editingSnippet.title.trim()}
+                      disabled={!editingSnippet.title.trim() || !editingSnippet.code.trim()}
                       className="flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                     >
                       <Save size={18} />
@@ -477,6 +517,12 @@ export default function CodeEmbedManager() {
                     </div>
                   </div>
                   
+                  {snippet.description && (
+                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                      {snippet.description}
+                    </p>
+                  )}
+                  
                   <div className="mb-4">
                     <span 
                       className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium text-gray-700 border border-gray-200"
@@ -494,7 +540,7 @@ export default function CodeEmbedManager() {
                       <div className="absolute top-0 left-0 text-xs font-mono text-gray-400 pr-2 border-r border-gray-300">
                         {snippet.code.split('\n').map((_, i) => (
                           <div key={i} className="text-right pr-2">{i + 1}</div>
-                        ))}
+                        )).slice(0, 8)}
                       </div>
                       <pre className="text-gray-700 font-mono text-xs pl-10 overflow-x-auto">
                         <SyntaxHighlighter

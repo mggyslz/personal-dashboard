@@ -167,6 +167,20 @@ interface UpdateOutputTypeDto {
   color?: string;
 }
 
+interface CreateCodeSnippetDto {
+  title: string;
+  code: string;
+  language?: string;
+  description?: string;
+}
+
+interface UpdateCodeSnippetDto {
+  title?: string;
+  code?: string;
+  language?: string;
+  description?: string;
+}
+
 /* =========================
    API Service
 ========================= */
@@ -198,6 +212,37 @@ class ApiService {
     }
   }
 
+  async getCodeSnippets() {
+    return this.request('/code-snippets');
+  }
+
+  async getCodeSnippet(id: number) {
+    return this.request(`/code-snippets/${id}`);
+  }
+
+  async createCodeSnippet(data: CreateCodeSnippetDto) {
+    return this.request('/code-snippets', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateCodeSnippet(id: number, data: UpdateCodeSnippetDto) {
+    return this.request(`/code-snippets/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteCodeSnippet(id: number) {
+    return this.request(`/code-snippets/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async getCodeLanguages() {
+    return this.request('/code-snippets/languages');
+  }
   /* =========================
      Journal Entries
   ========================= */

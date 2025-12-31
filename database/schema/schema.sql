@@ -138,6 +138,16 @@ CREATE TABLE IF NOT EXISTS mit_streaks (
   last_updated DATE DEFAULT CURRENT_DATE
 );
 
+-- Create code_snippets table
+CREATE TABLE IF NOT EXISTS code_snippets (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL,
+  code TEXT NOT NULL,
+  language TEXT DEFAULT 'javascript',
+  description TEXT DEFAULT '',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 -- =========================
 -- Indexes for performance
 -- =========================
@@ -161,3 +171,6 @@ CREATE INDEX IF NOT EXISTS idx_output_entries_date ON output_entries(date);
 CREATE INDEX IF NOT EXISTS idx_output_entries_type ON output_entries(type);
 CREATE INDEX IF NOT EXISTS idx_output_entries_date_type ON output_entries(date, type);
 CREATE INDEX IF NOT EXISTS idx_output_daily_stats_date ON output_daily_stats(date);
+
+CREATE INDEX IF NOT EXISTS idx_code_snippets_language ON code_snippets(language);
+CREATE INDEX IF NOT EXISTS idx_code_snippets_updated ON code_snippets(updated_at DESC);
