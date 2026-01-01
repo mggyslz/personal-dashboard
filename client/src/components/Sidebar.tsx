@@ -20,7 +20,6 @@ const socialLinks = [
   { icon: SiGithub, url: 'https://github.com/mggyslz', label: 'GitHub', hover: 'group-hover:text-black' },
 ];
 
-
 export default function Sidebar() {
   return (
     <aside className="fixed left-0 top-0 h-screen w-20 z-50">
@@ -31,8 +30,12 @@ export default function Sidebar() {
       <div className="relative h-full flex flex-col items-center py-6">
         {/* Brand */}
         <div className="mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center shadow-lg">
-            <span className="text-xs font-semibold text-white">MZ</span>
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center shadow-lg overflow-hidden">
+            <img 
+              src="/favicon.ico" 
+              alt="MZ Logo" 
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
 
@@ -51,7 +54,7 @@ export default function Sidebar() {
                   className="group relative p-3 rounded-2xl hover:bg-white/30 transition-all duration-200 hover:scale-105"
                   title={link.label}
                 >
-                  <Icon className={`w-[22px] h-[22px] text-gray-500 transition-colors ${link.hover} `} />
+                  <Icon className={`w-[22px] h-[22px] text-gray-500 transition-colors ${link.hover}`} />
                   {/* Tooltip */}
                   <span className="absolute left-full ml-4 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                     {link.label}
