@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
-import { Search, Calendar, ExternalLink, RefreshCw, Newspaper, Globe } from 'lucide-react';
+import { Search, Calendar, ExternalLink, RefreshCw, Newspaper } from 'lucide-react';
 
 interface NewsArticle {
   title: string;
@@ -18,11 +18,10 @@ export default function News() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [category, setCategory] = useState('technology');
-  const [country, setCountry] = useState('us');
 
   useEffect(() => {
     loadNews();
-  }, [category, country]);
+  }, [category]);
 
   useEffect(() => {
     if (searchTerm.trim() === '') {
@@ -41,7 +40,8 @@ export default function News() {
     setLoading(true);
     setError(null);
     try {
-      const data = await api.getNews(country, category, 20);
+      // Simplified: Just get news with default country
+      const data = await api.getNews('us', category, 20);
       setArticles(data);
       setFilteredArticles(data);
     } catch (error) {
@@ -86,15 +86,6 @@ export default function News() {
     { value: 'science', label: 'Science' },
     { value: 'sports', label: 'Sports' },
     { value: 'general', label: 'General' }
-  ];
-
-  const countries = [
-    { value: 'us', label: 'USA' },
-    { value: 'gb', label: 'UK' },
-    { value: 'ph', label: 'Philippines' },
-    { value: 'in', label: 'India' },
-    { value: 'ca', label: 'Canada' },
-    { value: 'au', label: 'Australia' }
   ];
 
   if (loading && articles.length === 0) {
@@ -144,21 +135,6 @@ export default function News() {
         </div>
 
         <div className="flex gap-3">
-          <div className="flex items-center gap-2">
-            <Globe size={16} strokeWidth={1.5} className="text-gray-400" />
-            <select
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-              className="px-3 py-2 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200 font-light"
-            >
-              {countries.map((c) => (
-                <option key={c.value} value={c.value}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
@@ -225,6 +201,6 @@ export default function News() {
           ))}
         </div>
       )}
-    </div> // ← This closing div was missing
+    </div>
   );
 }

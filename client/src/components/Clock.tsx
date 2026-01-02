@@ -23,11 +23,25 @@ export default function Clock() {
     <div className="h-full backdrop-blur-xl bg-gradient-to-br from-white/80 to-white/40 rounded-3xl p-8 shadow-lg shadow-black/5 hover:shadow-xl hover:shadow-black/10 transition-all duration-300">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100/50 flex items-center justify-center">
-          <div className="text-gray-600 font-light text-xs">TIME</div>
+          <div className="text-gray-600">
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              className="h-5 w-5" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={1.5} 
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" 
+              />
+            </svg>
+          </div>
         </div>
         <h2 className="text-lg font-light text-gray-700">Clock</h2>
       </div>
-
       <div className="flex items-center justify-between">
         {/* Digital Time */}
         <div className="flex flex-col">

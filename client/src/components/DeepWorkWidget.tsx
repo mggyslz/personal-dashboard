@@ -19,6 +19,11 @@ export default function DeepWorkWidget({
   getProgressPercentage,
   deepWorkSprints
 }: DeepWorkWidgetProps) {
+  const progressPercentage = getProgressPercentage();
+  const circleRadius = 80;
+  const circleCircumference = 2 * Math.PI * circleRadius;
+  const progressOffset = circleCircumference - (progressPercentage / 100) * circleCircumference;
+
   return (
     <a 
       href="/productivity#deepwork"
@@ -37,12 +42,44 @@ export default function DeepWorkWidget({
       </div>
       
       <div className="mb-4">
-        <div className={`text-center py-6 rounded-2xl ${isActive ? 'bg-indigo-100/50 border border-indigo-200/50' : 'bg-gray-100/50 border border-gray-200/50'}`}>
-          <div className="text-5xl font-light text-indigo-700 mb-2 font-mono">
-            {timeLeft > 0 ? formatTime(timeLeft) : '--:--'}
-          </div>
-          <div className={`text-sm ${isActive ? 'text-indigo-600' : 'text-gray-500'}`}>
-            {isActive ? 'Time remaining' : task ? 'Session ready' : 'No active session'}
+        <div className={`flex items-center justify-center py-6 rounded-2xl ${isActive ? 'bg-indigo-100/50 border border-indigo-200/50' : 'bg-gray-100/50 border border-gray-200/50'}`}>
+          <div className="relative flex items-center justify-center">
+            {/* Circular progress background */}
+            <svg className="w-48 h-48 transform -rotate-90">
+              {/* Background circle */}
+              <circle
+                cx="96"
+                cy="96"
+                r={circleRadius}
+                strokeWidth="8"
+                fill="transparent"
+                className="text-indigo-100"
+                stroke="currentColor"
+              />
+              {/* Progress circle */}
+              <circle
+                cx="96"
+                cy="96"
+                r={circleRadius}
+                strokeWidth="8"
+                fill="transparent"
+                strokeDasharray={circleCircumference}
+                strokeDashoffset={progressOffset}
+                strokeLinecap="round"
+                className={`transition-all duration-1000 ease-out ${isActive ? 'text-indigo-600' : 'text-gray-300'}`}
+                stroke="currentColor"
+              />
+            </svg>
+            
+            {/* Timer text in center */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <div className={`text-5xl font-light mb-2 font-mono ${isActive ? 'text-indigo-700' : 'text-gray-500'}`}>
+                {timeLeft > 0 ? formatTime(timeLeft) : '--:--'}
+              </div>
+              <div className={`text-sm ${isActive ? 'text-indigo-600' : 'text-gray-500'}`}>
+                {isActive ? 'Time remaining' : task ? 'Session ready' : 'No active session'}
+              </div>
+            </div>
           </div>
         </div>
         
@@ -50,10 +87,10 @@ export default function DeepWorkWidget({
           <div className="mt-4">
             <div className="flex justify-between text-xs text-gray-500 mb-1">
               <span>Progress</span>
-              <span>{Math.round(getProgressPercentage())}%</span>
+              <span>{Math.round(progressPercentage)}%</span>
             </div>
             <ProgressBar 
-              percentage={getProgressPercentage()} 
+              percentage={progressPercentage} 
               isActive={isActive}
               gradient={isActive ? 'linear-gradient(90deg, #4f46e5, #7c3aed)' : '#818cf8'}
             />

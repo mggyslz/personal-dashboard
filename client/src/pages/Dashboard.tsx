@@ -6,7 +6,6 @@ import EssentialWidgets from '../components/EssentialWidgets';
 import DeepWorkWidget from '../components/DeepWorkWidget';
 import MITWidget from '../components/MITWidget';
 import OutputTrackerWidget from '../components/OutputTrackerWidget';
-import CalendarSection from '../components/CalendarSection';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 
 interface DashboardStats {
@@ -212,8 +211,6 @@ export default function Dashboard() {
           getColorClasses={getColorClasses}
         />
       </div>
-
-      <CalendarSection upcomingEvents={quickStats.upcomingEvents} />
     </div>
   );
 }
