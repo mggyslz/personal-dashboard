@@ -41,6 +41,19 @@ export default function Notes() {
     loadCategories();
   }, []);
 
+  // NEW: Handle body scroll when modals are open
+  useEffect(() => {
+    if (showNewNote || editingNote || expandedNote) {
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+    }
+    
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, [showNewNote, editingNote, expandedNote]);
+
   const loadNotes = async () => {
     try {
       setIsLoading(true);
@@ -419,65 +432,86 @@ export default function Notes() {
         </div>
       </div>
 
-      {/* MODALS - Outside the main component, will overlay the entire page */}
-
       {/* Expanded Note Modal */}
       {expandedNote && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl border border-gray-200 shadow-xl w-full max-w-3xl p-6 max-h-[80vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-                      style={{ backgroundColor: expandedNote.color + '20' }}>
-                  <Tag className="text-gray-600" size={16} strokeWidth={1.5} />
+        <div className="fixed inset-0 z-50">
+          {/* Background overlay */}
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setExpandedNote(null)}></div>
+          
+          {/* Modal container - positioned absolutely inside fixed parent */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-xl
+                            w-[calc(100%-2rem)] max-w-3xl
+                            max-h-[80vh] p-6 overflow-y-auto">
+              {/* Content stays exactly the same as before */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: expandedNote.color + '20' }}
+                  >
+                    <Tag className="text-gray-600" size={16} strokeWidth={1.5} />
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-800">
+                      {expandedNote.title}
+                    </h3>
+                    <span className="inline-flex items-center px-2.5 py-0.5 mt-1
+                                    rounded text-xs font-light bg-gray-100 text-gray-600
+                                    border border-gray-200">
+                      {expandedNote.category}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-lg font-medium text-gray-800">{expandedNote.title}</h3>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-light bg-gray-100 text-gray-600 border border-gray-200 mt-1">
-                    {expandedNote.category}
+
+                <button
+                  onClick={() => setExpandedNote(null)}
+                  className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
+                >
+                  <X size={20} strokeWidth={1.5} />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="bg-gray-50 rounded-lg p-6 border border-gray-200 whitespace-pre-wrap">
+                  <div className="text-gray-700 leading-relaxed font-light">
+                    {expandedNote.content}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                  <span className="text-sm text-gray-400 font-light">
+                    Last updated: {new Date(expandedNote.updated_at).toLocaleString()}
                   </span>
-                </div>
-              </div>
-              <button
-                onClick={() => setExpandedNote(null)}
-                className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
-              >
-                <X size={20} strokeWidth={1.5} />
-              </button>
-            </div>
 
-            <div className="space-y-4">
-              <div className="bg-gray-50 rounded-lg p-6 border border-gray-200 whitespace-pre-wrap">
-                <div className="text-gray-700 leading-relaxed font-light">
-                  {expandedNote.content}
-                </div>
-              </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setEditingNote(expandedNote);
+                        setExpandedNote(null);
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 text-sm
+                                text-gray-600 hover:text-gray-800 hover:bg-gray-100
+                                rounded-lg transition-colors font-light"
+                    >
+                      <Edit2 size={14} strokeWidth={1.5} />
+                      Edit
+                    </button>
 
-              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                <span className="text-sm text-gray-400 font-light">
-                  Last updated: {new Date(expandedNote.updated_at).toLocaleString()}
-                </span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      setEditingNote(expandedNote);
-                      setExpandedNote(null);
-                    }}
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors font-light"
-                  >
-                    <Edit2 size={14} strokeWidth={1.5} />
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => {
-                      setExpandedNote(null);
-                      handleDeleteNote(expandedNote.id);
-                    }}
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors font-light"
-                  >
-                    <Trash2 size={14} strokeWidth={1.5} />
-                    Delete
-                  </button>
+                    <button
+                      onClick={() => {
+                        setExpandedNote(null);
+                        handleDeleteNote(expandedNote.id);
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 text-sm
+                                text-red-600 hover:text-red-800 hover:bg-red-50
+                                rounded-lg transition-colors font-light"
+                    >
+                      <Trash2 size={14} strokeWidth={1.5} />
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -488,11 +522,11 @@ export default function Notes() {
       {/* New Note Modal */}
       {showNewNote && (
         <div className="fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => {
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => {
             setShowNewNote(false);
             resetForm();
           }}></div>
-          <div className="absolute right-0 top-0 bottom-0 w-[800px] bg-white border-l border-gray-200 shadow-xl">
+          <div className="fixed right-0 top-0 bottom-0 w-[800px] bg-white border-l border-gray-200 shadow-xl">
             <div className="h-full overflow-y-auto">
               <div className="p-8">
                 <div className="flex items-center justify-between mb-8">
@@ -607,8 +641,8 @@ export default function Notes() {
       {/* Edit Note Modal */}
       {editingNote && (
         <div className="fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setEditingNote(null)}></div>
-          <div className="absolute right-0 top-0 bottom-0 w-[800px] bg-white border-l border-gray-200 shadow-xl">
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setEditingNote(null)}></div>
+          <div className="fixed right-0 top-0 bottom-0 w-[800px] bg-white border-l border-gray-200 shadow-xl">
             <div className="h-full overflow-y-auto">
               <div className="p-8">
                 <div className="flex items-center justify-between mb-8">

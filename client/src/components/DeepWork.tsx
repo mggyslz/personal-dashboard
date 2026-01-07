@@ -493,12 +493,12 @@ export default function DeepWorkSprint() {
 
   if (isLoading) {
     return (
-      <div className="max-w-7xl mx-auto">
-        <div className="bg-white/80 backdrop-blur-sm rounded-3xl border border-gray-200/50 shadow-lg p-8">
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-gray-200/50 rounded w-1/4"></div>
+      <div className="bg-white/60 backdrop-blur-sm p-8 rounded-3xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all">
+        <div className="animate-pulse space-y-4">
+          <div className="h-6 bg-gray-200/50 rounded w-1/3"></div>
+          <div className="space-y-3">
             <div className="h-4 bg-gray-200/50 rounded"></div>
-            <div className="h-64 bg-gray-200/50 rounded"></div>
+            <div className="h-4 bg-gray-200/50 rounded w-5/6"></div>
           </div>
         </div>
       </div>
@@ -506,54 +506,45 @@ export default function DeepWorkSprint() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto">
-      <div className="bg-white/80 backdrop-blur-sm rounded-3xl border border-gray-200/50 shadow-lg">
-        <div className="p-6 md:p-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-50 to-indigo-100/50 flex items-center justify-center">
-                <Target size={24} strokeWidth={1.5} className="text-indigo-600" />
-              </div>
-              <div>
-                <h1 className="text-2xl md:text-3xl font-light text-gray-800">
-                  Deep Work Sprint
-                </h1>
-                <p className="text-sm text-gray-500 font-light mt-1">
-                  Single-task focus with output verification
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={saveTask}
-                disabled={!task.trim() || isActive}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-light transition-all ${
-                  task.trim() && !isActive
-                    ? 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-              >
-                <Save size={18} />
-                Save
-              </button>
-              <button
-                onClick={() => setShowHistoryModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-xl font-light transition-all"
-              >
-                <History size={18} />
-                History
-              </button>
-            </div>
+    <>
+      {/* Main Component with Glassmorphism */}
+      <div className="bg-white/60 backdrop-blur-sm p-8 rounded-3xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <Target className="text-gray-400" size={20} strokeWidth={1.5} />
+            <h2 className="text-lg font-light text-gray-700">Deep Work Sprint</h2>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <button
+              onClick={saveTask}
+              disabled={!task.trim() || isActive}
+              className={`flex items-center gap-2 px-4 py-2 bg-gray-100/50 border border-gray-200/50 text-gray-600 rounded-xl hover:bg-gray-200/50 transition-colors font-light disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              <Save size={16} strokeWidth={1.5} />
+              Save Task
+            </button>
+            <button
+              onClick={() => setShowHistoryModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-xl hover:bg-gray-900 transition-colors font-light"
+            >
+              <History size={16} strokeWidth={1.5} />
+              History
+            </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 md:p-8">
-          <div className="flex flex-col space-y-8">
-            <div className={`p-6 rounded-2xl border ${isActive ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column */}
+          <div className="space-y-8">
+            {/* Timer Card */}
+            <div className={`p-6 rounded-2xl border ${isActive ? 'bg-green-50/50 border-green-200/50' : 'bg-gray-50/30 border-gray-200/50'}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className={`w-3 h-3 rounded-full ${isActive ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
-                  <span className={`font-medium ${isActive ? 'text-green-700' : 'text-gray-700'}`}>
+                  <span className={`font-light ${isActive ? 'text-green-700' : 'text-gray-700'}`}>
                     {isActive ? 'IN SESSION' : currentSessionId ? 'SESSION SAVED' : 'SESSION READY'}
                   </span>
                 </div>
@@ -563,23 +554,24 @@ export default function DeepWorkSprint() {
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+            {/* Task Card */}
+            <div className="bg-white/50 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-6">
               <h3 className="text-lg font-light text-gray-700 mb-4">Session Task</h3>
               <textarea
                 value={task}
                 onChange={(e) => !isTaskLocked && setTask(e.target.value)}
                 placeholder="Define your single task for this sprint..."
-                className="w-full h-32 p-4 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full h-32 p-4 bg-white/50 border border-gray-200/50 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-200 text-gray-800 placeholder-gray-400 font-light"
                 disabled={isTaskLocked}
               />
               <div className="flex items-center justify-between mt-4">
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-gray-500 font-light">
                   {isTaskLocked ? 'Task locked for session' : currentSessionId ? 'Task saved' : 'Enter a task to begin'}
                 </span>
                 {task.trim() && !isTaskLocked && (
                   <button
                     onClick={() => setIsTaskLocked(true)}
-                    className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                    className="px-4 py-2 text-sm bg-gray-100/50 hover:bg-gray-200/50 text-gray-700 rounded-lg transition-colors font-light border border-gray-200/50"
                   >
                     Lock Task
                   </button>
@@ -587,7 +579,8 @@ export default function DeepWorkSprint() {
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+            {/* Duration Card */}
+            <div className="bg-white/50 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-6">
               <h3 className="text-lg font-light text-gray-700 mb-4">Sprint Duration</h3>
               <div className="grid grid-cols-3 gap-3">
                 {Object.entries(SPRINT_DURATIONS).map(([key, value]) => (
@@ -597,8 +590,8 @@ export default function DeepWorkSprint() {
                     disabled={isActive || isTaskLocked}
                     className={`px-4 py-3 rounded-xl font-light transition-all flex flex-col items-center ${
                       duration === key
-                        ? 'bg-indigo-100 text-indigo-700 border border-indigo-200'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                        : 'bg-gray-50/50 text-gray-600 hover:bg-gray-100/50 border border-gray-200/50'
                     } ${(isActive || isTaskLocked) ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     <Clock size={18} strokeWidth={1.5} className="mb-1" />
@@ -609,8 +602,10 @@ export default function DeepWorkSprint() {
             </div>
           </div>
 
-          <div className="flex flex-col space-y-8">
-            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+          {/* Right Column */}
+          <div className="space-y-8">
+            {/* Controls Card */}
+            <div className="bg-white/50 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-6">
               <h3 className="text-lg font-light text-gray-700 mb-4">Session Control</h3>
               <div className="flex flex-col sm:flex-row gap-4">
                 <button
@@ -618,7 +613,7 @@ export default function DeepWorkSprint() {
                   disabled={!task.trim()}
                   className={`flex-1 flex items-center justify-center gap-3 px-8 py-4 rounded-xl font-light transition-all text-lg ${
                     task.trim()
-                      ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                      ? 'bg-gray-800 hover:bg-gray-900 text-white'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
                 >
@@ -637,7 +632,7 @@ export default function DeepWorkSprint() {
 
                 <button
                   onClick={resetSprint}
-                  className="flex-1 flex items-center justify-center gap-3 px-8 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-light transition-all text-lg"
+                  className="flex-1 flex items-center justify-center gap-3 px-8 py-4 bg-gray-100/50 hover:bg-gray-200/50 text-gray-700 rounded-xl font-light transition-all text-lg border border-gray-200/50"
                 >
                   <RotateCcw size={20} strokeWidth={1.5} />
                   Reset Session
@@ -645,20 +640,21 @@ export default function DeepWorkSprint() {
               </div>
             </div>
 
+            {/* Output Review Card */}
             {showOutputCheck && (
-              <div className="bg-white rounded-2xl border border-blue-200 p-6">
+              <div className="bg-white/50 backdrop-blur-sm rounded-2xl border border-blue-200/50 p-6">
                 <div className="flex items-center gap-3 mb-4">
                   <CheckCircle size={24} strokeWidth={1.5} className="text-blue-600" />
                   <h3 className="text-lg font-light text-gray-700">Session Output Review</h3>
                 </div>
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="text-sm text-gray-600 mb-4 font-light">
                   Document what you accomplished during this sprint. This reinforces completion and provides a record of progress.
                 </p>
                 <textarea
                   value={sessionOutput}
                   onChange={(e) => setSessionOutput(e.target.value)}
                   placeholder="What did you actually accomplish? Be specific..."
-                  className="w-full h-32 p-4 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4"
+                  className="w-full h-32 p-4 bg-white/50 border border-gray-200/50 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-200 text-gray-800 placeholder-gray-400 font-light mb-4"
                 />
                 <div className="flex justify-end">
                   <button
@@ -666,7 +662,7 @@ export default function DeepWorkSprint() {
                     disabled={!sessionOutput.trim()}
                     className={`px-6 py-3 rounded-xl font-light transition-all ${
                       sessionOutput.trim()
-                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                        ? 'bg-gray-800 hover:bg-gray-900 text-white'
                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}
                   >
@@ -676,39 +672,41 @@ export default function DeepWorkSprint() {
               </div>
             )}
 
-            <div className="bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-2xl border border-gray-200 p-6">
+            {/* Stats Card */}
+            <div className="bg-gradient-to-br from-gray-50/30 to-gray-100/20 rounded-2xl border border-gray-200/50 p-6">
               <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-4 bg-white rounded-xl border border-gray-200">
+                <div className="text-center p-4 bg-white/50 rounded-xl border border-gray-200/50">
                   <div className="text-2xl font-light text-gray-800 mb-1">{completedSprints}</div>
-                  <div className="text-sm text-gray-600">Sprints Completed</div>
+                  <div className="text-sm text-gray-600 font-light">Sprints Completed</div>
                 </div>
-                <div className="text-center p-4 bg-white rounded-xl border border-gray-200">
+                <div className="text-center p-4 bg-white/50 rounded-xl border border-gray-200/50">
                   <div className="text-2xl font-light text-gray-800 mb-1">
                     {duration.replace('-min', '')}
                   </div>
-                  <div className="text-sm text-gray-600">Minutes Per Sprint</div>
+                  <div className="text-sm text-gray-600 font-light">Minutes Per Sprint</div>
                 </div>
               </div>
-              <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="mt-4 pt-4 border-t border-gray-200/50">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Current Session Progress</span>
-                  <span className="font-medium text-gray-800">{Math.round(getProgressPercentage())}%</span>
+                  <span className="text-gray-600 font-light">Current Session Progress</span>
+                  <span className="font-light text-gray-800">{Math.round(getProgressPercentage())}%</span>
                 </div>
-                <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div className="mt-2 h-2 bg-gray-200/50 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-indigo-600 transition-all duration-1000 ease-out"
+                    className="h-full bg-gray-800 transition-all duration-1000 ease-out"
                     style={{ width: `${getProgressPercentage()}%` }}
                   />
                 </div>
               </div>
             </div>
 
-            <div className="p-6 bg-gradient-to-r from-indigo-50/60 to-indigo-100/40 rounded-2xl border border-indigo-200/50">
+            {/* Methodology Card */}
+            <div className="p-6 bg-gradient-to-r from-blue-50/20 to-blue-100/10 rounded-2xl border border-blue-200/30">
               <div className="flex items-start gap-4">
-                <Target size={20} strokeWidth={1.5} className="text-indigo-500 mt-0.5 flex-shrink-0" />
+                <Target size={20} strokeWidth={1.5} className="text-blue-500 mt-0.5 flex-shrink-0" />
                 <div>
-                  <h4 className="text-sm font-medium text-indigo-800 mb-1">Deep Work Methodology</h4>
-                  <p className="text-sm font-light text-indigo-700/90">
+                  <h4 className="text-sm font-light text-blue-800 mb-1">Deep Work Methodology</h4>
+                  <p className="text-sm font-light text-blue-700/90">
                     Each sprint consists of a single, uninterrupted focus session followed by output verification.
                     This method emphasizes quality of work over quantity of sessions.
                   </p>
@@ -719,93 +717,113 @@ export default function DeepWorkSprint() {
         </div>
       </div>
 
+      {/* History Modal */}
       {showHistoryModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
-            <div className="p-6 md:p-8 border-b border-gray-200 flex justify-between items-center">
-              <h2 className="text-2xl font-light text-gray-800 flex items-center gap-3">
-                <History size={24} strokeWidth={1.5} className="text-indigo-600" />
-                Session History
-              </h2>
-              <button onClick={() => setShowHistoryModal(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
-                <X size={24} />
-              </button>
-            </div>
-            <div className="p-6 md:p-8 max-h-[calc(90vh-100px)] overflow-y-auto space-y-8">
-              {incompleteSessions.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-medium text-gray-700 mb-4 border-b pb-2">
-                    In-Progress / Saved Sessions ({incompleteSessions.length})
-                  </h3>
-                  <div className="space-y-4">
-                    {incompleteSessions.map((session) => (
-                      <div key={session.id} className="p-4 bg-yellow-50 rounded-xl border border-yellow-200 flex justify-between items-center">
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-yellow-800 truncate">{session.task}</h4>
-                          <div className="text-sm text-yellow-600 mt-1 flex gap-4">
-                            <span>Time Left: {formatTime(session.time_left)}</span>
-                            <span>Duration: {Math.floor(session.duration / 60)} min</span>
+        <div className="fixed inset-0 z-50">
+          {/* Background overlay */}
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowHistoryModal(false)}></div>
+          
+          {/* Modal container */}
+          <div className="absolute inset-0 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl border border-gray-200/50 shadow-xl w-full max-w-3xl p-6 max-h-[80vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-gray-100/50 flex items-center justify-center border border-gray-200/50">
+                    <History className="text-gray-600" size={16} strokeWidth={1.5} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-light text-gray-800">Session History</h3>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowHistoryModal(false)}
+                  className="p-1.5 hover:bg-gray-100/50 rounded-lg transition-colors text-gray-500"
+                >
+                  <X size={20} strokeWidth={1.5} />
+                </button>
+              </div>
+
+              <div className="space-y-8">
+                {incompleteSessions.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-light text-gray-600 uppercase tracking-wider mb-4">
+                      In-Progress / Saved Sessions ({incompleteSessions.length})
+                    </h4>
+                    <div className="space-y-4">
+                      {incompleteSessions.map((session) => (
+                        <div key={session.id} className="p-4 bg-yellow-50/50 rounded-xl border border-yellow-200/50 flex justify-between items-center">
+                          <div className="flex-1 min-w-0">
+                            <h5 className="font-light text-yellow-800 truncate">{session.task}</h5>
+                            <div className="text-sm text-yellow-600 mt-1 flex gap-4 font-light">
+                              <span>Time Left: {formatTime(session.time_left)}</span>
+                              <span>Duration: {Math.floor(session.duration / 60)} min</span>
+                            </div>
+                          </div>
+                          <div className="flex gap-2 ml-4 flex-shrink-0">
+                            <button
+                              onClick={() => continueSession(session)}
+                              className="px-3 py-2 text-sm bg-gray-800 hover:bg-gray-900 text-white rounded-lg transition-colors font-light"
+                            >
+                              Continue
+                            </button>
+                            <button
+                              onClick={() => deleteSession(session.id)}
+                              className="p-2 text-red-500 hover:text-red-700 rounded-lg transition-colors"
+                            >
+                              <X size={18} />
+                            </button>
                           </div>
                         </div>
-                        <div className="flex gap-2 ml-4 flex-shrink-0">
-                          <button
-                            onClick={() => continueSession(session)}
-                            className="px-3 py-2 text-sm bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg transition-colors"
-                          >
-                            Continue
-                          </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <h4 className={`text-sm font-light text-gray-600 uppercase tracking-wider mb-4 ${incompleteSessions.length > 0 ? 'mt-8' : ''}`}>
+                    Completed Sprints ({completedSessions.length})
+                  </h4>
+                  <div className="space-y-4">
+                    {completedSessions.map((session) => (
+                      <div key={session.id} className="p-4 bg-green-50/50 rounded-xl border border-green-200/50">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1 min-w-0">
+                            <h5 className="font-light text-green-800 truncate">{session.task}</h5>
+                            <p className="text-sm text-green-700 mt-1 line-clamp-2 font-light">Output: {session.session_output}</p>
+                            <div className="flex gap-3 mt-2">
+                              <span className="text-xs text-green-600 flex items-center font-light">
+                                <Check size={14} className="mr-1" />
+                                {Math.floor(session.duration / 60)} min
+                              </span>
+                              <span className="text-xs text-green-600 font-light">
+                                {formatDate(session.created_at)}
+                              </span>
+                            </div>
+                          </div>
                           <button
                             onClick={() => deleteSession(session.id)}
-                            className="p-2 text-red-500 hover:text-red-700 rounded-lg transition-colors"
+                            className="p-1 ml-4 text-gray-400 hover:text-red-700 transition-colors flex-shrink-0"
                           >
-                            <X size={18} />
+                            <X size={16} />
                           </button>
                         </div>
                       </div>
                     ))}
-                  </div>
-                </div>
-              )}
-
-              <div>
-                <h3 className={`text-lg font-medium text-gray-700 mb-4 border-b pb-2 ${incompleteSessions.length > 0 ? 'mt-8' : ''}`}>
-                  Completed Sprints ({completedSessions.length})
-                </h3>
-                <div className="space-y-4">
-                  {completedSessions.map((session) => (
-                    <div key={session.id} className="p-4 bg-green-50 rounded-xl border border-green-200">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-green-800 truncate">{session.task}</h4>
-                          <p className="text-sm text-green-700 mt-1 line-clamp-2">Output: {session.session_output}</p>
-                          <div className="flex gap-3 mt-2">
-                            <span className="text-xs text-green-600 flex items-center">
-                              <Check size={14} className="mr-1" />
-                              {Math.floor(session.duration / 60)} min
-                            </span>
-                            <span className="text-xs text-green-600">
-                              {formatDate(session.created_at)}
-                            </span>
-                          </div>
+                    {completedSessions.length === 0 && (
+                      <div className="flex flex-col items-center justify-center py-8 text-center border-2 border-dashed border-gray-200/50 rounded-2xl bg-gray-50/30">
+                        <div className="w-12 h-12 rounded-lg bg-gray-100/50 flex items-center justify-center mb-3 border border-gray-200/50">
+                          <Target className="text-gray-400" size={20} strokeWidth={1.5} />
                         </div>
-                        <button
-                          onClick={() => deleteSession(session.id)}
-                          className="p-1 ml-4 text-gray-400 hover:text-red-700 transition-colors flex-shrink-0"
-                        >
-                          <X size={16} />
-                        </button>
+                        <p className="text-gray-500 text-sm font-light">No completed sprints yet. Start your first session!</p>
                       </div>
-                    </div>
-                  ))}
-                  {completedSessions.length === 0 && (
-                    <p className="text-gray-500 text-center py-4">No completed sprints yet. Start your first session!</p>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
