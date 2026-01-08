@@ -39,7 +39,7 @@ export default function WelcomeSection({
       value: `${Math.min(100, Math.round((completedTasks / Math.max(totalReminders, 1)) * 100))}%`,
       description: 'Tasks completed',
       icon: TrendingUp,
-      color: 'bg-emerald-50 text-emerald-600 border-emerald-200',
+      color: 'bg-violet-50 text-violet-600 border-violet-200',
       link: '/'
     },
     {

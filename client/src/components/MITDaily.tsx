@@ -335,65 +335,18 @@ export default function MITDaily() {
             </div>
           </div>
 
-          {/* History Sidebar */}
+          {/* Streak Sidebar */}
           <div className="bg-white/50 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-light text-gray-700">Task History</h3>
+              <h3 className="text-lg font-light text-gray-700">Streak Overview</h3>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Award size={16} />
                 <span className="font-light">Longest: {streakStats?.longest_streak || 0} days</span>
               </div>
             </div>
             
-            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-              {history.length > 0 ? (
-                history.map((entry) => (
-                  <div
-                    key={entry.id}
-                    className={`p-4 rounded-xl border ${
-                      entry.date === currentDate
-                        ? 'border-gray-300 bg-gray-50/50'
-                        : 'border-gray-200/50 bg-gray-50/30'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <span className={`text-sm font-light ${
-                          entry.date === currentDate ? 'text-gray-800' : 'text-gray-600'
-                        }`}>
-                          {formatDate(entry.date)}
-                        </span>
-                        <span className="text-xs text-gray-400 ml-2 font-light">
-                          {getDayOfWeek(entry.date)}
-                        </span>
-                      </div>
-                      <div className={`flex items-center gap-1 ${
-                        entry.completed ? 'text-green-600' : 'text-gray-400'
-                      }`}>
-                        {entry.completed ? (
-                          <CheckCircle size={14} strokeWidth={2} />
-                        ) : (
-                          <XCircle size={14} strokeWidth={2} />
-                        )}
-                      </div>
-                    </div>
-                    <p className="text-gray-800 text-sm font-light leading-relaxed line-clamp-2">
-                      {entry.task}
-                    </p>
-                  </div>
-                ))
-              ) : (
-                <div className="flex flex-col items-center justify-center py-8 text-center border-2 border-dashed border-gray-200/50 rounded-2xl bg-gray-50/30">
-                  <div className="w-12 h-12 rounded-lg bg-gray-100/50 flex items-center justify-center mb-3 border border-gray-200/50">
-                    <Target className="text-gray-400" size={20} strokeWidth={1.5} />
-                  </div>
-                  <p className="text-gray-500 text-sm font-light">No task history yet.</p>
-                </div>
-              )}
-            </div>
-
             {/* Streak Display */}
-            <div className="mt-8 pt-6 border-t border-gray-200/50">
+            <div className="space-y-8">
               <div className="text-center">
                 <div className="flex items-center justify-center gap-3 mb-2">
                   <Flame size={24} className="text-red-500" />
@@ -571,23 +524,6 @@ export default function MITDaily() {
                         </div>
                       </div>
                     ))}
-                  </div>
-                </div>
-
-                {/* Tips */}
-                <div className="p-6 bg-gradient-to-r from-gray-50/20 to-gray-100/10 rounded-2xl border border-gray-200/50">
-                  <div className="flex items-start gap-4">
-                    <Target size={20} strokeWidth={1.5} className="text-gray-500 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <h4 className="text-sm font-light text-gray-800 mb-2">Tips for Maintaining Your Streak</h4>
-                      <ul className="text-sm font-light text-gray-600 space-y-1">
-                        <li>• Set your MIT first thing in the morning</li>
-                        <li>• Break large tasks into smaller, actionable steps</li>
-                        <li>• Focus on completing one task before starting another</li>
-                        <li>• Review your MIT at the end of each day</li>
-                        <li>• Don't break the chain - consistency builds momentum</li>
-                      </ul>
-                    </div>
                   </div>
                 </div>
               </div>

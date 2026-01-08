@@ -699,20 +699,6 @@ export default function DeepWorkSprint() {
                 </div>
               </div>
             </div>
-
-            {/* Methodology Card */}
-            <div className="p-6 bg-gradient-to-r from-blue-50/20 to-blue-100/10 rounded-2xl border border-blue-200/30">
-              <div className="flex items-start gap-4">
-                <Target size={20} strokeWidth={1.5} className="text-blue-500 mt-0.5 flex-shrink-0" />
-                <div>
-                  <h4 className="text-sm font-light text-blue-800 mb-1">Deep Work Methodology</h4>
-                  <p className="text-sm font-light text-blue-700/90">
-                    Each sprint consists of a single, uninterrupted focus session followed by output verification.
-                    This method emphasizes quality of work over quantity of sessions.
-                  </p>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>

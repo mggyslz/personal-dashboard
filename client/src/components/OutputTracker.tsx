@@ -388,20 +388,6 @@ export default function OutputTracker() {
                 </div>
               </div>
             </div>
-
-            {/* Methodology Card */}
-            <div className="p-6 bg-gradient-to-r from-blue-50/20 to-blue-100/10 rounded-2xl border border-blue-200/30">
-              <div className="flex items-start gap-4">
-                <BarChart3 size={20} strokeWidth={1.5} className="text-blue-500 mt-0.5 flex-shrink-0" />
-                <div>
-                  <h4 className="text-sm font-light text-blue-800 mb-1">Output-Based Tracking</h4>
-                  <p className="text-sm font-light text-blue-700/90">
-                    This method focuses on tangible results rather than time spent. 
-                    By tracking outputs, you prioritize meaningful progress over visible activity.
-                  </p>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Right Column */}
@@ -433,84 +419,6 @@ export default function OutputTracker() {
                     </div>
                   );
                 })}
-              </div>
-            </div>
-
-            {/* Recent Output Card */}
-            <div className="bg-white/50 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-6">
-              <h3 className="text-lg font-light text-gray-700 mb-6">Recent Output</h3>
-              
-              {entries.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8 text-center border-2 border-dashed border-gray-200/50 rounded-2xl bg-gray-50/30">
-                  <div className="w-12 h-12 rounded-lg bg-gray-100/50 flex items-center justify-center mb-3 border border-gray-200/50">
-                    <FileText className="text-gray-400" size={20} strokeWidth={1.5} />
-                  </div>
-                  <p className="text-gray-500 text-sm font-light">No output entries yet</p>
-                  <p className="text-sm text-gray-400 mt-1 font-light">Start tracking your productivity</p>
-                </div>
-              ) : (
-                <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-                  {entries.map((entry) => {
-                    const type = outputTypes.find(t => t.name === entry.type);
-                    const isToday = entry.date === currentDate;
-                    
-                    return (
-                      <div
-                        key={entry.id}
-                        className={`p-4 rounded-xl border ${
-                          isToday
-                            ? 'border-blue-200/50 bg-blue-50/30'
-                            : 'border-gray-200/50 bg-gray-50/30'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <div className={`w-2 h-2 rounded-full ${getProgressColor(type?.color || 'gray')}`} />
-                            <span className={`text-sm ${isToday ? 'text-blue-700' : 'text-gray-600'} font-light`}>
-                              {entry.date === currentDate ? 'Today' : entry.date}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div className={`px-3 py-1 rounded-lg ${getColorClasses(type?.color || 'gray')} font-light`}>
-                              <span className="text-sm font-medium">{entry.count}</span>
-                            </div>
-                            <button
-                              onClick={() => deleteOutputEntry(entry.id)}
-                              className="p-1 text-gray-400 hover:text-red-500 transition-colors"
-                              title="Delete entry"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                        </div>
-                        
-                        <div className="mb-2">
-                          <span className="text-gray-800 font-light">{entry.type}</span>
-                        </div>
-                        
-                        {entry.notes && (
-                          <p className="text-sm text-gray-600 leading-relaxed font-light">
-                            {entry.notes}
-                          </p>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Streak Progress Card */}
-            <div className="p-6 bg-gradient-to-r from-gray-50/20 to-gray-100/10 rounded-2xl border border-gray-200/50">
-              <div className="flex items-start gap-4">
-                <TrendingUp size={20} strokeWidth={1.5} className="text-gray-500 mt-0.5 flex-shrink-0" />
-                <div>
-                  <h4 className="text-sm font-light text-gray-800 mb-1">Streak Tracking</h4>
-                  <p className="text-sm font-light text-gray-600 leading-relaxed">
-                    You've maintained your output target for {streak} consecutive days. 
-                    Consistency in tracking leads to meaningful progress over time.
-                  </p>
-                </div>
               </div>
             </div>
           </div>
