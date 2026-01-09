@@ -69,11 +69,12 @@ CREATE TABLE IF NOT EXISTS deep_work_sessions (
 -- =========================
 CREATE TABLE IF NOT EXISTS deep_work_stats (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  date TEXT NOT NULL,
+  date TEXT NOT NULL UNIQUE,
   total_sprints INTEGER DEFAULT 0,
   total_minutes INTEGER DEFAULT 0,
   total_outputs INTEGER DEFAULT 0,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 -- =========================

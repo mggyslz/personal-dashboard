@@ -56,6 +56,20 @@ interface CreateDeepWorkSessionDto {
   is_task_locked?: boolean;
 }
 
+interface DeepWorkStatsDto {
+  total_sprints: number;
+  total_minutes: number;
+  total_outputs: number;
+}
+
+interface DeepWorkDailyStatsDto {
+  date: string;
+  total_sprints: number;
+  total_minutes: number;
+  total_outputs: number;
+}
+
+
 interface UpdateDeepWorkSessionDto {
   task?: string;
   duration?: number;
@@ -212,6 +226,70 @@ class ApiService {
     }
   }
 
+  /* =========================
+    Deep Work Sessions - UPDATED
+  ========================= */
+
+  async createDeepWorkSession(data: CreateDeepWorkSessionDto) {
+    return this.request('/deepwork/sessions', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getActiveSession() {
+    return this.request('/deepwork/sessions/active');
+  }
+
+  async updateDeepWorkSession(id: number, data: UpdateDeepWorkSessionDto) {
+    return this.request(`/deepwork/sessions/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async completeSession(id: number, data: CompleteSessionDto) {
+    return this.request(`/deepwork/sessions/${id}/complete`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getDeepWorkStats() {
+    return this.request<DeepWorkStatsDto>('/deepwork/stats');
+  }
+
+  // NEW: Get daily stats
+  async getDeepWorkDailyStats(date?: string) {
+    const query = date ? `?date=${date}` : '';
+    return this.request<DeepWorkDailyStatsDto>(`/deepwork/stats/daily${query}`);
+  }
+
+  // NEW: Initialize stats (debug endpoint)
+  async initializeDeepWorkStats() {
+    return this.request('/deepwork/stats/initialize', {
+      method: 'POST',
+    });
+  }
+
+  async getCompletedSessions() {
+    return this.request('/deepwork/sessions/completed');
+  }
+
+  async deleteDeepWorkSession(id: number) {
+    return this.request(`/deepwork/sessions/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async getDeepWorkSessions() {
+    return this.request('/deepwork/sessions');
+  }
+
+  /* =========================
+   Code Snippets
+  ========================= */
+
   async getCodeSnippets() {
     return this.request('/code-snippets');
   }
@@ -243,6 +321,7 @@ class ApiService {
   async getCodeLanguages() {
     return this.request('/code-snippets/languages');
   }
+
   /* =========================
      Journal Entries
   ========================= */
@@ -318,157 +397,111 @@ class ApiService {
   }
 
   /* =========================
-    Deep Work Sessions
+   MIT Daily
   ========================= */
 
-  async createDeepWorkSession(data: CreateDeepWorkSessionDto) {
-    return this.request('/deepwork/sessions', {
+  async getTodayMITTask() {
+    return this.request<MITDailyTaskDto>('/mit/today');
+  }
+
+  async setTodayMITTask(data: SetMITTaskDto) {
+    return this.request<MITDailyTaskDto>('/mit/today', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
-  async getActiveSession() {
-    return this.request('/deepwork/sessions/active');
-  }
-
-  async updateDeepWorkSession(id: number, data: UpdateDeepWorkSessionDto) {
-    return this.request(`/deepwork/sessions/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-  }
-
-  async completeSession(id: number, data: CompleteSessionDto) {
-    return this.request(`/deepwork/sessions/${id}/complete`, {
+  async toggleMITComplete(id: number, data: ToggleCompleteDto) {
+    return this.request<MITDailyTaskDto>(`/mit/${id}/complete`, {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
   }
 
-  async getDeepWorkStats() {
-    return this.request('/deepwork/stats');
+  async getMITHistory(limit: number = 30) {
+    const query = `?limit=${limit}`;
+    return this.request<{
+      history: MITDailyTaskDto[];
+      streak: { current_streak: number; longest_streak: number };
+    }>(`/mit/history${query}`);
   }
 
-  async getCompletedSessions() {
-    return this.request('/deepwork/sessions/completed');
+  async getMITStreakStats() {
+    return this.request<MITDailyStreakDto>('/mit/streak');
   }
 
-  async deleteDeepWorkSession(id: number) {
-    return this.request(`/deepwork/sessions/${id}`, {
+  async getMITWeeklyStats() {
+    return this.request('/mit/weekly');
+  }
+
+  async getMITMonthlyStats() {
+    return this.request('/mit/monthly');
+  }
+
+  async deleteMITTask(id: number) {
+    return this.request(`/mit/${id}`, {
       method: 'DELETE',
     });
   }
 
-  async getDeepWorkSessions() {
-    return this.request('/deepwork/sessions');
+  /* =========================
+   Output Tracker
+  ========================= */
+
+  async getOutputEntries(limit: number = 50) {
+    const query = `?limit=${limit}`;
+    return this.request<OutputEntryDto[]>(`/output/entries${query}`);
   }
 
-/* =========================
-   MIT Daily
-========================= */
+  async getOutputEntry(id: string) {
+    return this.request<OutputEntryDto>(`/output/entries/${id}`);
+  }
 
-async getTodayMITTask() {
-  return this.request<MITDailyTaskDto>('/mit/today');
-}
+  async createOutputEntry(data: CreateOutputEntryDto) {
+    return this.request<OutputEntryDto>('/output/entries', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
 
-async setTodayMITTask(data: SetMITTaskDto) {
-  return this.request<MITDailyTaskDto>('/mit/today', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  });
-}
+  async deleteOutputEntry(id: string) {
+    return this.request(`/output/entries/${id}`, {
+      method: 'DELETE',
+    });
+  }
 
-async toggleMITComplete(id: number, data: ToggleCompleteDto) {
-  return this.request<MITDailyTaskDto>(`/mit/${id}/complete`, {
-    method: 'PATCH',
-    body: JSON.stringify(data),
-  });
-}
+  async getOutputTypes() {
+    return this.request<OutputTypeDto[]>('/output/types');
+  }
 
-async getMITHistory(limit: number = 30) {
-  const query = `?limit=${limit}`;
-  return this.request<{
-    history: MITDailyTaskDto[];
-    streak: { current_streak: number; longest_streak: number };
-  }>(`/mit/history${query}`);
-}
+  async createOutputType(data: CreateOutputTypeDto) {
+    return this.request<OutputTypeDto>('/output/types', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
 
-async getMITStreakStats() {
-  return this.request<MITDailyStreakDto>('/mit/streak');
-}
+  async updateOutputType(id: string, data: UpdateOutputTypeDto) {
+    return this.request<OutputTypeDto>(`/output/types/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
 
-async getMITWeeklyStats() {
-  return this.request('/mit/weekly');
-}
+  async deleteOutputType(id: string) {
+    return this.request(`/output/types/${id}`, {
+      method: 'DELETE',
+    });
+  }
 
-async getMITMonthlyStats() {
-  return this.request('/mit/monthly');
-}
+  async getOutputStats(date?: string) {
+    const query = date ? `?date=${date}` : '';
+    return this.request<OutputStatsDto>(`/output/stats${query}`);
+  }
 
-async deleteMITTask(id: number) {
-  return this.request(`/mit/${id}`, {
-    method: 'DELETE',
-  });
-}
-/* =========================
-   Output Tracker
-========================= */
-
-async getOutputEntries(limit: number = 50) {
-  const query = `?limit=${limit}`;
-  return this.request<OutputEntryDto[]>(`/output/entries${query}`);
-}
-
-async getOutputEntry(id: string) {
-  return this.request<OutputEntryDto>(`/output/entries/${id}`);
-}
-
-async createOutputEntry(data: CreateOutputEntryDto) {
-  return this.request<OutputEntryDto>('/output/entries', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  });
-}
-
-async deleteOutputEntry(id: string) {
-  return this.request(`/output/entries/${id}`, {
-    method: 'DELETE',
-  });
-}
-
-async getOutputTypes() {
-  return this.request<OutputTypeDto[]>('/output/types');
-}
-
-async createOutputType(data: CreateOutputTypeDto) {
-  return this.request<OutputTypeDto>('/output/types', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  });
-}
-
-async updateOutputType(id: string, data: UpdateOutputTypeDto) {
-  return this.request<OutputTypeDto>(`/output/types/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(data),
-  });
-}
-
-async deleteOutputType(id: string) {
-  return this.request(`/output/types/${id}`, {
-    method: 'DELETE',
-  });
-}
-
-async getOutputStats(date?: string) {
-  const query = date ? `?date=${date}` : '';
-  return this.request<OutputStatsDto>(`/output/stats${query}`);
-}
-
-async getOutputStreak() {
-  return this.request<number>('/output/streak');
-}
+  async getOutputStreak() {
+    return this.request<number>('/output/streak');
+  }
 
   /* =========================
      Notes

@@ -12,15 +12,41 @@ interface OutputTrackerWidgetProps {
   outputToday: number;
   outputStreak: number;
   outputTypes: OutputType[];
-  getColorClasses: (color: string) => string;
 }
 
 export default function OutputTrackerWidget({
   outputToday,
   outputStreak,
-  outputTypes,
-  getColorClasses
+  outputTypes
 }: OutputTrackerWidgetProps) {
+  const getProgressColor = (color: string) => {
+    const colorMap: Record<string, string> = {
+      blue: 'bg-blue-500',
+      green: 'bg-green-500',
+      purple: 'bg-purple-500',
+      orange: 'bg-orange-500',
+      red: 'bg-red-500',
+      yellow: 'bg-yellow-500',
+      pink: 'bg-pink-500',
+      indigo: 'bg-indigo-500',
+    };
+    return colorMap[color] || 'bg-gray-500';
+  };
+
+  const getDotColor = (color: string) => {
+    const colorMap: Record<string, string> = {
+      blue: 'bg-blue-400',
+      green: 'bg-green-400',
+      purple: 'bg-purple-400',
+      orange: 'bg-orange-400',
+      red: 'bg-red-400',
+      yellow: 'bg-yellow-400',
+      pink: 'bg-pink-400',
+      indigo: 'bg-indigo-400',
+    };
+    return colorMap[color] || 'bg-gray-400';
+  };
+
   const getOutputProgressPercentage = (total: number, target: number) => {
     if (target === 0) return 0;
     return Math.min((total / target) * 100, 100);
@@ -42,7 +68,7 @@ export default function OutputTrackerWidget({
           </div>
         </div>
         <span className="text-xs font-medium px-3 py-1.5 rounded-full bg-blue-100 text-blue-700">
-          {outputStreak} days
+          {outputStreak} day{outputStreak !== 1 ? 's' : ''}
         </span>
       </div>
       
@@ -65,7 +91,7 @@ export default function OutputTrackerWidget({
             <div key={index} className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${getColorClasses(type.color)}`} />
+                  <div className={`w-2 h-2 rounded-full ${getDotColor(type.color)}`} />
                   <span className="text-xs font-medium text-gray-700 truncate">{type.name}</span>
                 </div>
                 <span className="text-xs text-gray-500">
@@ -74,7 +100,7 @@ export default function OutputTrackerWidget({
               </div>
               <div className="h-1.5 bg-gray-200/60 rounded-full overflow-hidden">
                 <div 
-                  className={`h-full transition-all duration-1000 ease-out ${getColorClasses(type.color)}`}
+                  className={`h-full transition-all duration-1000 ease-out ${getProgressColor(type.color)}`}
                   style={{ width: `${percentage}%` }}
                 />
               </div>

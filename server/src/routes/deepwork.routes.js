@@ -11,4 +11,8 @@ router.get('/stats', deepWorkController.getStats.bind(deepWorkController));
 router.delete('/sessions/:id', deepWorkController.deleteSession.bind(deepWorkController));
 router.get('/sessions', deepWorkController.getAllSessions.bind(deepWorkController));
 
+// NEW ROUTES FOR STATS FIXES
+router.post('/stats/initialize', deepWorkController.initializeStats.bind(deepWorkController));
+router.get('/stats/daily', deepWorkController.getDailyStats.bind(deepWorkController));
+
 module.exports = router;

@@ -96,14 +96,15 @@ export default function Dashboard() {
 
       const deepWorkSprints = parseInt(localStorage.getItem('completedSprints') || '0');
       const mitStreakLocal = parseInt(localStorage.getItem('mitStreak') || '0');
-      const outputStreakLocal = parseInt(localStorage.getItem('outputStreak') || '0');
+      
+      // FIX: Get outputStreak from the API response, not localStorage
+      const outputStreak = outputStats?.streak || 0; // ← THIS IS THE FIX
 
       const currentMIT = mitTask?.exists ? mitTask.task : null;
       const mitCompleted = mitTask?.exists && mitTask.completed ? 1 : 0;
       const mitStreak = mitStreakStats?.current_streak || mitStreakLocal;
 
       const outputToday = outputStats?.totalOutput || 0;
-      const outputStreak = outputStreakLocal;
       
       const outputTypesData = outputTypes.map(type => {
         const typeStats = outputStats?.typeStats?.[type.name] || { todayTotal: 0, target: type.target };
@@ -118,7 +119,7 @@ export default function Dashboard() {
       setQuickStats({
         completedTasks: completedReminders,
         activeNotes: activeNotesCount,
-        focusSessions: deepWorkSprints + outputStreak,
+        focusSessions: deepWorkSprints + outputStreak, // Use the correct streak
         journalEntries: journalEntriesCount,
         upcomingEvents: todayEvents,
         totalReminders: Array.isArray(reminders) ? reminders.length : 0,
@@ -127,7 +128,7 @@ export default function Dashboard() {
         currentMIT: currentMIT,
         mitStreak: mitStreak,
         outputToday: outputToday,
-        outputStreak: outputStreak,
+        outputStreak: outputStreak, // Use the correct streak
         outputTypes: outputTypesData,
       });
 

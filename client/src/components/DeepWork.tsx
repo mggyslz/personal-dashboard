@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Play, Pause, RotateCcw, Target, CheckCircle, Clock, Save, History, Check, X } from 'lucide-react';
+import { api } from '../services/api'; // Adjust path as needed
 
 const SPRINT_DURATIONS = {
   '60-min': 60 * 60,
@@ -64,6 +65,39 @@ export default function DeepWorkSprint() {
   const loadActiveSession = async () => {
     try {
       setIsLoading(true);
+      
+      // Try to get active session from API first
+      try {
+        const activeSession = await api.getActiveSession();
+        if (activeSession && activeSession.id) {
+          setCurrentSessionId(activeSession.id);
+          setTask(activeSession.task || '');
+          setTimeLeft(activeSession.time_left || SPRINT_DURATIONS['60-min']);
+          timeLeftRef.current = activeSession.time_left || SPRINT_DURATIONS['60-min'];
+          setIsActive(activeSession.is_active || false);
+          isActiveRef.current = activeSession.is_active || false;
+          setIsTaskLocked(activeSession.is_task_locked || false);
+
+          const sessionDuration = activeSession.duration || SPRINT_DURATIONS['60-min'];
+          const durationKey = Object.keys(SPRINT_DURATIONS).find(
+            key => SPRINT_DURATIONS[key as SprintDuration] === sessionDuration
+          ) as SprintDuration;
+          if (durationKey) {
+            setDuration(durationKey);
+          }
+
+          if (activeSession.time_left <= 0 && activeSession.is_active) {
+            setShowOutputCheck(true);
+            setIsActive(false);
+            isActiveRef.current = false;
+          }
+          return;
+        }
+      } catch (apiError) {
+        console.log('No active session from API, falling back to sessionStorage');
+      }
+
+      // Fallback to sessionStorage
       const mockSession = JSON.parse(sessionStorage.getItem('activeDeepWorkSession') || 'null');
 
       if (mockSession && mockSession.id) {
@@ -106,20 +140,28 @@ export default function DeepWorkSprint() {
 
   const loadStats = async () => {
     try {
+      const stats = await api.getDeepWorkStats();
+      console.log('Loaded stats from API:', stats);
+      setCompletedSprints(stats.total_sprints || 0);
+      
+      // Also load daily stats
+      const dailyStats = await api.get('/api/deepwork/stats/daily');
+      console.log('Daily stats:', dailyStats);
+    } catch (error) {
+      console.error('Error loading stats from API, using local:', error);
       const stats = JSON.parse(sessionStorage.getItem('deepWorkStats') || '{"total_sprints":0}');
       setCompletedSprints(stats.total_sprints || 0);
-    } catch (error) {
-      console.error('Error loading stats:', error);
     }
   };
 
   const loadAllSessions = async () => {
     try {
-      const sessions = JSON.parse(sessionStorage.getItem('allDeepWorkSessions') || '[]');
+      const sessions = await api.getDeepWorkSessions();
       setAllSessions(sessions || []);
     } catch (error) {
-      console.error('Error loading sessions:', error);
-      setAllSessions([]);
+      console.error('Error loading sessions from API, using local:', error);
+      const sessions = JSON.parse(sessionStorage.getItem('allDeepWorkSessions') || '[]');
+      setAllSessions(sessions || []);
     }
   };
 
@@ -154,8 +196,22 @@ export default function DeepWorkSprint() {
         time_left: 0,
         is_active: false,
         is_task_locked: isTaskLocked,
+        completed: false, // Not completed yet - needs output
       };
       saveSessionState(sessionData);
+      
+      // Update backend immediately when timer completes
+      try {
+        api.updateDeepWorkSession(currentSessionId, {
+          task,
+          duration: SPRINT_DURATIONS[duration],
+          time_left: 0,
+          is_active: false,
+          is_task_locked: isTaskLocked,
+        }).catch(console.error);
+      } catch (error) {
+        console.error('Failed to update session on completion:', error);
+      }
     }
   }, [currentSessionId, task, duration, isTaskLocked, saveSessionState]);
 
@@ -186,6 +242,19 @@ export default function DeepWorkSprint() {
               is_task_locked: isTaskLocked,
             };
             saveSessionState(sessionData);
+            
+            // Update session in backend
+            try {
+              api.updateDeepWorkSession(currentSessionId, {
+                task,
+                duration: SPRINT_DURATIONS[duration],
+                time_left: newTimeLeft,
+                is_active: newTimeLeft > 0,
+                is_task_locked: isTaskLocked,
+              }).catch(console.error);
+            } catch (error) {
+              console.error('Failed to update session in backend:', error);
+            }
           }
 
           if (newTimeLeft <= 0) {
@@ -223,25 +292,26 @@ export default function DeepWorkSprint() {
         let sessionId = currentSessionId;
 
         if (!sessionId) {
-          sessionId = Date.now();
-          setCurrentSessionId(sessionId);
-          
-          const newSession = {
-            id: sessionId,
+          // Create new session via API
+          const newSession = await api.createDeepWorkSession({
             task,
             duration: SPRINT_DURATIONS[duration],
             time_left: SPRINT_DURATIONS[duration],
             is_active: true,
             is_task_locked: true,
-            session_output: '',
-            completed: false,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          };
+          });
           
-          const sessions = JSON.parse(sessionStorage.getItem('allDeepWorkSessions') || '[]');
-          sessions.push(newSession);
-          sessionStorage.setItem('allDeepWorkSessions', JSON.stringify(sessions));
+          sessionId = newSession.id;
+          setCurrentSessionId(sessionId);
+        } else {
+          // Update existing session
+          await api.updateDeepWorkSession(sessionId, {
+            task,
+            duration: SPRINT_DURATIONS[duration],
+            time_left: timeLeft,
+            is_active: true,
+            is_task_locked: true,
+          });
         }
 
         const sessionData = {
@@ -260,16 +330,68 @@ export default function DeepWorkSprint() {
         lastUpdateTimeRef.current = Date.now();
         await loadAllSessions();
       } catch (error) {
-        console.error('Error starting sprint:', error);
-        alert('Failed to start sprint. Please try again.');
+        console.error('Error starting sprint with API, falling back:', error);
+        // Fallback to local storage
+        fallbackStartSprint();
       }
     }
+  };
+
+  const fallbackStartSprint = async () => {
+    let sessionId = currentSessionId;
+    
+    if (!sessionId) {
+      sessionId = Date.now();
+      setCurrentSessionId(sessionId);
+      
+      const newSession = {
+        id: sessionId,
+        task,
+        duration: SPRINT_DURATIONS[duration],
+        time_left: SPRINT_DURATIONS[duration],
+        is_active: true,
+        is_task_locked: true,
+        session_output: '',
+        completed: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      
+      const sessions = JSON.parse(sessionStorage.getItem('allDeepWorkSessions') || '[]');
+      sessions.push(newSession);
+      sessionStorage.setItem('allDeepWorkSessions', JSON.stringify(sessions));
+    }
+
+    const sessionData = {
+      id: sessionId,
+      task,
+      duration: SPRINT_DURATIONS[duration],
+      time_left: timeLeft,
+      is_active: true,
+      is_task_locked: true,
+    };
+    saveSessionState(sessionData);
+
+    setIsTaskLocked(true);
+    setIsActive(true);
+    isActiveRef.current = true;
+    lastUpdateTimeRef.current = Date.now();
+    await loadAllSessions();
   };
 
   const pauseSprint = async () => {
     if (!currentSessionId) return;
 
     try {
+      // Update backend
+      await api.updateDeepWorkSession(currentSessionId, {
+        task,
+        duration: SPRINT_DURATIONS[duration],
+        time_left: timeLeftRef.current,
+        is_active: false,
+        is_task_locked: isTaskLocked,
+      });
+
       const sessionData = {
         id: currentSessionId,
         task,
@@ -284,7 +406,19 @@ export default function DeepWorkSprint() {
       isActiveRef.current = false;
       await loadAllSessions();
     } catch (error) {
-      console.error('Error pausing sprint:', error);
+      console.error('Error pausing sprint with API, using local:', error);
+      const sessionData = {
+        id: currentSessionId,
+        task,
+        duration: SPRINT_DURATIONS[duration],
+        time_left: timeLeftRef.current,
+        is_active: false,
+        is_task_locked: isTaskLocked,
+      };
+      saveSessionState(sessionData);
+      
+      setIsActive(false);
+      isActiveRef.current = false;
     }
   };
 
@@ -296,11 +430,14 @@ export default function DeepWorkSprint() {
 
     if (currentSessionId) {
       try {
+        // Delete from backend
+        await api.deleteDeepWorkSession(currentSessionId);
+      } catch (error) {
+        console.error('Error deleting session from backend:', error);
+        // Fallback to local storage
         const sessions = JSON.parse(sessionStorage.getItem('allDeepWorkSessions') || '[]');
         const filtered = sessions.filter((s: any) => s.id !== currentSessionId);
         sessionStorage.setItem('allDeepWorkSessions', JSON.stringify(filtered));
-      } catch (error) {
-        console.error('Error deleting session:', error);
       }
     }
 
@@ -325,6 +462,18 @@ export default function DeepWorkSprint() {
       timeLeftRef.current = SPRINT_DURATIONS[newDuration];
 
       if (currentSessionId) {
+        try {
+          await api.updateDeepWorkSession(currentSessionId, {
+            task,
+            duration: SPRINT_DURATIONS[newDuration],
+            time_left: SPRINT_DURATIONS[newDuration],
+            is_active: false,
+            is_task_locked: false,
+          });
+        } catch (error) {
+          console.error('Error updating duration in backend:', error);
+        }
+        
         const sessionData = {
           id: currentSessionId,
           task,
@@ -341,41 +490,109 @@ export default function DeepWorkSprint() {
   const submitOutput = async () => {
     if (sessionOutput.trim() && currentSessionId) {
       try {
-        const sessions = JSON.parse(sessionStorage.getItem('allDeepWorkSessions') || '[]');
-        const updatedSessions = sessions.map((s: any) => 
-          s.id === currentSessionId 
-            ? { ...s, completed: true, session_output: sessionOutput.trim(), updated_at: new Date().toISOString() }
-            : s
-        );
-        sessionStorage.setItem('allDeepWorkSessions', JSON.stringify(updatedSessions));
+        // Call backend API to complete the session
+        const completedSession = await api.completeSession(currentSessionId, {
+          session_output: sessionOutput.trim()
+        });
 
-        const stats = JSON.parse(sessionStorage.getItem('deepWorkStats') || '{"total_sprints":0}');
-        stats.total_sprints = (stats.total_sprints || 0) + 1;
-        sessionStorage.setItem('deepWorkStats', JSON.stringify(stats));
+        // Check if session was actually completed
+        if (completedSession && completedSession.completed) {
+          // Also update the stats
+          await loadStats();
+          
+          // Clear local storage
+          sessionStorage.removeItem('activeDeepWorkSession');
+          sessionStorage.removeItem('deepWorkLastTick');
 
-        sessionStorage.removeItem('activeDeepWorkSession');
-        sessionStorage.removeItem('deepWorkLastTick');
+          await loadAllSessions();
 
-        await loadStats();
-        await loadAllSessions();
-
-        setShowOutputCheck(false);
-        setTask('');
-        setIsTaskLocked(false);
-        setTimeLeft(SPRINT_DURATIONS[duration]);
-        timeLeftRef.current = SPRINT_DURATIONS[duration];
-        setCurrentSessionId(null);
-        setSessionOutput('');
+          setShowOutputCheck(false);
+          setTask('');
+          setIsTaskLocked(false);
+          setTimeLeft(SPRINT_DURATIONS[duration]);
+          timeLeftRef.current = SPRINT_DURATIONS[duration];
+          setCurrentSessionId(null);
+          setSessionOutput('');
+        } else {
+          console.error('Session completion failed on server');
+          alert('Failed to complete session. Please try again.');
+        }
       } catch (error) {
-        console.error('Error completing session:', error);
-        alert('Failed to submit session output. Please try again.');
+        console.error('Error completing session with API, falling back:', error);
+        // Fallback to local storage
+        fallbackToLocalStorage();
       }
     }
+  };
+
+  const fallbackToLocalStorage = async () => {
+    const sessions = JSON.parse(sessionStorage.getItem('allDeepWorkSessions') || '[]');
+    const updatedSessions = sessions.map((s: any) => 
+      s.id === currentSessionId 
+        ? { ...s, completed: true, session_output: sessionOutput.trim(), updated_at: new Date().toISOString() }
+        : s
+    );
+    sessionStorage.setItem('allDeepWorkSessions', JSON.stringify(updatedSessions));
+
+    const stats = JSON.parse(sessionStorage.getItem('deepWorkStats') || '{"total_sprints":0}');
+    stats.total_sprints = (stats.total_sprints || 0) + 1;
+    sessionStorage.setItem('deepWorkStats', JSON.stringify(stats));
+
+    sessionStorage.removeItem('activeDeepWorkSession');
+    sessionStorage.removeItem('deepWorkLastTick');
+
+    await loadStats();
+    await loadAllSessions();
+
+    setShowOutputCheck(false);
+    setTask('');
+    setIsTaskLocked(false);
+    setTimeLeft(SPRINT_DURATIONS[duration]);
+    timeLeftRef.current = SPRINT_DURATIONS[duration];
+    setCurrentSessionId(null);
+    setSessionOutput('');
   };
 
   const saveTask = async () => {
     if (task.trim()) {
       try {
+        if (currentSessionId) {
+          // Update existing session in backend
+          await api.updateDeepWorkSession(currentSessionId, {
+            task,
+            duration: SPRINT_DURATIONS[duration],
+            time_left: timeLeft,
+            is_active: false,
+            is_task_locked: false,
+          });
+          
+          const sessionData = {
+            id: currentSessionId,
+            task,
+            duration: SPRINT_DURATIONS[duration],
+            time_left: timeLeft,
+            is_active: false,
+            is_task_locked: false,
+          };
+          saveSessionState(sessionData);
+        } else {
+          // Create new session in backend
+          const newSession = await api.createDeepWorkSession({
+            task,
+            duration: SPRINT_DURATIONS[duration],
+            time_left: SPRINT_DURATIONS[duration],
+            is_active: false,
+            is_task_locked: false,
+          });
+          
+          setCurrentSessionId(newSession.id);
+          saveSessionState(newSession);
+        }
+
+        await loadAllSessions();
+        alert('Task saved successfully!');
+      } catch (error) {
+        console.error('Error saving task with API, using local:', error);
         if (currentSessionId) {
           const sessions = JSON.parse(sessionStorage.getItem('allDeepWorkSessions') || '[]');
           const updatedSessions = sessions.map((s: any) =>
@@ -416,12 +633,7 @@ export default function DeepWorkSprint() {
           setCurrentSessionId(sessionId);
           saveSessionState(newSession);
         }
-
-        await loadAllSessions();
-        alert('Task saved successfully!');
-      } catch (error) {
-        console.error('Error saving task:', error);
-        alert('Failed to save task. Please try again.');
+        alert('Task saved locally!');
       }
     }
   };
@@ -472,9 +684,8 @@ export default function DeepWorkSprint() {
     if (!window.confirm('Are you sure you want to permanently delete this session? This action cannot be undone.')) return;
 
     try {
-      const sessions = JSON.parse(sessionStorage.getItem('allDeepWorkSessions') || '[]');
-      const filtered = sessions.filter((s: any) => s.id !== id);
-      sessionStorage.setItem('allDeepWorkSessions', JSON.stringify(filtered));
+      // Delete from backend
+      await api.deleteDeepWorkSession(id);
 
       if (currentSessionId === id) {
         resetSprint();
@@ -483,8 +694,23 @@ export default function DeepWorkSprint() {
         await loadStats();
       }
     } catch (error) {
-      console.error('Error deleting session:', error);
-      alert('Failed to delete session.');
+      console.error('Error deleting session from backend:', error);
+      // Fallback to local storage
+      try {
+        const sessions = JSON.parse(sessionStorage.getItem('allDeepWorkSessions') || '[]');
+        const filtered = sessions.filter((s: any) => s.id !== id);
+        sessionStorage.setItem('allDeepWorkSessions', JSON.stringify(filtered));
+
+        if (currentSessionId === id) {
+          resetSprint();
+        } else {
+          await loadAllSessions();
+          await loadStats();
+        }
+      } catch (localError) {
+        console.error('Error deleting session locally:', localError);
+        alert('Failed to delete session.');
+      }
     }
   };
 
