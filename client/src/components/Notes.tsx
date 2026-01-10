@@ -482,7 +482,11 @@ export default function Notes() {
 
                 <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                   <span className="text-sm text-gray-400 font-light">
-                    Last updated: {new Date(expandedNote.updated_at).toLocaleString()}
+                    Last updated: {new Date(expandedNote.updated_at).toLocaleString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric',
+                        year: 'numeric'
+                      })} 
                   </span>
 
                   <div className="flex gap-2">
