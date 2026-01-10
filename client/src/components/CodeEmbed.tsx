@@ -461,25 +461,23 @@ export default function CodeEmbedManager() {
                       rows={2}
                       className="w-full px-4 py-3 bg-white rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 text-gray-800 placeholder-gray-400 resize-none font-light"
                     />
-                  </div>
-                  
+                  </div>            
                   <div>
-                    <label className="block text-sm font-light text-gray-600 mb-3">
+                    <label className="block text-xs font-light text-gray-600 mb-1">
                       Language
                     </label>
                     <select
                       value={newSnippet.language}
-                      onChange={(e) => setNewSnippet({...newSnippet, language: e.target.value})}
-                      className="w-full px-4 py-3 bg-white rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 text-gray-800 font-light"
+                      onChange={(e) => setNewSnippet({ ...newSnippet, language: e.target.value })}
+                      className="w-full px-2 py-1 bg-white rounded-lg border border-gray-200 text-gray-800 text-sm font-light focus:outline-none focus:ring-1 focus:ring-blue-200"
                     >
                       {languageOptions.map(lang => (
-                        <option key={lang} value={lang}>
+                        <option key={lang} value={lang} className="text-sm py-1">
                           {lang.charAt(0).toUpperCase() + lang.slice(1)}
                         </option>
                       ))}
                     </select>
                   </div>
-
                   <div className="rounded-xl border border-gray-200 overflow-hidden">
                     <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
                       <span className="text-sm font-light text-gray-600">Code</span>

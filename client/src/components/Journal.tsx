@@ -417,7 +417,11 @@ export default function Journal() {
 
                   <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                     <span className="text-xs text-gray-500">
-                      Created: {new Date(expandedEntry.date).toLocaleString()}
+                      Created: {new Date(expandedEntry.date).toLocaleString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric',
+                        year: 'numeric'
+                      })} 
                     </span>
                     <button
                       onClick={() => {
