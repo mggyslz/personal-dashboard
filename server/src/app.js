@@ -15,6 +15,7 @@ const deepWorkRoutes = require('./routes/deepwork.routes');
 const mitDailyRoutes = require('./routes/mitdaily.routes');
 const outputRoutes = require('./routes/output.routes');
 const codeSnippetRoutes = require('./routes/codeSnippet.routes'); 
+const moodRoutes = require('./routes/mood.routes');
 
 const app = express();
 
@@ -42,6 +43,7 @@ app.use('/api/deepwork', deepWorkRoutes);
 app.use('/api/mit', mitDailyRoutes);
 app.use('/api/output', outputRoutes);
 app.use('/api/code-snippets', codeSnippetRoutes); 
+app.use('/api/mood', moodRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });

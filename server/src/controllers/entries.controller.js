@@ -1,5 +1,6 @@
 const entriesRepo = require('../db/repositories/entries.repo');
 const aiService = require('../services/ai.service');
+const moodRepo = require('../db/repositories/mood.repo');
 
 class EntriesController {
   async create(req, res) {
@@ -7,15 +8,15 @@ class EntriesController {
       const { text, date } = req.body;
 
       if (!text || !date) {
-        return res.status(400).json({ 
-          error: 'Text and date are required' 
+        return res.status(400).json({
+          error: 'Text and date are required'
         });
       }
 
       // Analyze with AI
       const analysis = await aiService.analyze(text);
 
-      // Create entry with analysis
+      // Create journal entry with analysis
       const entry = await entriesRepo.create({
         date,
         text,
@@ -24,7 +25,32 @@ class EntriesController {
         insights: analysis.insights
       });
 
-      res.status(201).json(entry);
+      // Auto-track mood with current time
+      try {
+        const now = new Date();
+        const timeString = now.toTimeString().split(' ')[0].substring(0, 5); // HH:MM format
+        
+        await moodRepo.create({
+          entry_date: date,
+          mood: analysis.mood,
+          time: timeString,
+          intensity: 5,
+          factors: JSON.stringify(analysis.themes || []),
+          note: text.substring(0, 100),
+          journal_entry_id: entry.id
+        });
+      } catch (error) {
+        console.error('Auto-track mood from journal failed:', error);
+        // Deliberately swallowed — journal creation must succeed
+      }
+
+      // Parse themes for response
+      const responseEntry = {
+        ...entry,
+        themes: analysis.themes
+      };
+
+      res.status(201).json(responseEntry);
     } catch (error) {
       console.error('Create entry error:', error);
       res.status(500).json({ error: error.message });
@@ -75,9 +101,16 @@ class EntriesController {
         });
       }
 
+      // Get existing entry
+      const existingEntry = await entriesRepo.findById(id);
+      if (!existingEntry) {
+        return res.status(404).json({ error: 'Entry not found' });
+      }
+
       // Re-analyze with AI
       const analysis = await aiService.analyze(text);
 
+      // Update journal entry
       const entry = await entriesRepo.update(id, {
         date,
         text,
@@ -86,8 +119,40 @@ class EntriesController {
         insights: analysis.insights
       });
 
-      if (!entry) {
-        return res.status(404).json({ error: 'Entry not found' });
+      // Update mood entry if it exists
+      try {
+        const now = new Date();
+        const timeString = now.toTimeString().split(' ')[0].substring(0, 5);
+        
+        // Find existing mood entry for this journal entry
+        const existingMood = await moodRepo.findByJournalEntryId(id);
+        
+        if (existingMood) {
+          // Update existing mood entry
+          await moodRepo.create({
+            entry_date: date,
+            mood: analysis.mood,
+            time: timeString,
+            intensity: 5,
+            factors: JSON.stringify(analysis.themes || []),
+            note: text.substring(0, 100),
+            journal_entry_id: id
+          });
+        } else {
+          // Create new mood entry
+          await moodRepo.create({
+            entry_date: date,
+            mood: analysis.mood,
+            time: timeString,
+            intensity: 5,
+            factors: JSON.stringify(analysis.themes || []),
+            note: text.substring(0, 100),
+            journal_entry_id: id
+          });
+        }
+      } catch (moodError) {
+        console.error('Update mood from journal failed:', moodError);
+        // Continue - journal update should succeed regardless
       }
 
       entry.themes = JSON.parse(entry.themes);
@@ -100,7 +165,26 @@ class EntriesController {
 
   async delete(req, res) {
     try {
-      const deleted = await entriesRepo.delete(req.params.id);
+      const { id } = req.params;
+      
+      // Get entry first
+      const entry = await entriesRepo.findById(id);
+      
+      if (!entry) {
+        return res.status(404).json({ error: 'Entry not found' });
+      }
+
+      // Note: Mood entries will be automatically deleted due to CASCADE constraint
+      // But we can also explicitly delete them
+      try {
+        await moodRepo.deleteByJournalEntryId(id);
+      } catch (moodError) {
+        console.error('Auto-delete mood from journal failed:', moodError);
+        // Continue - journal deletion should still proceed
+      }
+
+      // Delete the journal entry (cascade will handle mood entries)
+      const deleted = await entriesRepo.delete(id);
       
       if (!deleted) {
         return res.status(404).json({ error: 'Entry not found' });
@@ -113,7 +197,7 @@ class EntriesController {
     }
   }
 
-  async getMoodStats(req, res) {
+  async getMoodEntriesStats(req, res) {
     try {
       const stats = await entriesRepo.getMoodStats();
       res.json(stats);

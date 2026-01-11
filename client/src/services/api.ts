@@ -225,6 +225,49 @@ class ApiService {
       throw error;
     }
   }
+  
+  async getMoodSummary() {
+    return this.request<{
+      currentMood: string | null;
+      currentThemes: string[];
+      currentInsights: string;
+      moodDistribution: Record<string, number>;
+      totalEntries: number;
+      recommendations: string[];
+    }>('/mood/summary');
+  }
+
+  async getMoodHistory(limit: number = 30) {
+    return this.request<Array<{
+      entry_date: string;
+      time: string | null;
+      mood: string;
+      themes: string[];
+      insights: string;
+    }>>(`/mood/history?limit=${limit}`);
+  }
+
+  async getMoodAnalysis() {
+    return this.request<{
+      total: number;
+      positiveCount: number;
+      negativeCount: number;
+      neutralCount: number;
+      averageMood: string;
+      positivePercentage: number;
+      streak: number;
+    }>('/mood/analysis');
+  }
+
+  async getMoodChartData(days: number = 30) {
+    return this.request<Array<{
+      entry_date: string;
+      time: string | null;
+      mood: string;
+      value: number;
+      themes: string[];
+    }>>(`/mood/chart?days=${days}`);
+  }
 
   /* =========================
     Deep Work Sessions - UPDATED

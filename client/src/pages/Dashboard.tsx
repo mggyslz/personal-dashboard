@@ -7,6 +7,7 @@ import DeepWorkWidget from '../components/DeepWorkWidget';
 import MITWidget from '../components/MITWidget';
 import OutputTrackerWidget from '../components/OutputTrackerWidget';
 import LoadingSkeleton from '../components/LoadingSkeleton';
+import MoodTracker from '../components/MoodTracker';
 
 interface DashboardStats {
   completedTasks: number;
@@ -212,6 +213,7 @@ export default function Dashboard() {
           getColorClasses={getColorClasses}
         />
       </div>
+      <MoodTracker />
     </div>
   );
 }

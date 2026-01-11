@@ -13,6 +13,23 @@ CREATE TABLE IF NOT EXISTS entries (
 );
 
 -- =========================
+-- Mood Tracking table (with cascade trigger)
+-- =========================
+CREATE TABLE IF NOT EXISTS mood_tracking (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  entry_date TEXT NOT NULL, -- Reference to journal entry date
+  mood TEXT NOT NULL,
+  time TEXT, -- Time field for multiple moods per day
+  intensity INTEGER DEFAULT 5, -- 1-10 scale
+  factors TEXT, -- JSON array of factors influencing mood
+  note TEXT,
+  journal_entry_id INTEGER, -- Reference to journal entry
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (journal_entry_id) REFERENCES entries(id) ON DELETE CASCADE
+);
+
+-- =========================
 -- Reminders table
 -- =========================
 CREATE TABLE IF NOT EXISTS reminders (
@@ -149,6 +166,7 @@ CREATE TABLE IF NOT EXISTS code_snippets (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 -- =========================
 -- Indexes for performance
 -- =========================
@@ -175,3 +193,7 @@ CREATE INDEX IF NOT EXISTS idx_output_daily_stats_date ON output_daily_stats(dat
 
 CREATE INDEX IF NOT EXISTS idx_code_snippets_language ON code_snippets(language);
 CREATE INDEX IF NOT EXISTS idx_code_snippets_updated ON code_snippets(updated_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_mood_tracking_entry_date ON mood_tracking(entry_date);
+CREATE INDEX IF NOT EXISTS idx_mood_tracking_time ON mood_tracking(time);
+CREATE INDEX IF NOT EXISTS idx_mood_tracking_journal_entry_id ON mood_tracking(journal_entry_id);
