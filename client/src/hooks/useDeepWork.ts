@@ -1,5 +1,6 @@
 // hooks/useDeepWork.ts
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { api } from '../services/api'; // ADD THIS IMPORT
 
 interface DeepWorkSession {
   id: number;
@@ -21,6 +22,22 @@ const useDeepWork = () => {
   const [isLoading, setIsLoading] = useState(true);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const lastUpdateRef = useRef<number>(Date.now());
+
+  // Update localStorage when session completes
+  const updateLocalStorageStats = useCallback(async () => {
+    try {
+      const stats = await api.getDeepWorkStats();
+      const completedSprints = stats?.total_sprints || 0;
+      localStorage.setItem('completedSprints', completedSprints.toString());
+      
+      // Also update sessionStorage for consistency
+      const sessionStats = JSON.parse(sessionStorage.getItem('deepWorkStats') || '{"total_sprints":0}');
+      sessionStats.total_sprints = completedSprints;
+      sessionStorage.setItem('deepWorkStats', JSON.stringify(sessionStats));
+    } catch (error) {
+      console.error('Error updating localStorage stats:', error);
+    }
+  }, []);
 
   // Load session from localStorage
   const loadSession = useCallback(() => {
@@ -50,6 +67,11 @@ const useDeepWork = () => {
           const updatedSession = { ...savedSession, is_active: false };
           sessionStorage.setItem('activeDeepWorkSession', JSON.stringify(updatedSession));
           setIsActive(false);
+          
+          // Sync stats when session completes
+          if (savedSession.completed) {
+            updateLocalStorageStats();
+          }
         }
       } else {
         setSession(null);
@@ -64,22 +86,25 @@ const useDeepWork = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [updateLocalStorageStats]);
 
   // Initialize
   useEffect(() => {
     loadSession();
     
+    // Also fetch latest stats from API on init
+    updateLocalStorageStats();
+    
     // Listen for storage changes
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'activeDeepWorkSession' || e.key === 'deepWorkLastTick') {
+      if (e.key === 'activeDeepWorkSession' || e.key === 'deepWorkLastTick' || e.key === 'deepWorkStats') {
         loadSession();
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, [loadSession]);
+  }, [loadSession, updateLocalStorageStats]);
 
   // Timer logic
   useEffect(() => {
@@ -110,6 +135,12 @@ const useDeepWork = () => {
 
           if (newTimeLeft <= 0) {
             setIsActive(false);
+            
+            // Sync stats when timer completes
+            setTimeout(() => {
+              updateLocalStorageStats();
+            }, 1000);
+            
             return 0;
           }
 
@@ -135,7 +166,7 @@ const useDeepWork = () => {
         timerRef.current = null;
       }
     };
-  }, [isActive, timeLeft, session]);
+  }, [isActive, timeLeft, session, updateLocalStorageStats]);
 
   const formatTime = useCallback((seconds: number) => {
     const hours = Math.floor(seconds / 3600);
@@ -153,6 +184,12 @@ const useDeepWork = () => {
     return ((session.duration - timeLeft) / session.duration) * 100;
   }, [session, timeLeft]);
 
+  // Function to manually refresh deep work stats
+  const refreshDeepWorkStats = useCallback(async () => {
+    await updateLocalStorageStats();
+    loadSession();
+  }, [updateLocalStorageStats, loadSession]);
+
   return {
     session,
     timeLeft,
@@ -161,7 +198,8 @@ const useDeepWork = () => {
     task: session?.task || null,
     formatTime,
     getProgressPercentage,
-    refreshSession: loadSession
+    refreshSession: loadSession,
+    refreshDeepWorkStats // Export this function for manual refresh
   };
 };
 

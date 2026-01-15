@@ -94,12 +94,12 @@ class DeepWorkController {
         return res.status(404).json({ error: 'Session not found' });
       }
 
-      // DEBUG: Check if session has duration
-      console.log('Session duration:', session.duration, 'seconds');
-      console.log('Session created_at:', session.created_at);
-
-      // Update statistics - ADD AWAIT HERE
+      // Update statistics - FIXED: Properly increment stats
       await this.updateStats(session);
+      
+      // Also update the aggregated stats table
+      await this.updateAggregatedStats();
+      
       console.log('Session completed successfully');
       
       res.json(session);
@@ -107,6 +107,38 @@ class DeepWorkController {
       console.error('Complete session error:', error);
       console.error('Error stack:', error.stack);
       res.status(500).json({ error: error.message });
+    }
+  }
+
+  async updateAggregatedStats() {
+    try {
+      // Calculate total stats from all completed sessions
+      const completedSessions = await deepWorkRepo.getCompletedSessions();
+      
+      let totalSprints = 0;
+      let totalMinutes = 0;
+      let totalOutputs = 0;
+      
+      completedSessions.forEach(session => {
+        totalSprints++;
+        totalMinutes += Math.floor(session.duration / 60);
+        totalOutputs++; // Each completed session has an output
+      });
+      
+      // Update or create the stats record with ID 1 (or a fixed ID for aggregated stats)
+      const stats = {
+        total_sprints: totalSprints,
+        total_minutes: totalMinutes,
+        total_outputs: totalOutputs
+      };
+      
+      // Assuming you have a method to update aggregated stats
+      await deepWorkRepo.updateAggregatedStats(stats);
+      
+      console.log('Aggregated stats updated:', stats);
+    } catch (error) {
+      console.error('Error updating aggregated stats:', error);
+      throw error;
     }
   }
 
@@ -243,6 +275,46 @@ class DeepWorkController {
       });
     } catch (error) {
       console.error('Initialize stats error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+  
+  async fixAllStats(req, res) {
+    try {
+      console.log('Fixing all stats...');
+      
+      // Get all completed sessions
+      const completedSessions = await deepWorkRepo.getCompletedSessions();
+      console.log('Total completed sessions found:', completedSessions.length);
+      
+      let totalSprints = 0;
+      let totalMinutes = 0;
+      
+      completedSessions.forEach(session => {
+        totalSprints++;
+        totalMinutes += Math.floor(session.duration / 60);
+        console.log(`Session ${session.id}: ${Math.floor(session.duration / 60)} minutes`);
+      });
+      
+      // Update aggregated stats
+      await deepWorkRepo.updateAggregatedStats({
+        total_sprints: totalSprints,
+        total_minutes: totalMinutes,
+        total_outputs: totalSprints
+      });
+      
+      console.log('Fixed stats:', { totalSprints, totalMinutes });
+      
+      res.json({
+        message: 'Stats fixed successfully',
+        stats: {
+          total_sprints: totalSprints,
+          total_minutes: totalMinutes,
+          total_outputs: totalSprints
+        }
+      });
+    } catch (error) {
+      console.error('Fix stats error:', error);
       res.status(500).json({ error: error.message });
     }
   }

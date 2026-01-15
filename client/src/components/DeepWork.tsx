@@ -145,8 +145,11 @@ export default function DeepWorkSprint() {
       setCompletedSprints(stats.total_sprints || 0);
       
       // Also load daily stats
-      const dailyStats = await api.get('/api/deepwork/stats/daily');
+      const dailyStats = await api.getDeepWorkDailyStats();
       console.log('Daily stats:', dailyStats);
+      
+      // Force a refresh of welcome section stats
+      // You might want to add a callback prop or use context to update parent
     } catch (error) {
       console.error('Error loading stats from API, using local:', error);
       const stats = JSON.parse(sessionStorage.getItem('deepWorkStats') || '{"total_sprints":0}');

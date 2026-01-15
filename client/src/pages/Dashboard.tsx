@@ -55,6 +55,13 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchDashboardData();
+    
+    // Refresh stats every 30 seconds to keep dashboard updated
+    const interval = setInterval(() => {
+      fetchDashboardData();
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const fetchDashboardData = async () => {
@@ -69,7 +76,8 @@ export default function Dashboard() {
         mitTask,
         outputStats,
         mitStreakStats,
-        outputTypes
+        outputTypes,
+        deepWorkStats // ADDED: Fetch deep work stats from API
       ] = await Promise.all([
         api.getReminders(),
         api.getNotes(),
@@ -78,8 +86,17 @@ export default function Dashboard() {
         api.getTodayMITTask(),
         api.getOutputStats(todaysDate),
         api.getMITStreakStats(),
-        api.getOutputTypes()
+        api.getOutputTypes(),
+        api.getDeepWorkStats() // ADDED: Get deep work stats
       ]);
+
+      // Get deep work stats from API response
+      const deepWorkSprintsFromAPI = deepWorkStats?.total_sprints || 0;
+      
+      // Sync with localStorage for backward compatibility
+      if (deepWorkSprintsFromAPI > 0) {
+        localStorage.setItem('completedSprints', deepWorkSprintsFromAPI.toString());
+      }
 
       const completedReminders = Array.isArray(reminders) 
         ? reminders.filter((r: any) => r.completed === 1).length 
@@ -95,16 +112,10 @@ export default function Dashboard() {
           }).length 
         : 0;
 
-      const deepWorkSprints = parseInt(localStorage.getItem('completedSprints') || '0');
-      const mitStreakLocal = parseInt(localStorage.getItem('mitStreak') || '0');
-      
-      // FIX: Get outputStreak from the API response, not localStorage
-      const outputStreak = outputStats?.streak || 0; // ← THIS IS THE FIX
-
+      const outputStreak = outputStats?.streak || 0;
       const currentMIT = mitTask?.exists ? mitTask.task : null;
       const mitCompleted = mitTask?.exists && mitTask.completed ? 1 : 0;
-      const mitStreak = mitStreakStats?.current_streak || mitStreakLocal;
-
+      const mitStreak = mitStreakStats?.current_streak || 0;
       const outputToday = outputStats?.totalOutput || 0;
       
       const outputTypesData = outputTypes.map(type => {
@@ -120,30 +131,41 @@ export default function Dashboard() {
       setQuickStats({
         completedTasks: completedReminders,
         activeNotes: activeNotesCount,
-        focusSessions: deepWorkSprints + outputStreak, // Use the correct streak
+        focusSessions: deepWorkSprintsFromAPI, // Use API value directly
         journalEntries: journalEntriesCount,
         upcomingEvents: todayEvents,
         totalReminders: Array.isArray(reminders) ? reminders.length : 0,
-        deepWorkSprints: deepWorkSprints,
+        deepWorkSprints: deepWorkSprintsFromAPI, // Use API value
         mitCompleted: mitCompleted,
         currentMIT: currentMIT,
         mitStreak: mitStreak,
         outputToday: outputToday,
-        outputStreak: outputStreak, // Use the correct streak
+        outputStreak: outputStreak,
         outputTypes: outputTypesData,
       });
 
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       
+      // Fallback: try to get from both localStorage and sessionStorage
+      const localStorageSprints = parseInt(localStorage.getItem('completedSprints') || '0');
+      const sessionStorageSprints = parseInt(
+        sessionStorage.getItem('deepWorkStats') 
+          ? JSON.parse(sessionStorage.getItem('deepWorkStats')!).total_sprints || '0' 
+          : '0'
+      );
+      
+      // Use the higher value between localStorage and sessionStorage
+      const fallbackSprints = Math.max(localStorageSprints, sessionStorageSprints);
+      
       const fallbackStats = {
         completedTasks: parseInt(localStorage.getItem('completedTasks') || '0'),
         activeNotes: parseInt(localStorage.getItem('activeNotes') || '0'),
-        focusSessions: parseInt(localStorage.getItem('focusSessions') || '0'),
+        focusSessions: fallbackSprints,
         journalEntries: parseInt(localStorage.getItem('journalEntries') || '0'),
         upcomingEvents: 0,
         totalReminders: 0,
-        deepWorkSprints: parseInt(localStorage.getItem('completedSprints') || '0'),
+        deepWorkSprints: fallbackSprints,
         mitCompleted: parseInt(localStorage.getItem('mitStreak') || '0'),
         currentMIT: null,
         mitStreak: parseInt(localStorage.getItem('mitStreak') || '0'),
@@ -176,14 +198,12 @@ export default function Dashboard() {
     return <LoadingSkeleton />;
   }
 
-  const deepWorkSprints = parseInt(localStorage.getItem('completedSprints') || '0');
-
   return (
     <div className="space-y-6">
       <WelcomeSection
         completedTasks={quickStats.completedTasks}
         totalReminders={quickStats.totalReminders}
-        focusSessions={quickStats.focusSessions}
+        focusSessions={quickStats.focusSessions} // This now uses the correct API value
         mitStreak={quickStats.mitStreak}
         journalEntries={quickStats.journalEntries}
       />
@@ -197,7 +217,7 @@ export default function Dashboard() {
           task={deepWorkTask}
           formatTime={formatTime}
           getProgressPercentage={getProgressPercentage}
-          deepWorkSprints={deepWorkSprints}
+          deepWorkSprints={quickStats.deepWorkSprints} // Use quickStats value
         />
 
         <MITWidget

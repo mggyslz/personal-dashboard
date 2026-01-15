@@ -39,6 +39,30 @@ class DeepWorkRepository {
     return sessions.map(session => this.normalizeSession(session));
   }
 
+  async updateAggregatedStats(stats) {
+    try {
+      console.log('Updating aggregated stats:', stats);
+      
+      // First check if we have an aggregated stats row (use ID 1 for aggregated)
+      const sql = `
+        INSERT OR REPLACE INTO deep_work_stats 
+        (id, total_sprints, total_minutes, total_outputs, date, updated_at)
+        VALUES (1, ?, ?, ?, DATE('now'), CURRENT_TIMESTAMP)
+      `;
+      
+      await db.run(sql, [
+        stats.total_sprints || 0,
+        stats.total_minutes || 0,
+        stats.total_outputs || 0
+      ]);
+      
+      console.log('Aggregated stats updated successfully');
+    } catch (error) {
+      console.error('Error updating aggregated stats:', error);
+      throw error;
+    }
+  }
+
   async findActiveSession() {
     const sql = 'SELECT * FROM deep_work_sessions WHERE is_active = 1 AND completed = 0 LIMIT 1';
     const session = await db.get(sql);
@@ -184,20 +208,46 @@ class DeepWorkRepository {
   }
 
   async getStats() {
-    const sql = `
-      SELECT
-        COUNT(*) as total_sprints,
-        COALESCE(SUM(duration) / 60, 0) as total_minutes,
-        COALESCE(SUM(CASE WHEN completed = 1 THEN 1 ELSE 0 END), 0) as total_outputs
-      FROM deep_work_sessions
-      WHERE completed = 1
-    `;
-    const result = await db.get(sql);
-    return {
-      total_sprints: result?.total_sprints || 0,
-      total_minutes: result?.total_minutes || 0,
-      total_outputs: result?.total_outputs || 0
-    };
+    try {
+      // Try to get from aggregated stats first
+      const sql = 'SELECT * FROM deep_work_stats WHERE id = 1';
+      const aggregatedStats = await db.get(sql);
+      
+      if (aggregatedStats) {
+        console.log('Returning aggregated stats:', aggregatedStats);
+        return {
+          total_sprints: Number(aggregatedStats.total_sprints || 0),
+          total_minutes: Number(aggregatedStats.total_minutes || 0),
+          total_outputs: Number(aggregatedStats.total_outputs || 0)
+        };
+      }
+      
+      // Fallback to calculating from sessions
+      const fallbackSql = `
+        SELECT
+          COUNT(*) as total_sprints,
+          COALESCE(SUM(duration) / 60, 0) as total_minutes,
+          COALESCE(SUM(CASE WHEN completed = 1 THEN 1 ELSE 0 END), 0) as total_outputs
+        FROM deep_work_sessions
+        WHERE completed = 1
+      `;
+      
+      const result = await db.get(fallbackSql);
+      console.log('Fallback stats calculation:', result);
+      
+      return {
+        total_sprints: result?.total_sprints || 0,
+        total_minutes: result?.total_minutes || 0,
+        total_outputs: result?.total_outputs || 0
+      };
+    } catch (error) {
+      console.error('Error getting stats:', error);
+      return {
+        total_sprints: 0,
+        total_minutes: 0,
+        total_outputs: 0
+      };
+    }
   }
 
   normalizeSession(session) {
