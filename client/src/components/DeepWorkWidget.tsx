@@ -19,67 +19,71 @@ export default function DeepWorkWidget({
   deepWorkSprints
 }: DeepWorkWidgetProps) {
   const progressPercentage = getProgressPercentage();
-  const circleRadius = 70;
-  const circleCircumference = 2 * Math.PI * circleRadius;
-  const progressOffset = circleCircumference - (progressPercentage / 100) * circleCircumference;
+  const radius = 60; // SVG circle radius
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (progressPercentage / 100) * circumference;
 
   return (
-    <a 
-      href="/productivity#deepwork"
-      className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-gray-200/60 hover:border-gray-300/80 hover:shadow-sm transition-all cursor-pointer"
-    >
+    <div className="border-2 border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-x-[2px] hover:-translate-y-[2px] transition-all duration-200">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-50 border border-indigo-200/50">
-            <Timer size={18} className="text-indigo-600" />
+          <div className="p-2 border-2 border-black">
+            <Timer size={20} className="text-black" />
           </div>
           <div>
-            <h3 className="text-base font-medium text-gray-800">Deep Work</h3>
-            <p className="text-xs text-gray-500 mt-0.5">Focus sprint</p>
+            <h3 className="text-lg font-black text-black">DEEP WORK</h3>
+            <p className="text-sm text-gray-600 mt-0.5 font-bold">FOCUS SPRINT</p>
           </div>
         </div>
-        <span className={`text-xs font-medium px-3 py-1.5 rounded-full ${isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-          {isActive ? 'Active' : task ? 'Ready' : 'Set task'}
+        <span className={`text-sm font-black px-3 py-1.5 border-2 ${isActive ? 'border-green-500 bg-green-500 text-white' : 'border-black bg-white text-black'}`}>
+          {isActive ? 'ACTIVE' : task ? 'READY' : 'SET TASK'}
         </span>
       </div>
       
+      {/* Timer Display */}
       <div className="mb-6">
         <div className="flex items-center justify-center mb-6">
-          <div className="relative w-48 h-48">
-            {/* Circular progress background */}
-            <svg className="w-full h-full transform -rotate-90">
-              {/* Background circle */}
+          <div className="relative w-40 h-40">
+            {/* SVG Circle Progress Indicator */}
+            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 140 140">
+              {/* Background Circle */}
               <circle
-                cx="96"
-                cy="96"
-                r={circleRadius}
+                cx="70"
+                cy="70"
+                r={radius}
+                stroke="#e5e7eb"
                 strokeWidth="8"
                 fill="transparent"
-                className="text-gray-200/60"
-                stroke="currentColor"
+                className="transition-all duration-300"
               />
-              {/* Progress circle */}
+              {/* Progress Circle */}
               <circle
-                cx="96"
-                cy="96"
-                r={circleRadius}
+                cx="70"
+                cy="70"
+                r={radius}
+                stroke="url(#gradient)"
                 strokeWidth="8"
                 fill="transparent"
-                strokeDasharray={circleCircumference}
-                strokeDashoffset={progressOffset}
+                strokeDasharray={circumference}
+                strokeDashoffset={strokeDashoffset}
                 strokeLinecap="round"
-                className={`transition-all duration-1000 ease-out ${isActive ? 'text-indigo-500' : 'text-gray-300'}`}
-                stroke="currentColor"
+                className="transition-all duration-1000 ease-out"
               />
+              <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#3b82f6" />
+                  <stop offset="100%" stopColor="#1d4ed8" />
+                </linearGradient>
+              </defs>
             </svg>
             
-            {/* Timer text in center */}
+            {/* Timer Text */}
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className={`text-3xl font-light mb-1 font-mono tracking-tight ${isActive ? 'text-gray-800' : 'text-gray-500'}`}>
+              <div className={`text-4xl font-black font-mono tracking-tight ${isActive ? 'text-black' : 'text-black'}`}>
                 {timeLeft > 0 ? formatTime(timeLeft) : '--:--'}
               </div>
-              <div className={`text-sm ${isActive ? 'text-indigo-600' : 'text-gray-500'}`}>
-                {isActive ? 'Time remaining' : task ? 'Ready' : 'No session'}
+              <div className={`text-sm font-bold ${isActive ? 'text-gray-800' : 'text-gray-600'}`}>
+                {isActive ? 'TIME REMAINING' : task ? 'READY' : 'NO SESSION'}
               </div>
             </div>
           </div>
@@ -87,13 +91,13 @@ export default function DeepWorkWidget({
         
         {timeLeft > 0 && (
           <div>
-            <div className="flex justify-between text-xs text-gray-500 mb-2">
-              <span>Progress</span>
-              <span className="font-medium">{Math.round(progressPercentage)}%</span>
+            <div className="flex justify-between text-sm text-black font-bold mb-2">
+              <span>PROGRESS</span>
+              <span>{Math.round(progressPercentage)}%</span>
             </div>
-            <div className="h-1.5 bg-gray-200/60 rounded-full overflow-hidden">
+            <div className="h-3 bg-gray-200 border-2 border-black overflow-hidden">
               <div 
-                className="h-full bg-gradient-to-r from-indigo-500 to-indigo-600 transition-all duration-1000 ease-out"
+                className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-1000 ease-out"
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>
@@ -101,23 +105,25 @@ export default function DeepWorkWidget({
         )}
       </div>
       
-      <div className="space-y-3">
-        <div className="text-sm font-medium text-gray-800 mb-2">Current Task</div>
-        <p className="text-sm text-gray-600 font-light line-clamp-2 bg-gray-50/50 rounded-xl p-3 border border-gray-200/40">
-          {task || 'Click to set a task and start your first sprint...'}
-        </p>
+      <div className="space-y-4">
+        <div className="text-sm font-black text-black mb-2">CURRENT TASK</div>
+        <div className="border-2 border-black bg-gray-50 p-4">
+          <p className="text-sm text-black font-bold line-clamp-2">
+            {task || 'CLICK TO SET A TASK AND START YOUR FIRST SPRINT...'}
+          </p>
+        </div>
         
-        <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-200/40">
-          <div className="flex items-center gap-1.5">
-            <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-            <span>{deepWorkSprints} sprints completed</span>
+        <div className="flex items-center justify-between text-sm text-black pt-4 border-t-2 border-black">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-black" />
+            <span className="font-bold">{deepWorkSprints} SPRINTS COMPLETED</span>
           </div>
-          <div className={`flex items-center gap-1.5 ${isActive ? 'text-green-600' : 'text-gray-400'}`}>
-            <div className={`w-1.5 h-1.5 rounded-full ${isActive ? 'animate-pulse bg-green-500' : 'bg-gray-300'}`} />
-            {isActive ? 'Live' : 'Paused'}
+          <div className="flex items-center gap-2">
+            <div className={`w-3 h-3 ${isActive ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`} />
+            <span className="font-bold">{isActive ? 'LIVE' : 'PAUSED'}</span>
           </div>
         </div>
       </div>
-    </a>
+    </div>
   );
 }

@@ -31,17 +31,17 @@ export default function Notes() {
     title: '',
     content: '',
     category: 'general',
-    color: '#6B7280'
+    color: '#000000'
   });
 
-  const [selectedColor, setSelectedColor] = useState('#6B7280');
+  const [selectedColor, setSelectedColor] = useState('#000000');
 
   useEffect(() => {
     loadNotes();
     loadCategories();
   }, []);
 
-  // NEW: Handle body scroll when modals are open
+  // Handle body scroll when modals are open
   useEffect(() => {
     if (showNewNote || editingNote || expandedNote) {
       document.body.classList.add('modal-open');
@@ -208,9 +208,9 @@ export default function Notes() {
       title: '',
       content: '',
       category: 'general',
-      color: '#6B7280'
+      color: '#000000'
     });
-    setSelectedColor('#6B7280');
+    setSelectedColor('#000000');
   };
 
   const handleColorSelect = (color: string) => {
@@ -225,13 +225,15 @@ export default function Notes() {
   };
 
   const colorOptions = [
-    '#6B7280',
+    '#000000',
     '#3B82F6',
     '#10B981',
     '#F59E0B',
     '#EF4444',
     '#8B5CF6',
     '#EC4899',
+    '#22D3EE',
+    '#A855F7'
   ];
 
   const pinnedNotes = notes.filter(note => note.pinned);
@@ -239,7 +241,7 @@ export default function Notes() {
 
   if (isLoading) {
     return (
-      <div className="bg-white/60 backdrop-blur-sm p-8 rounded-3xl border border-gray-200/50 shadow-sm">
+      <div className="border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 h-full bg-white">
         <div className="animate-pulse space-y-4">
           <div className="h-6 bg-gray-200 rounded w-1/3"></div>
           <div className="space-y-3">
@@ -253,32 +255,34 @@ export default function Notes() {
 
   return (
     <>
-      {/* Main Notes Component with Glassmorphism */}
-      <div className="bg-white/60 backdrop-blur-sm p-8 rounded-3xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all">
+      {/* Main Notes Component - Neobrutalism Style */}
+      <div className="border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-200 h-full bg-white">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <FileText className="text-gray-400" size={20} strokeWidth={1.5} />
-            <h2 className="text-lg font-light text-gray-700">Notes</h2>
+            <div className="p-2 border-2 border-black">
+              <FileText className="text-black" size={20} strokeWidth={2} />
+            </div>
+            <h2 className="text-xl font-black text-black">NOTES</h2>
           </div>
           
           <div className="flex items-center gap-4">
             <button
               onClick={toggleAiSummary}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-light transition-all ${
+              className={`flex items-center gap-2 px-4 py-2 border-2 font-black transition-all ${
                 aiSummaryEnabled 
-                  ? 'bg-purple-50 text-purple-700 border border-purple-200' 
-                  : 'bg-gray-50/50 text-gray-600 border border-gray-200'
+                  ? 'bg-purple-100 text-purple-900 border-purple-600 shadow-[4px_4px_0px_0px_rgba(147,51,234,1)]' 
+                  : 'bg-gray-100 text-black border-black hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px]'
               }`}
             >
-              <div className={`w-2 h-2 rounded-full ${aiSummaryEnabled ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-              AI Assistant {aiSummaryEnabled ? 'Active' : 'Disabled'}
+              <div className={`w-2 h-2 rounded-full ${aiSummaryEnabled ? 'bg-green-600' : 'bg-black'}`}></div>
+              AI {aiSummaryEnabled ? 'ACTIVE' : 'DISABLED'}
             </button>
             <button
               onClick={() => setShowNewNote(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-xl hover:bg-gray-900 transition-colors font-light"
+              className="flex items-center gap-2 px-4 py-2 bg-black text-white border-2 border-black font-black hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all"
             >
-              <Plus size={16} strokeWidth={1.5} />
-              New Note
+              <Plus size={16} strokeWidth={2} />
+              NEW NOTE
             </button>
           </div>
         </div>
@@ -289,61 +293,65 @@ export default function Notes() {
           {pinnedNotes.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <Pin size={18} className="text-gray-500" strokeWidth={1.5} />
-                <h3 className="text-lg font-light text-gray-700">Pinned</h3>
+                <Pin size={18} className="text-black" strokeWidth={2} />
+                <h3 className="text-lg font-black text-black">PINNED</h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {pinnedNotes.map(note => (
                   <div
                     key={note.id}
-                    className="group relative bg-white/50 backdrop-blur-sm rounded-2xl p-5 border border-gray-200/50 
-                             hover:border-gray-300 hover:shadow-sm transition-all duration-200 
+                    className="group relative bg-white border-2 border-black p-5 
+                             hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-200 
                              cursor-pointer h-full flex flex-col min-h-[200px]"
-                    style={{ borderLeftColor: note.color, borderLeftWidth: '4px' }}
+                    style={{ 
+                      borderLeftColor: note.color, 
+                      borderLeftWidth: '8px',
+                      borderLeftStyle: 'solid'
+                    }}
                     onClick={() => setExpandedNote(note)}
                   >
                     <div className="flex-1">
                       <div className="flex items-start justify-between mb-3">
-                        <h4 className="font-light text-gray-800 text-lg pr-10 line-clamp-2">{note.title}</h4>
+                        <h4 className="font-black text-black text-lg pr-10 line-clamp-2">{note.title}</h4>
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-3 top-3" onClick={e => e.stopPropagation()}>
                           <button
                             onClick={() => handleTogglePin(note.id)}
-                            className="p-2 hover:bg-gray-100/50 rounded-lg transition-colors text-gray-500"
+                            className="p-2 hover:bg-gray-100 border border-black hover:border-black transition-colors text-black"
                             title="Unpin"
                           >
-                            <PinOff size={16} strokeWidth={1.5} />
+                            <PinOff size={16} strokeWidth={2} />
                           </button>
                           <button
                             onClick={(e) => { e.stopPropagation(); setEditingNote(note); }}
-                            className="p-2 hover:bg-gray-100/50 rounded-lg transition-colors text-gray-500"
+                            className="p-2 hover:bg-blue-100 border border-black hover:border-blue-600 transition-colors text-black"
                             title="Edit"
                           >
-                            <Edit2 size={16} strokeWidth={1.5} />
+                            <Edit2 size={16} strokeWidth={2} />
                           </button>
                           <button
                             onClick={(e) => { e.stopPropagation(); handleDeleteNote(note.id); }}
-                            className="p-2 hover:bg-gray-100/50 rounded-lg transition-colors text-gray-500"
+                            className="p-2 hover:bg-red-100 border border-black hover:border-red-600 transition-colors text-black"
                             title="Delete"
                           >
-                            <Trash2 size={16} strokeWidth={1.5} />
+                            <Trash2 size={16} strokeWidth={2} />
                           </button>
                         </div>
                       </div>
                       
-                      <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-4 font-light">
+                      <p className="text-black text-sm leading-relaxed mb-4 line-clamp-4 font-bold">
                         {note.content}
                       </p>
                     </div>
                     
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-100/50" onClick={e => e.stopPropagation()}>
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-light bg-gray-100/50 text-gray-600 border border-gray-200/50">
-                        {note.category}
+                    <div className="flex items-center justify-between pt-4 border-t-2 border-black" onClick={e => e.stopPropagation()}>
+                      <span className="inline-flex items-center px-3 py-1 border-2 border-black text-xs font-black bg-white text-black">
+                        {note.category.toUpperCase()}
                       </span>
-                      <span className="text-xs text-gray-400 font-light">
+                      <span className="text-xs text-black font-black">
                         {new Date(note.updated_at).toLocaleDateString('en-US', { 
                           month: 'short', 
                           day: 'numeric'
-                        })}
+                        }).toUpperCase()}
                       </span>
                     </div>
                   </div>
@@ -354,59 +362,63 @@ export default function Notes() {
 
           {/* All Notes Section */}
           <div>
-            <h3 className="text-lg font-light text-gray-700 mb-4">All Notes</h3>
+            <h3 className="text-lg font-black text-black mb-4">ALL NOTES</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {regularNotes.map(note => (
                 <div
                   key={note.id}
-                  className="group relative bg-white/50 backdrop-blur-sm rounded-2xl p-5 border border-gray-200/50 
-                           hover:border-gray-300 hover:shadow-sm transition-all duration-200 
+                  className="group relative bg-white border-2 border-black p-5 
+                           hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-200 
                            cursor-pointer h-full flex flex-col min-h-[200px]"
-                  style={{ borderLeftColor: note.color, borderLeftWidth: '4px' }}
+                  style={{ 
+                    borderLeftColor: note.color, 
+                    borderLeftWidth: '8px',
+                    borderLeftStyle: 'solid'
+                  }}
                   onClick={() => setExpandedNote(note)}
                 >
                   <div className="flex-1">
                     <div className="flex items-start justify-between mb-3">
-                      <h4 className="font-light text-gray-800 text-lg pr-10 line-clamp-2">{note.title}</h4>
+                      <h4 className="font-black text-black text-lg pr-10 line-clamp-2">{note.title}</h4>
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-3 top-3" onClick={e => e.stopPropagation()}>
                         <button
                           onClick={() => handleTogglePin(note.id)}
-                          className="p-2 hover:bg-gray-100/50 rounded-lg transition-colors text-gray-500"
+                          className="p-2 hover:bg-gray-100 border border-black hover:border-black transition-colors text-black"
                           title="Pin"
                         >
-                          <Pin size={16} strokeWidth={1.5} />
+                          <Pin size={16} strokeWidth={2} />
                         </button>
                         <button
                           onClick={(e) => { e.stopPropagation(); setEditingNote(note); }}
-                          className="p-2 hover:bg-gray-100/50 rounded-lg transition-colors text-gray-500"
+                          className="p-2 hover:bg-blue-100 border border-black hover:border-blue-600 transition-colors text-black"
                           title="Edit"
                         >
-                          <Edit2 size={16} strokeWidth={1.5} />
+                          <Edit2 size={16} strokeWidth={2} />
                         </button>
                         <button
                           onClick={(e) => { e.stopPropagation(); handleDeleteNote(note.id); }}
-                          className="p-2 hover:bg-gray-100/50 rounded-lg transition-colors text-gray-500"
+                          className="p-2 hover:bg-red-100 border border-black hover:border-red-600 transition-colors text-black"
                           title="Delete"
                         >
-                          <Trash2 size={16} strokeWidth={1.5} />
+                          <Trash2 size={16} strokeWidth={2} />
                         </button>
                       </div>
                     </div>
                     
-                    <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-4 font-light">
+                    <p className="text-black text-sm leading-relaxed mb-4 line-clamp-4 font-bold">
                       {note.content}
                     </p>
                   </div>
                   
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100/50" onClick={e => e.stopPropagation()}>
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-light bg-gray-100/50 text-gray-600 border border-gray-200/50">
-                      {note.category}
+                  <div className="flex items-center justify-between pt-4 border-t-2 border-black" onClick={e => e.stopPropagation()}>
+                    <span className="inline-flex items-center px-3 py-1 border-2 border-black text-xs font-black bg-white text-black">
+                      {note.category.toUpperCase()}
                     </span>
-                    <span className="text-xs text-gray-400 font-light">
+                    <span className="text-xs text-black font-black">
                       {new Date(note.updated_at).toLocaleDateString('en-US', { 
                         month: 'short', 
                         day: 'numeric'
-                      })}
+                      }).toUpperCase()}
                     </span>
                   </div>
                 </div>
@@ -415,106 +427,103 @@ export default function Notes() {
           </div>
 
           {notes.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-16 text-center border-2 border-dashed border-gray-200/50 rounded-2xl bg-gray-50/30">
-              <div className="w-16 h-16 rounded-lg bg-gray-100/50 flex items-center justify-center mb-4 border border-gray-200/50">
-                <Tag className="text-gray-400" size={24} strokeWidth={1.5} />
+            <div className="flex flex-col items-center justify-center py-16 text-center border-2 border-dashed border-black bg-gray-50">
+              <div className="w-16 h-16 rounded-lg bg-white flex items-center justify-center mb-4 border-2 border-black">
+                <Tag className="text-black" size={24} strokeWidth={2} />
               </div>
-              <h4 className="text-lg font-medium text-gray-800 mb-3">No notes yet</h4>
-              <p className="text-gray-500 text-sm font-light mb-8 max-w-md">Start capturing your thoughts, ideas, and important information in one place.</p>
+              <h4 className="text-lg font-black text-black mb-3">NO NOTES YET</h4>
+              <p className="text-black text-sm font-bold mb-8 max-w-md">START CAPTURING YOUR THOUGHTS, IDEAS, AND IMPORTANT INFORMATION IN ONE PLACE.</p>
               <button
                 onClick={() => setShowNewNote(true)}
-                className="px-6 py-3 bg-gray-800 text-white rounded-xl hover:bg-gray-900 transition-all font-light"
+                className="px-6 py-3 bg-black text-white border-2 border-black font-black hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all"
               >
-                Create your first note
+                CREATE YOUR FIRST NOTE
               </button>
             </div>
           )}
         </div>
       </div>
 
-      {/* Expanded Note Modal */}
+      {/* Expanded Note Modal - Neobrutalism Style */}
       {expandedNote && (
         <div className="fixed inset-0 z-50">
           {/* Background overlay */}
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setExpandedNote(null)}></div>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setExpandedNote(null)}></div>
           
-          {/* Modal container - positioned absolutely inside fixed parent */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="bg-white rounded-xl border border-gray-200 shadow-xl
-                            w-[calc(100%-2rem)] max-w-3xl
-                            max-h-[80vh] p-6 overflow-y-auto">
-              {/* Content stays exactly the same as before */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: expandedNote.color + '20' }}
+          {/* Modal container */}
+          <div className="absolute inset-0 flex items-center justify-center p-4">
+            <div className="bg-white border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] 
+                            w-full max-w-3xl max-h-[80vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-8 h-8 rounded border-2 border-black flex items-center justify-center"
+                      style={{ backgroundColor: expandedNote.color }}
+                    >
+                      <Tag className="text-white" size={16} strokeWidth={2} />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-black text-black">
+                        {expandedNote.title}
+                      </h3>
+                      <span className="inline-flex items-center px-2.5 py-0.5 mt-1
+                                      border-2 border-black text-xs font-black bg-white text-black">
+                        {expandedNote.category.toUpperCase()}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setExpandedNote(null)}
+                    className="p-1.5 border-2 border-black hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all text-black"
                   >
-                    <Tag className="text-gray-600" size={16} strokeWidth={1.5} />
+                    <X size={20} strokeWidth={2} />
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="bg-gray-50 border-2 border-black p-6">
+                    <div className="text-black leading-relaxed whitespace-pre-wrap font-bold">
+                      {expandedNote.content}
+                    </div>
                   </div>
 
-                  <div>
-                    <h3 className="text-lg font-medium text-gray-800">
-                      {expandedNote.title}
-                    </h3>
-                    <span className="inline-flex items-center px-2.5 py-0.5 mt-1
-                                    rounded text-xs font-light bg-gray-100 text-gray-600
-                                    border border-gray-200">
-                      {expandedNote.category}
+                  <div className="flex items-center justify-between pt-4 border-t-2 border-black">
+                    <span className="text-sm text-black font-black">
+                      LAST UPDATED: {new Date(expandedNote.updated_at).toLocaleString('en-US', { 
+                          month: 'short', 
+                          day: 'numeric',
+                          year: 'numeric'
+                        }).toUpperCase()}
                     </span>
-                  </div>
-                </div>
 
-                <button
-                  onClick={() => setExpandedNote(null)}
-                  className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
-                >
-                  <X size={20} strokeWidth={1.5} />
-                </button>
-              </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          setEditingNote(expandedNote);
+                          setExpandedNote(null);
+                        }}
+                        className="flex items-center gap-2 px-3 py-2 border-2 border-black
+                                  text-black hover:bg-blue-100 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[2px_2px_0px_0px_rgba(59,130,246,1)]
+                                  transition-all font-black text-sm"
+                      >
+                        <Edit2 size={14} strokeWidth={2} />
+                        EDIT
+                      </button>
 
-              <div className="space-y-4">
-                <div className="bg-gray-50 rounded-lg p-6 border border-gray-200 whitespace-pre-wrap">
-                  <div className="text-gray-700 leading-relaxed font-light">
-                    {expandedNote.content}
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                  <span className="text-sm text-gray-400 font-light">
-                    Last updated: {new Date(expandedNote.updated_at).toLocaleString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric',
-                        year: 'numeric'
-                      })} 
-                  </span>
-
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        setEditingNote(expandedNote);
-                        setExpandedNote(null);
-                      }}
-                      className="flex items-center gap-2 px-3 py-2 text-sm
-                                text-gray-600 hover:text-gray-800 hover:bg-gray-100
-                                rounded-lg transition-colors font-light"
-                    >
-                      <Edit2 size={14} strokeWidth={1.5} />
-                      Edit
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setExpandedNote(null);
-                        handleDeleteNote(expandedNote.id);
-                      }}
-                      className="flex items-center gap-2 px-3 py-2 text-sm
-                                text-red-600 hover:text-red-800 hover:bg-red-50
-                                rounded-lg transition-colors font-light"
-                    >
-                      <Trash2 size={14} strokeWidth={1.5} />
-                      Delete
-                    </button>
+                      <button
+                        onClick={() => {
+                          setExpandedNote(null);
+                          handleDeleteNote(expandedNote.id);
+                        }}
+                        className="flex items-center gap-2 px-3 py-2 border-2 border-red-600 bg-red-100
+                                  text-red-900 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[2px_2px_0px_0px_rgba(220,38,38,1)]
+                                  transition-all font-black text-sm"
+                      >
+                        <Trash2 size={14} strokeWidth={2} />
+                        DELETE
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -523,26 +532,29 @@ export default function Notes() {
         </div>
       )}
 
-      {/* New Note Modal */}
+      {/* New Note Modal - Neobrutalism Style */}
       {showNewNote && (
         <div className="fixed inset-0 z-50">
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => {
-            setShowNewNote(false);
-            resetForm();
-          }}></div>
-          <div className="fixed right-0 top-0 bottom-0 w-[800px] bg-white border-l border-gray-200 shadow-xl">
+          <div 
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm" 
+            onClick={() => {
+              setShowNewNote(false);
+              resetForm();
+            }}
+          ></div>
+          <div className="fixed right-0 top-0 bottom-0 w-[800px] bg-white border-l-2 border-black shadow-[8px_0px_0px_0px_rgba(0,0,0,1)]">
             <div className="h-full overflow-y-auto">
               <div className="p-8">
                 <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-2xl font-light text-gray-800">New Note</h2>
+                  <h2 className="text-2xl font-black text-black">NEW NOTE</h2>
                   <button
                     onClick={() => {
                       setShowNewNote(false);
                       resetForm();
                     }}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
+                    className="p-2 border-2 border-black hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all text-black"
                   >
-                    <X size={24} strokeWidth={1.5} />
+                    <X size={24} strokeWidth={2} />
                   </button>
                 </div>
 
@@ -551,44 +563,44 @@ export default function Notes() {
                     type="text"
                     value={newNote.title}
                     onChange={(e) => setNewNote({...newNote, title: e.target.value})}
-                    placeholder="Title"
-                    className="w-full px-4 py-4 bg-white rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 text-xl font-light text-gray-800 placeholder-gray-400"
+                    placeholder="TITLE"
+                    className="w-full px-4 py-4 bg-white border-2 border-black focus:outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:translate-x-[-2px] focus:translate-y-[-2px] transition-all text-xl font-black text-black placeholder-gray-500"
                     autoFocus
                   />
                   
                   <textarea
                     value={newNote.content}
                     onChange={(e) => setNewNote({...newNote, content: e.target.value})}
-                    placeholder="Start typing here..."
+                    placeholder="START TYPING HERE..."
                     rows={12}
-                    className="w-full px-4 py-4 bg-white rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 resize-none text-gray-800 placeholder-gray-400 leading-relaxed font-light"
+                    className="w-full px-4 py-4 bg-white border-2 border-black focus:outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:translate-x-[-2px] focus:translate-y-[-2px] transition-all resize-none text-black placeholder-gray-500 leading-relaxed font-bold"
                   />
 
                   <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-light text-gray-600 mb-3">
-                        Category
+                      <label className="block text-sm font-black text-black mb-3">
+                        CATEGORY
                       </label>
                       <select
                         value={newNote.category}
                         onChange={(e) => setNewNote({...newNote, category: e.target.value})}
-                        className="w-full px-4 py-3 bg-white rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 text-gray-800 font-light"
+                        className="w-full px-4 py-3 bg-white border-2 border-black focus:outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:translate-x-[-2px] focus:translate-y-[-2px] transition-all text-black font-bold"
                       >
                         {categories.length > 0 ? (
                           categories.map(category => (
                             <option key={category} value={category}>
-                              {category.charAt(0).toUpperCase() + category.slice(1)}
+                              {category.toUpperCase()}
                             </option>
                           ))
                         ) : (
-                          <option value="general">General</option>
+                          <option value="general">GENERAL</option>
                         )}
                       </select>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-light text-gray-600 mb-3">
-                        Color
+                      <label className="block text-sm font-black text-black mb-3">
+                        COLOR
                       </label>
                       <div className="flex gap-3">
                         {colorOptions.map(color => (
@@ -597,10 +609,10 @@ export default function Notes() {
                             type="button"
                             onClick={() => handleColorSelect(color)}
                             className={`
-                              relative w-12 h-12 rounded-xl border-2 transition-all duration-200
+                              relative w-12 h-12 border-2 transition-all duration-200
                               ${selectedColor === color 
-                                ? 'border-gray-800 scale-105 shadow-sm' 
-                                : 'border-transparent hover:border-gray-300'
+                                ? 'border-black scale-105 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' 
+                                : 'border-transparent hover:border-black hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px)]'
                               }
                             `}
                             style={{ backgroundColor: color }}
@@ -608,7 +620,7 @@ export default function Notes() {
                           >
                             {selectedColor === color && (
                               <div className="absolute inset-0 flex items-center justify-center">
-                                <Check size={20} className="text-white opacity-90" strokeWidth={2} />
+                                <Check size={20} className="text-white" strokeWidth={2.5} />
                               </div>
                             )}
                           </button>
@@ -617,22 +629,22 @@ export default function Notes() {
                     </div>
                   </div>
 
-                  <div className="flex justify-end gap-4 pt-8 border-t border-gray-100">
+                  <div className="flex justify-end gap-4 pt-8 border-t-2 border-black">
                     <button
                       onClick={() => {
                         setShowNewNote(false);
                         resetForm();
                       }}
-                      className="px-6 py-3 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-xl transition-colors font-light"
+                      className="px-6 py-3 text-black hover:bg-gray-100 border-2 border-black hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all font-black"
                     >
-                      Cancel
+                      CANCEL
                     </button>
                     <button
                       onClick={handleCreateNote}
                       disabled={!newNote.title.trim()}
-                      className="px-6 py-3 bg-gray-800 text-white rounded-xl hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-light"
+                      className="px-6 py-3 bg-black text-white border-2 border-black hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all disabled:bg-gray-400 disabled:border-gray-400 disabled:cursor-not-allowed disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-none font-black"
                     >
-                      Create Note
+                      CREATE NOTE
                     </button>
                   </div>
                 </div>
@@ -642,20 +654,20 @@ export default function Notes() {
         </div>
       )}
 
-      {/* Edit Note Modal */}
+      {/* Edit Note Modal - Neobrutalism Style */}
       {editingNote && (
         <div className="fixed inset-0 z-50">
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setEditingNote(null)}></div>
-          <div className="fixed right-0 top-0 bottom-0 w-[800px] bg-white border-l border-gray-200 shadow-xl">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setEditingNote(null)}></div>
+          <div className="fixed right-0 top-0 bottom-0 w-[800px] bg-white border-l-2 border-black shadow-[8px_0px_0px_0px_rgba(0,0,0,1)]">
             <div className="h-full overflow-y-auto">
               <div className="p-8">
                 <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-2xl font-light text-gray-800">Edit Note</h2>
+                  <h2 className="text-2xl font-black text-black">EDIT NOTE</h2>
                   <button
                     onClick={() => setEditingNote(null)}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
+                    className="p-2 border-2 border-black hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all text-black"
                   >
-                    <X size={24} strokeWidth={1.5} />
+                    <X size={24} strokeWidth={2} />
                   </button>
                 </div>
 
@@ -664,7 +676,7 @@ export default function Notes() {
                     type="text"
                     value={editingNote.title}
                     onChange={(e) => setEditingNote({...editingNote, title: e.target.value})}
-                    className="w-full px-4 py-4 bg-white rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 text-xl font-light text-gray-800"
+                    className="w-full px-4 py-4 bg-white border-2 border-black focus:outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:translate-x-[-2px] focus:translate-y-[-2px] transition-all text-xl font-black text-black"
                     autoFocus
                   />
                   
@@ -672,34 +684,34 @@ export default function Notes() {
                     value={editingNote.content}
                     onChange={(e) => setEditingNote({...editingNote, content: e.target.value})}
                     rows={12}
-                    className="w-full px-4 py-4 bg-white rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 resize-none text-gray-800 leading-relaxed font-light"
+                    className="w-full px-4 py-4 bg-white border-2 border-black focus:outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:translate-x-[-2px] focus:translate-y-[-2px] transition-all resize-none text-black leading-relaxed font-bold"
                   />
 
                   <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-light text-gray-600 mb-3">
-                        Category
+                      <label className="block text-sm font-black text-black mb-3">
+                        CATEGORY
                       </label>
                       <select
                         value={editingNote.category}
                         onChange={(e) => setEditingNote({...editingNote, category: e.target.value})}
-                        className="w-full px-4 py-3 bg-white rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 text-gray-800 font-light"
+                        className="w-full px-4 py-3 bg-white border-2 border-black focus:outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:translate-x-[-2px] focus:translate-y-[-2px] transition-all text-black font-bold"
                       >
                         {categories.length > 0 ? (
                           categories.map(category => (
                             <option key={category} value={category}>
-                              {category.charAt(0).toUpperCase() + category.slice(1)}
+                              {category.toUpperCase()}
                             </option>
                           ))
                         ) : (
-                          <option value="general">General</option>
+                          <option value="general">GENERAL</option>
                         )}
                       </select>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-light text-gray-600 mb-3">
-                        Color
+                      <label className="block text-sm font-black text-black mb-3">
+                        COLOR
                       </label>
                       <div className="flex gap-3">
                         {colorOptions.map(color => (
@@ -708,10 +720,10 @@ export default function Notes() {
                             type="button"
                             onClick={() => handleEditColorSelect(color)}
                             className={`
-                              relative w-12 h-12 rounded-xl border-2 transition-all duration-200
+                              relative w-12 h-12 border-2 transition-all duration-200
                               ${editingNote.color === color 
-                                ? 'border-gray-800 scale-105 shadow-sm' 
-                                : 'border-transparent hover:border-gray-300'
+                                ? 'border-black scale-105 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' 
+                                : 'border-transparent hover:border-black hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px)]'
                               }
                             `}
                             style={{ backgroundColor: color }}
@@ -719,7 +731,7 @@ export default function Notes() {
                           >
                             {editingNote.color === color && (
                               <div className="absolute inset-0 flex items-center justify-center">
-                                <Check size={20} className="text-white opacity-90" strokeWidth={2} />
+                                <Check size={20} className="text-white" strokeWidth={2.5} />
                               </div>
                             )}
                           </button>
@@ -733,36 +745,36 @@ export default function Notes() {
                       <button
                         onClick={() => handleRephraseNote(editingNote)}
                         disabled={isSummarizing}
-                        className="flex items-center justify-center gap-3 w-full px-6 py-4 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all disabled:opacity-50 font-light"
+                        className="flex items-center justify-center gap-3 w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-purple-800 text-white border-2 border-black hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(147,51,234,1)] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-none font-black"
                       >
                         {isSummarizing ? (
                           <>
                             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                            <span>Rephrasing Note...</span>
+                            <span>REPHRASING NOTE...</span>
                           </>
                         ) : (
                           <>
-                            <span>Improve Note with AI</span>
+                            <span>IMPROVE NOTE WITH AI</span>
                           </>
                         )}
                       </button>
                     </div>
                   )}
 
-                  <div className="flex justify-end gap-4 pt-8 border-t border-gray-100">
+                  <div className="flex justify-end gap-4 pt-8 border-t-2 border-black">
                     <button
                       onClick={() => setEditingNote(null)}
-                      className="px-6 py-3 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-xl transition-colors font-light"
+                      className="px-6 py-3 text-black hover:bg-gray-100 border-2 border-black hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all font-black"
                     >
-                      Cancel
+                      CANCEL
                     </button>
                     <button
                       onClick={handleUpdateNote}
                       disabled={!editingNote.title.trim()}
-                      className="flex items-center gap-2 px-6 py-3 bg-gray-800 text-white rounded-xl hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-light"
+                      className="flex items-center gap-2 px-6 py-3 bg-black text-white border-2 border-black hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all disabled:bg-gray-400 disabled:border-gray-400 disabled:cursor-not-allowed disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-none font-black"
                     >
-                      <Save size={18} strokeWidth={1.5} />
-                      Save Changes
+                      <Save size={18} strokeWidth={2} />
+                      SAVE CHANGES
                     </button>
                   </div>
                 </div>

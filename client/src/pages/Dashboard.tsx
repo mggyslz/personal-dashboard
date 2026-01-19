@@ -11,15 +11,12 @@ import MoodTracker from '../components/MoodTracker';
 
 interface DashboardStats {
   completedTasks: number;
-  activeNotes: number;
+  totalReminders: number;
   focusSessions: number;
   journalEntries: number;
-  upcomingEvents: number;
-  totalReminders: number;
-  deepWorkSprints: number;
-  mitCompleted: number;
-  currentMIT: string | null;
   mitStreak: number;
+  currentMIT: string | null;
+  mitCompleted: number;
   outputToday: number;
   outputStreak: number;
   outputTypes: Array<{name: string; todayTotal: number; target: number; color: string}>;
@@ -28,15 +25,12 @@ interface DashboardStats {
 export default function Dashboard() {
   const [quickStats, setQuickStats] = useState<DashboardStats>({
     completedTasks: 0,
-    activeNotes: 0,
+    totalReminders: 0,
     focusSessions: 0,
     journalEntries: 0,
-    upcomingEvents: 0,
-    totalReminders: 0,
-    deepWorkSprints: 0,
-    mitCompleted: 0,
-    currentMIT: null,
     mitStreak: 0,
+    currentMIT: null,
+    mitCompleted: 0,
     outputToday: 0,
     outputStreak: 0,
     outputTypes: [],
@@ -56,7 +50,7 @@ export default function Dashboard() {
   useEffect(() => {
     fetchDashboardData();
     
-    // Refresh stats every 30 seconds to keep dashboard updated
+    // Refresh stats every 30 seconds
     const interval = setInterval(() => {
       fetchDashboardData();
     }, 30000);
@@ -70,53 +64,34 @@ export default function Dashboard() {
       
       const [
         reminders,
-        notes,
-        journalEntries,
-        calendarEvents,
+        entries,
         mitTask,
         outputStats,
         mitStreakStats,
         outputTypes,
-        deepWorkStats // ADDED: Fetch deep work stats from API
+        deepWorkStats
       ] = await Promise.all([
         api.getReminders(),
-        api.getNotes(),
         api.getEntries(),
-        api.getCalendarEvents(),
         api.getTodayMITTask(),
         api.getOutputStats(todaysDate),
         api.getMITStreakStats(),
         api.getOutputTypes(),
-        api.getDeepWorkStats() // ADDED: Get deep work stats
+        api.getDeepWorkStats()
       ]);
-
-      // Get deep work stats from API response
-      const deepWorkSprintsFromAPI = deepWorkStats?.total_sprints || 0;
-      
-      // Sync with localStorage for backward compatibility
-      if (deepWorkSprintsFromAPI > 0) {
-        localStorage.setItem('completedSprints', deepWorkSprintsFromAPI.toString());
-      }
 
       const completedReminders = Array.isArray(reminders) 
         ? reminders.filter((r: any) => r.completed === 1).length 
         : 0;
 
-      const activeNotesCount = Array.isArray(notes) ? notes.length : 0;
-      const journalEntriesCount = Array.isArray(journalEntries) ? journalEntries.length : 0;
+      const journalEntriesCount = Array.isArray(entries) ? entries.length : 0;
       
-      const todayEvents = Array.isArray(calendarEvents) 
-        ? calendarEvents.filter((event: any) => {
-            const eventDate = new Date(event.start).toISOString().split('T')[0];
-            return eventDate === todaysDate;
-          }).length 
-        : 0;
-
       const outputStreak = outputStats?.streak || 0;
       const currentMIT = mitTask?.exists ? mitTask.task : null;
       const mitCompleted = mitTask?.exists && mitTask.completed ? 1 : 0;
       const mitStreak = mitStreakStats?.current_streak || 0;
       const outputToday = outputStats?.totalOutput || 0;
+      const focusSessions = deepWorkStats?.total_sprints || 0;
       
       const outputTypesData = outputTypes.map(type => {
         const typeStats = outputStats?.typeStats?.[type.name] || { todayTotal: 0, target: type.target };
@@ -130,15 +105,12 @@ export default function Dashboard() {
 
       setQuickStats({
         completedTasks: completedReminders,
-        activeNotes: activeNotesCount,
-        focusSessions: deepWorkSprintsFromAPI, // Use API value directly
-        journalEntries: journalEntriesCount,
-        upcomingEvents: todayEvents,
         totalReminders: Array.isArray(reminders) ? reminders.length : 0,
-        deepWorkSprints: deepWorkSprintsFromAPI, // Use API value
-        mitCompleted: mitCompleted,
-        currentMIT: currentMIT,
+        focusSessions: focusSessions,
+        journalEntries: journalEntriesCount,
         mitStreak: mitStreak,
+        currentMIT: currentMIT,
+        mitCompleted: mitCompleted,
         outputToday: outputToday,
         outputStreak: outputStreak,
         outputTypes: outputTypesData,
@@ -147,51 +119,24 @@ export default function Dashboard() {
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       
-      // Fallback: try to get from both localStorage and sessionStorage
+      // Fallback to localStorage for critical values
       const localStorageSprints = parseInt(localStorage.getItem('completedSprints') || '0');
-      const sessionStorageSprints = parseInt(
-        sessionStorage.getItem('deepWorkStats') 
-          ? JSON.parse(sessionStorage.getItem('deepWorkStats')!).total_sprints || '0' 
-          : '0'
-      );
       
-      // Use the higher value between localStorage and sessionStorage
-      const fallbackSprints = Math.max(localStorageSprints, sessionStorageSprints);
-      
-      const fallbackStats = {
-        completedTasks: parseInt(localStorage.getItem('completedTasks') || '0'),
-        activeNotes: parseInt(localStorage.getItem('activeNotes') || '0'),
-        focusSessions: fallbackSprints,
-        journalEntries: parseInt(localStorage.getItem('journalEntries') || '0'),
-        upcomingEvents: 0,
+      setQuickStats({
+        completedTasks: 0,
         totalReminders: 0,
-        deepWorkSprints: fallbackSprints,
-        mitCompleted: parseInt(localStorage.getItem('mitStreak') || '0'),
+        focusSessions: localStorageSprints,
+        journalEntries: 0,
+        mitStreak: 0,
         currentMIT: null,
-        mitStreak: parseInt(localStorage.getItem('mitStreak') || '0'),
+        mitCompleted: 0,
         outputToday: 0,
-        outputStreak: parseInt(localStorage.getItem('outputStreak') || '0'),
+        outputStreak: 0,
         outputTypes: [],
-      };
-      
-      setQuickStats(fallbackStats);
+      });
     } finally {
       setLoading(false);
     }
-  };
-
-  const getColorClasses = (color: string) => {
-    const colorMap: Record<string, string> = {
-      blue: 'bg-blue-500',
-      green: 'bg-green-500',
-      purple: 'bg-purple-500',
-      orange: 'bg-orange-500',
-      red: 'bg-red-500',
-      yellow: 'bg-yellow-500',
-      pink: 'bg-pink-500',
-      indigo: 'bg-indigo-500',
-    };
-    return colorMap[color] || 'bg-gray-500';
   };
 
   if (loading) {
@@ -203,7 +148,7 @@ export default function Dashboard() {
       <WelcomeSection
         completedTasks={quickStats.completedTasks}
         totalReminders={quickStats.totalReminders}
-        focusSessions={quickStats.focusSessions} // This now uses the correct API value
+        focusSessions={quickStats.focusSessions}
         mitStreak={quickStats.mitStreak}
         journalEntries={quickStats.journalEntries}
       />
@@ -217,7 +162,7 @@ export default function Dashboard() {
           task={deepWorkTask}
           formatTime={formatTime}
           getProgressPercentage={getProgressPercentage}
-          deepWorkSprints={quickStats.deepWorkSprints} // Use quickStats value
+          deepWorkSprints={quickStats.focusSessions}
         />
 
         <MITWidget
@@ -230,9 +175,9 @@ export default function Dashboard() {
           outputToday={quickStats.outputToday}
           outputStreak={quickStats.outputStreak}
           outputTypes={quickStats.outputTypes}
-          getColorClasses={getColorClasses}
         />
       </div>
+      
       <MoodTracker />
     </div>
   );

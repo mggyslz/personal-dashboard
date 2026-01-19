@@ -4,10 +4,27 @@ class WeatherService {
   constructor() {
     this.geocodingUrl = 'https://geocoding-api.open-meteo.com/v1/search';
     this.weatherUrl = 'https://api.open-meteo.com/v1/forecast';
+    
+    // Cache storage
+    this.coordinatesCache = new Map();
+    this.weatherCache = new Map();
+    
+    // Cache TTL in milliseconds (5 minutes for coordinates, 10 minutes for weather)
+    this.COORDINATES_CACHE_TTL = 5 * 60 * 1000;
+    this.WEATHER_CACHE_TTL = 10 * 60 * 1000;
   }
 
-  // Get coordinates for a city using Open-Meteo Geocoding API
+  // Get coordinates for a city with caching
   async getCoordinates(city) {
+    const cacheKey = city.toLowerCase().trim();
+    const cached = this.coordinatesCache.get(cacheKey);
+    
+    // Return cached coordinates if still valid
+    if (cached && (Date.now() - cached.timestamp) < this.COORDINATES_CACHE_TTL) {
+      console.log('Using cached coordinates for:', city);
+      return cached.data;
+    }
+
     try {
       const response = await axios.get(this.geocodingUrl, {
         params: {
@@ -15,7 +32,8 @@ class WeatherService {
           count: 1,
           language: 'en',
           format: 'json'
-        }
+        },
+        timeout: 5000 // 5 second timeout
       });
 
       if (!response.data.results || response.data.results.length === 0) {
@@ -23,12 +41,21 @@ class WeatherService {
       }
 
       const result = response.data.results[0];
-      return {
+      const coordinates = {
         latitude: result.latitude,
         longitude: result.longitude,
         name: result.name,
         country: result.country
       };
+
+      // Cache the coordinates
+      this.coordinatesCache.set(cacheKey, {
+        data: coordinates,
+        timestamp: Date.now()
+      });
+
+      console.log('Fetched new coordinates for:', city);
+      return coordinates;
     } catch (error) {
       console.error('Geocoding error:', error.message);
       throw error;
@@ -71,7 +98,18 @@ class WeatherService {
     return weatherCodes[code] || 'unknown';
   }
 
+  // Get weather with caching
   async getCurrentWeather(city = 'Manila') {
+    const normalizedCity = city.toLowerCase().trim();
+    const cacheKey = normalizedCity;
+    const cached = this.weatherCache.get(cacheKey);
+    
+    // Return cached weather if still valid
+    if (cached && (Date.now() - cached.timestamp) < this.WEATHER_CACHE_TTL) {
+      console.log('Using cached weather for:', city);
+      return cached.data;
+    }
+
     try {
       // Get coordinates for the city
       const location = await this.getCoordinates(city);
@@ -82,13 +120,19 @@ class WeatherService {
           latitude: location.latitude,
           longitude: location.longitude,
           current: 'temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m',
-          timezone: 'auto'
-        }
+          timezone: 'auto',
+          forecast_days: 1
+        },
+        timeout: 5000 // 5 second timeout
       });
+
+      if (!response.data.current) {
+        throw new Error('Invalid weather data received');
+      }
 
       const current = response.data.current;
 
-      return {
+      const weatherData = {
         city: `${location.name}, ${location.country}`,
         temperature: Math.round(current.temperature_2m),
         description: this.getWeatherDescription(current.weather_code),
@@ -96,15 +140,38 @@ class WeatherService {
         windSpeed: Math.round(current.wind_speed_10m * 10) / 10, // Round to 1 decimal
         weatherCode: current.weather_code
       };
+
+      // Cache the weather data
+      this.weatherCache.set(cacheKey, {
+        data: weatherData,
+        timestamp: Date.now()
+      });
+
+      console.log('Fetched new weather for:', city);
+      return weatherData;
     } catch (error) {
       console.error('Weather API error:', error.message);
-      return this.getMockWeather();
+      
+      // Return mock data if API fails AND there's no cache
+      const cached = this.weatherCache.get(cacheKey);
+      if (cached) {
+        console.log('API failed, using stale cache for:', city);
+        return cached.data;
+      }
+      
+      return this.getMockWeather(city);
     }
   }
 
-  getMockWeather() {
+  // Clear cache (optional, useful for testing)
+  clearCache() {
+    this.coordinatesCache.clear();
+    this.weatherCache.clear();
+  }
+
+  getMockWeather(city = 'Manila') {
     return {
-      city: 'Manila, Philippines',
+      city: `${city}, Unknown`,
       temperature: 28,
       description: 'partly cloudy',
       humidity: 75,

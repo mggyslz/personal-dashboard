@@ -81,28 +81,41 @@ export default function Reminders() {
 
   if (loading) {
     return (
-      <div className="bg-white/60 backdrop-blur-sm p-8 rounded-3xl border border-gray-200/50 shadow-sm">
+      <div className="border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 h-full">
         <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-          <div className="h-20 bg-gray-200 rounded"></div>
+          <div className="flex justify-between items-center">
+            <div className="h-6 rounded w-1/3 bg-gray-200"></div>
+            <div className="h-6 rounded w-16 bg-gray-200"></div>
+          </div>
+          <div className="h-20 rounded bg-gray-200"></div>
         </div>
       </div>
     );
   }
 
+  const completedCount = reminders.filter(r => r.completed === 1).length;
+  const totalCount = reminders.length;
+
   return (
-    <div className="bg-white/60 backdrop-blur-sm p-8 rounded-3xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all">
+    <div className="border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-200 h-full bg-white">
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-2">
-          <Bell className="text-gray-400" size={20} strokeWidth={1.5} />
-          <h2 className="text-lg font-light text-gray-700">Reminders</h2>
+          <div className="p-2 border-2 border-black">
+            <Bell className="text-black" size={20} strokeWidth={2} />
+          </div>
+          <h2 className="text-xl font-black text-black">REMINDERS</h2>
         </div>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
-        >
-          {showForm ? <X size={18} strokeWidth={1.5} className="text-gray-600" /> : <Plus size={18} strokeWidth={1.5} className="text-gray-600" />}
-        </button>
+        <div className="flex items-center gap-2">
+          <div className="px-3 py-1 border-2 border-black text-sm font-bold">
+            {completedCount}/{totalCount}
+          </div>
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="p-2 border-2 border-black font-bold hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+          >
+            {showForm ? <X size={18} strokeWidth={2} className="text-black" /> : <Plus size={18} strokeWidth={2} className="text-black" />}
+          </button>
+        </div>
       </div>
 
       {showForm && (
@@ -111,65 +124,67 @@ export default function Reminders() {
             type="text"
             value={newReminder}
             onChange={(e) => setNewReminder(e.target.value)}
-            placeholder="What do you need to remember?"
-            className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent font-light"
+            placeholder="WHAT DO YOU NEED TO REMEMBER?"
+            className="w-full px-4 py-3 border-2 border-black font-bold focus:outline-none focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
           />
           <div className="flex gap-3">
             <input
               type="date"
               value={newDate}
               onChange={(e) => setNewDate(e.target.value)}
-              className="flex-1 px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent font-light"
+              className="flex-1 px-4 py-3 border-2 border-black font-bold focus:outline-none focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
             />
             <input
               type="time"
               value={newTime}
               onChange={(e) => setNewTime(e.target.value)}
-              className="w-32 px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent font-light"
+              className="w-32 px-4 py-3 border-2 border-black font-bold focus:outline-none focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-gray-800 text-white py-3 rounded-xl hover:bg-gray-900 transition-colors font-light"
+            className="w-full py-3 border-2 border-black bg-black text-white font-bold hover:bg-white hover:text-black hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
           >
-            Add Reminder
+            ADD REMINDER
           </button>
         </form>
       )}
 
-      <div className="space-y-2 max-h-80 overflow-y-auto">
+      <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
         {reminders.length === 0 ? (
-          <p className="text-gray-400 font-light text-center py-8">No reminders yet</p>
+          <div className="border-2 border-black p-4 text-center">
+            <p className="font-black text-black">NO REMINDERS YET</p>
+          </div>
         ) : (
           reminders.map((reminder) => (
             <div
               key={reminder.id}
-              className="flex items-center gap-4 p-4 rounded-xl bg-gray-50/50 hover:bg-gray-100/80 transition-colors group"
+              className={`flex items-center gap-4 p-4 border-2 ${reminder.completed === 1 ? 'border-gray-400 bg-gray-50' : 'border-black bg-white'} hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all group`}
             >
-              <input
-                type="checkbox"
-                checked={reminder.completed === 1}
-                onChange={() => handleToggle(reminder.id)}
-                className="w-5 h-5 rounded-lg accent-gray-800 cursor-pointer"
-              />
+              <button
+                onClick={() => handleToggle(reminder.id)}
+                className={`w-6 h-6 border-2 ${reminder.completed === 1 ? 'border-black bg-black' : 'border-black'} flex items-center justify-center font-bold hover:scale-110 transition-transform`}
+              >
+                {reminder.completed === 1 && <span className="text-white text-sm">✓</span>}
+              </button>
               <div className="flex-1 min-w-0">
                 <p
-                  className={`font-light ${reminder.completed === 1
-                      ? 'line-through text-gray-400'
-                      : 'text-gray-800'
+                  className={`font-bold ${reminder.completed === 1
+                      ? 'line-through text-gray-600'
+                      : 'text-black'
                     }`}
                 >
-                  {reminder.text}
+                  {reminder.text.toUpperCase()}
                 </p>
-                <p className="text-xs text-gray-400 mt-1 font-light">
-                  {new Date(reminder.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at {reminder.time}
+                <p className="text-xs font-bold text-gray-700 mt-1">
+                  {new Date(reminder.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase()} AT {reminder.time}
                 </p>
               </div>
               <button
                 onClick={() => handleDelete(reminder.id)}
-                className="opacity-0 group-hover:opacity-100 p-2 hover:bg-gray-200 rounded-lg transition-all"
+                className="p-2 border-2 border-black font-bold hover:bg-black hover:text-white transition-colors"
               >
-                <X size={16} strokeWidth={1.5} className="text-gray-400" />
+                <X size={16} strokeWidth={2} />
               </button>
             </div>
           ))

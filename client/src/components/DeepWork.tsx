@@ -722,12 +722,12 @@ export default function DeepWorkSprint() {
 
   if (isLoading) {
     return (
-      <div className="bg-white/60 backdrop-blur-sm p-8 rounded-3xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all">
+      <div className="border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-6 bg-gray-200/50 rounded w-1/3"></div>
+          <div className="h-6 bg-gray-200 rounded w-1/3"></div>
           <div className="space-y-3">
-            <div className="h-4 bg-gray-200/50 rounded"></div>
-            <div className="h-4 bg-gray-200/50 rounded w-5/6"></div>
+            <div className="h-4 bg-gray-200 rounded"></div>
+            <div className="h-4 bg-gray-200 rounded w-5/6"></div>
           </div>
         </div>
       </div>
@@ -736,95 +736,93 @@ export default function DeepWorkSprint() {
 
   return (
     <>
-      {/* Main Component with Glassmorphism */}
-      <div className="bg-white/60 backdrop-blur-sm p-8 rounded-3xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all">
+      {/* Main Component with Neobrutalism Style */}
+      <div className="border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-200 bg-white">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <Target className="text-gray-400" size={20} strokeWidth={1.5} />
-            <h2 className="text-lg font-light text-gray-700">Deep Work Sprint</h2>
+            <div className="p-2 border-2 border-black">
+              <Target className="text-black" size={20} strokeWidth={2} />
+            </div>
+            <h2 className="text-xl font-black text-black">DEEP WORK SPRINT</h2>
           </div>
           
           <div className="flex items-center gap-4">
             <button
               onClick={saveTask}
               disabled={!task.trim() || isActive}
-              className={`flex items-center gap-2 px-4 py-2 bg-gray-100/50 border border-gray-200/50 text-gray-600 rounded-xl hover:bg-gray-200/50 transition-colors font-light disabled:opacity-50 disabled:cursor-not-allowed`}
+              className={`flex items-center gap-2 px-4 py-2 border-2 ${!task.trim() || isActive ? 'border-gray-400 bg-gray-200 text-gray-500' : 'border-black bg-white text-black hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'} transition-all font-black disabled:cursor-not-allowed`}
             >
-              <Save size={16} strokeWidth={1.5} />
-              Save Task
+              <Save size={16} strokeWidth={2} />
+              SAVE TASK
             </button>
             <button
               onClick={() => setShowHistoryModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-xl hover:bg-gray-900 transition-colors font-light"
+              className="flex items-center gap-2 px-4 py-2 border-2 border-black bg-black text-white hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all font-black"
             >
-              <History size={16} strokeWidth={1.5} />
-              History
+              <History size={16} strokeWidth={2} />
+              HISTORY
             </button>
           </div>
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Column */}
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* Timer Card */}
-            <div className={`p-6 rounded-2xl border ${isActive ? 'bg-green-50/50 border-green-200/50' : 'bg-gray-50/30 border-gray-200/50'}`}>
+            <div className={`p-6 border-2 ${isActive ? 'border-green-600 bg-green-100' : 'border-black bg-white'}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full ${isActive ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
-                  <span className={`font-light ${isActive ? 'text-green-700' : 'text-gray-700'}`}>
+                  <div className={`w-4 h-4 border-2 ${isActive ? 'border-green-600 bg-green-500 animate-pulse' : 'border-black bg-gray-300'}`} />
+                  <span className={`font-black ${isActive ? 'text-green-800' : 'text-black'}`}>
                     {isActive ? 'IN SESSION' : currentSessionId ? 'SESSION SAVED' : 'SESSION READY'}
                   </span>
                 </div>
-                <div className="text-3xl font-light text-gray-800">
+                <div className="text-3xl font-black text-black">
                   {formatTime(timeLeft)}
                 </div>
               </div>
             </div>
 
             {/* Task Card */}
-            <div className="bg-white/50 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-6">
-              <h3 className="text-lg font-light text-gray-700 mb-4">Session Task</h3>
+            <div className="border-2 border-black bg-white p-6">
+              <h3 className="text-lg font-black text-black mb-4">SESSION TASK</h3>
               <textarea
                 value={task}
                 onChange={(e) => !isTaskLocked && setTask(e.target.value)}
                 placeholder="Define your single task for this sprint..."
-                className="w-full h-32 p-4 bg-white/50 border border-gray-200/50 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-200 text-gray-800 placeholder-gray-400 font-light"
+                className="w-full h-32 p-4 bg-white border-2 border-black focus:outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:translate-x-[-2px] focus:translate-y-[-2px] transition-all duration-200 resize-none font-bold disabled:bg-gray-100 disabled:text-gray-500"
                 disabled={isTaskLocked}
               />
               <div className="flex items-center justify-between mt-4">
-                <span className="text-sm text-gray-500 font-light">
-                  {isTaskLocked ? 'Task locked for session' : currentSessionId ? 'Task saved' : 'Enter a task to begin'}
+                <span className="text-sm text-black font-black">
+                  {isTaskLocked ? 'TASK LOCKED FOR SESSION' : currentSessionId ? 'TASK SAVED' : 'ENTER A TASK TO BEGIN'}
                 </span>
                 {task.trim() && !isTaskLocked && (
                   <button
                     onClick={() => setIsTaskLocked(true)}
-                    className="px-4 py-2 text-sm bg-gray-100/50 hover:bg-gray-200/50 text-gray-700 rounded-lg transition-colors font-light border border-gray-200/50"
+                    className="px-4 py-2 text-sm border-2 border-black bg-white text-black hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all font-black"
                   >
-                    Lock Task
+                    LOCK TASK
                   </button>
                 )}
               </div>
             </div>
 
             {/* Duration Card */}
-            <div className="bg-white/50 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-6">
-              <h3 className="text-lg font-light text-gray-700 mb-4">Sprint Duration</h3>
+            <div className="border-2 border-black bg-white p-6">
+              <h3 className="text-lg font-black text-black mb-4">SPRINT DURATION</h3>
               <div className="grid grid-cols-3 gap-3">
                 {Object.entries(SPRINT_DURATIONS).map(([key, value]) => (
                   <button
                     key={key}
                     onClick={() => handleDurationChange(key as SprintDuration)}
                     disabled={isActive || isTaskLocked}
-                    className={`px-4 py-3 rounded-xl font-light transition-all flex flex-col items-center ${
-                      duration === key
-                        ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                        : 'bg-gray-50/50 text-gray-600 hover:bg-gray-100/50 border border-gray-200/50'
-                    } ${(isActive || isTaskLocked) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`p-4 border-2 flex flex-col items-center transition-all font-black ${duration === key ? 'border-black bg-black text-white' : 'border-black bg-white text-black hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'} ${(isActive || isTaskLocked) ? 'border-gray-400 bg-gray-200 text-gray-500 hover:translate-x-0 hover:translate-y-0 hover:shadow-none cursor-not-allowed' : ''}`}
                   >
-                    <Clock size={18} strokeWidth={1.5} className="mb-1" />
-                    <span>{key.replace('-', ' ')}</span>
+                    <Clock size={18} strokeWidth={2} className="mb-2" />
+                    <span>{key.replace('-', ' ').toUpperCase()}</span>
                   </button>
                 ))}
               </div>
@@ -832,97 +830,91 @@ export default function DeepWorkSprint() {
           </div>
 
           {/* Right Column */}
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* Controls Card */}
-            <div className="bg-white/50 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-6">
-              <h3 className="text-lg font-light text-gray-700 mb-4">Session Control</h3>
+            <div className="border-2 border-black bg-white p-6">
+              <h3 className="text-lg font-black text-black mb-4">SESSION CONTROL</h3>
               <div className="flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={isActive ? pauseSprint : startSprint}
                   disabled={!task.trim()}
-                  className={`flex-1 flex items-center justify-center gap-3 px-8 py-4 rounded-xl font-light transition-all text-lg ${
-                    task.trim()
-                      ? 'bg-gray-800 hover:bg-gray-900 text-white'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
+                  className={`flex-1 flex items-center justify-center gap-3 px-8 py-4 border-2 font-black transition-all text-lg ${task.trim() ? 'border-black bg-black text-white hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' : 'border-gray-400 bg-gray-200 text-gray-500 cursor-not-allowed hover:translate-x-0 hover:translate-y-0 hover:shadow-none'}`}
                 >
                   {isActive ? (
                     <>
-                      <Pause size={20} strokeWidth={1.5} />
-                      Pause Sprint
+                      <Pause size={20} strokeWidth={2} />
+                      PAUSE SPRINT
                     </>
                   ) : (
                     <>
-                      <Play size={20} strokeWidth={1.5} />
-                      Start Sprint
+                      <Play size={20} strokeWidth={2} />
+                      START SPRINT
                     </>
                   )}
                 </button>
 
                 <button
                   onClick={resetSprint}
-                  className="flex-1 flex items-center justify-center gap-3 px-8 py-4 bg-gray-100/50 hover:bg-gray-200/50 text-gray-700 rounded-xl font-light transition-all text-lg border border-gray-200/50"
+                  className="flex-1 flex items-center justify-center gap-3 px-8 py-4 border-2 border-black bg-white text-black hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all text-lg font-black"
                 >
-                  <RotateCcw size={20} strokeWidth={1.5} />
-                  Reset Session
+                  <RotateCcw size={20} strokeWidth={2} />
+                  RESET SESSION
                 </button>
               </div>
             </div>
 
             {/* Output Review Card */}
             {showOutputCheck && (
-              <div className="bg-white/50 backdrop-blur-sm rounded-2xl border border-blue-200/50 p-6">
+              <div className="border-2 border-black bg-blue-100 p-6">
                 <div className="flex items-center gap-3 mb-4">
-                  <CheckCircle size={24} strokeWidth={1.5} className="text-blue-600" />
-                  <h3 className="text-lg font-light text-gray-700">Session Output Review</h3>
+                  <div className="p-2 border-2 border-black bg-white">
+                    <CheckCircle size={20} strokeWidth={2} className="text-black" />
+                  </div>
+                  <h3 className="text-lg font-black text-black">SESSION OUTPUT REVIEW</h3>
                 </div>
-                <p className="text-sm text-gray-600 mb-4 font-light">
+                <p className="text-sm text-black mb-4 font-bold">
                   Document what you accomplished during this sprint. This reinforces completion and provides a record of progress.
                 </p>
                 <textarea
                   value={sessionOutput}
                   onChange={(e) => setSessionOutput(e.target.value)}
                   placeholder="What did you actually accomplish? Be specific..."
-                  className="w-full h-32 p-4 bg-white/50 border border-gray-200/50 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-200 text-gray-800 placeholder-gray-400 font-light mb-4"
+                  className="w-full h-32 p-4 bg-white border-2 border-black focus:outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:translate-x-[-2px] focus:translate-y-[-2px] transition-all duration-200 resize-none font-bold mb-4"
                 />
                 <div className="flex justify-end">
                   <button
                     onClick={submitOutput}
                     disabled={!sessionOutput.trim()}
-                    className={`px-6 py-3 rounded-xl font-light transition-all ${
-                      sessionOutput.trim()
-                        ? 'bg-gray-800 hover:bg-gray-900 text-white'
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    }`}
+                    className={`px-6 py-3 border-2 font-black transition-all ${sessionOutput.trim() ? 'border-black bg-black text-white hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' : 'border-gray-400 bg-gray-200 text-gray-500 cursor-not-allowed hover:translate-x-0 hover:translate-y-0 hover:shadow-none'}`}
                   >
-                    Complete Sprint
+                    COMPLETE SPRINT
                   </button>
                 </div>
               </div>
             )}
 
             {/* Stats Card */}
-            <div className="bg-gradient-to-br from-gray-50/30 to-gray-100/20 rounded-2xl border border-gray-200/50 p-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-4 bg-white/50 rounded-xl border border-gray-200/50">
-                  <div className="text-2xl font-light text-gray-800 mb-1">{completedSprints}</div>
-                  <div className="text-sm text-gray-600 font-light">Sprints Completed</div>
+            <div className="border-2 border-black bg-yellow-100 p-6">
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="text-center p-4 bg-white border-2 border-black">
+                  <div className="text-2xl font-black text-black mb-1">{completedSprints}</div>
+                  <div className="text-sm text-black font-black">SPRINTS COMPLETED</div>
                 </div>
-                <div className="text-center p-4 bg-white/50 rounded-xl border border-gray-200/50">
-                  <div className="text-2xl font-light text-gray-800 mb-1">
+                <div className="text-center p-4 bg-white border-2 border-black">
+                  <div className="text-2xl font-black text-black mb-1">
                     {duration.replace('-min', '')}
                   </div>
-                  <div className="text-sm text-gray-600 font-light">Minutes Per Sprint</div>
+                  <div className="text-sm text-black font-black">MINUTES PER SPRINT</div>
                 </div>
               </div>
-              <div className="mt-4 pt-4 border-t border-gray-200/50">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600 font-light">Current Session Progress</span>
-                  <span className="font-light text-gray-800">{Math.round(getProgressPercentage())}%</span>
+              <div className="pt-4 border-t-2 border-black">
+                <div className="flex items-center justify-between text-sm mb-2">
+                  <span className="text-black font-black">CURRENT SESSION PROGRESS</span>
+                  <span className="font-black text-black">{Math.round(getProgressPercentage())}%</span>
                 </div>
-                <div className="mt-2 h-2 bg-gray-200/50 rounded-full overflow-hidden">
+                <div className="h-4 bg-white border-2 border-black overflow-hidden">
                   <div
-                    className="h-full bg-gray-800 transition-all duration-1000 ease-out"
+                    className="h-full bg-black transition-all duration-1000 ease-out"
                     style={{ width: `${getProgressPercentage()}%` }}
                   />
                 </div>
@@ -932,60 +924,60 @@ export default function DeepWorkSprint() {
         </div>
       </div>
 
-      {/* History Modal */}
+      {/* History Modal - Neobrutalism Style */}
       {showHistoryModal && (
         <div className="fixed inset-0 z-50">
           {/* Background overlay */}
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowHistoryModal(false)}></div>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowHistoryModal(false)}></div>
           
           {/* Modal container */}
           <div className="absolute inset-0 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl border border-gray-200/50 shadow-xl w-full max-w-3xl p-6 max-h-[80vh] overflow-y-auto">
+            <div className="bg-white border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] w-full max-w-3xl p-6 max-h-[80vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-gray-100/50 flex items-center justify-center border border-gray-200/50">
-                    <History className="text-gray-600" size={16} strokeWidth={1.5} />
+                  <div className="w-8 h-8 border-2 border-black flex items-center justify-center">
+                    <History className="text-black" size={16} strokeWidth={2} />
                   </div>
                   <div>
-                    <h3 className="text-lg font-light text-gray-800">Session History</h3>
+                    <h3 className="text-lg font-black text-black">SESSION HISTORY</h3>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowHistoryModal(false)}
-                  className="p-1.5 hover:bg-gray-100/50 rounded-lg transition-colors text-gray-500"
+                  className="p-1.5 border-2 border-black hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all text-black"
                 >
-                  <X size={20} strokeWidth={1.5} />
+                  <X size={20} strokeWidth={2} />
                 </button>
               </div>
 
               <div className="space-y-8">
                 {incompleteSessions.length > 0 && (
                   <div>
-                    <h4 className="text-sm font-light text-gray-600 uppercase tracking-wider mb-4">
-                      In-Progress / Saved Sessions ({incompleteSessions.length})
+                    <h4 className="text-sm font-black text-black uppercase tracking-wider mb-4">
+                      IN-PROGRESS / SAVED SESSIONS ({incompleteSessions.length})
                     </h4>
                     <div className="space-y-4">
                       {incompleteSessions.map((session) => (
-                        <div key={session.id} className="p-4 bg-yellow-50/50 rounded-xl border border-yellow-200/50 flex justify-between items-center">
+                        <div key={session.id} className="p-4 bg-yellow-100 border-2 border-black flex justify-between items-center">
                           <div className="flex-1 min-w-0">
-                            <h5 className="font-light text-yellow-800 truncate">{session.task}</h5>
-                            <div className="text-sm text-yellow-600 mt-1 flex gap-4 font-light">
-                              <span>Time Left: {formatTime(session.time_left)}</span>
-                              <span>Duration: {Math.floor(session.duration / 60)} min</span>
+                            <h5 className="font-black text-black truncate">{session.task}</h5>
+                            <div className="text-sm text-black mt-1 flex gap-4 font-bold">
+                              <span>TIME LEFT: {formatTime(session.time_left)}</span>
+                              <span>DURATION: {Math.floor(session.duration / 60)} MIN</span>
                             </div>
                           </div>
                           <div className="flex gap-2 ml-4 flex-shrink-0">
                             <button
                               onClick={() => continueSession(session)}
-                              className="px-3 py-2 text-sm bg-gray-800 hover:bg-gray-900 text-white rounded-lg transition-colors font-light"
+                              className="px-3 py-2 text-sm border-2 border-black bg-black text-white hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all font-black"
                             >
-                              Continue
+                              CONTINUE
                             </button>
                             <button
                               onClick={() => deleteSession(session.id)}
-                              className="p-2 text-red-500 hover:text-red-700 rounded-lg transition-colors"
+                              className="p-2 border-2 border-red-600 bg-red-100 text-red-900 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[2px_2px_0px_0px_rgba(220,38,38,1)] transition-all"
                             >
-                              <X size={18} />
+                              <X size={18} strokeWidth={2} />
                             </button>
                           </div>
                         </div>
@@ -995,41 +987,41 @@ export default function DeepWorkSprint() {
                 )}
 
                 <div>
-                  <h4 className={`text-sm font-light text-gray-600 uppercase tracking-wider mb-4 ${incompleteSessions.length > 0 ? 'mt-8' : ''}`}>
-                    Completed Sprints ({completedSessions.length})
+                  <h4 className={`text-sm font-black text-black uppercase tracking-wider mb-4 ${incompleteSessions.length > 0 ? 'mt-8' : ''}`}>
+                    COMPLETED SPRINTS ({completedSessions.length})
                   </h4>
                   <div className="space-y-4">
                     {completedSessions.map((session) => (
-                      <div key={session.id} className="p-4 bg-green-50/50 rounded-xl border border-green-200/50">
+                      <div key={session.id} className="p-4 bg-green-100 border-2 border-black">
                         <div className="flex justify-between items-start">
                           <div className="flex-1 min-w-0">
-                            <h5 className="font-light text-green-800 truncate">{session.task}</h5>
-                            <p className="text-sm text-green-700 mt-1 line-clamp-2 font-light">Output: {session.session_output}</p>
+                            <h5 className="font-black text-black truncate">{session.task}</h5>
+                            <p className="text-sm text-black mt-1 line-clamp-2 font-bold">OUTPUT: {session.session_output}</p>
                             <div className="flex gap-3 mt-2">
-                              <span className="text-xs text-green-600 flex items-center font-light">
-                                <Check size={14} className="mr-1" />
-                                {Math.floor(session.duration / 60)} min
+                              <span className="text-xs text-black flex items-center font-black">
+                                <Check size={14} className="mr-1" strokeWidth={2} />
+                                {Math.floor(session.duration / 60)} MIN
                               </span>
-                              <span className="text-xs text-green-600 font-light">
-                                {formatDate(session.created_at)}
+                              <span className="text-xs text-black font-black">
+                                {formatDate(session.created_at).toUpperCase()}
                               </span>
                             </div>
                           </div>
                           <button
                             onClick={() => deleteSession(session.id)}
-                            className="p-1 ml-4 text-gray-400 hover:text-red-700 transition-colors flex-shrink-0"
+                            className="p-1 ml-4 border-2 border-red-600 bg-red-100 text-red-900 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[2px_2px_0px_0px_rgba(220,38,38,1)] transition-all flex-shrink-0"
                           >
-                            <X size={16} />
+                            <X size={16} strokeWidth={2} />
                           </button>
                         </div>
                       </div>
                     ))}
                     {completedSessions.length === 0 && (
-                      <div className="flex flex-col items-center justify-center py-8 text-center border-2 border-dashed border-gray-200/50 rounded-2xl bg-gray-50/30">
-                        <div className="w-12 h-12 rounded-lg bg-gray-100/50 flex items-center justify-center mb-3 border border-gray-200/50">
-                          <Target className="text-gray-400" size={20} strokeWidth={1.5} />
+                      <div className="flex flex-col items-center justify-center py-8 text-center border-2 border-dashed border-black bg-gray-100">
+                        <div className="w-12 h-12 border-2 border-black flex items-center justify-center mb-3 bg-white">
+                          <Target className="text-black" size={20} strokeWidth={2} />
                         </div>
-                        <p className="text-gray-500 text-sm font-light">No completed sprints yet. Start your first session!</p>
+                        <p className="text-black text-sm font-black">NO COMPLETED SPRINTS YET. START YOUR FIRST SESSION!</p>
                       </div>
                     )}
                   </div>

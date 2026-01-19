@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import CalendarPage from './pages/CalendarPage';
@@ -7,12 +8,13 @@ import JournalPage from './pages/JournalPage';
 import NewsPage from './pages/NewsPage';
 import NotesPage from './pages/NotesPage';
 import ProductivityPage from './pages/ProductivityPage';
+
 import './App.css';
 
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
+      <div className="min-h-screen bg-[#FFFAF0]">
         <Sidebar />
         <MainContent />
       </div>
@@ -21,94 +23,111 @@ function App() {
 }
 
 function MainContent() {
-  const [greeting, setGreeting] = useState('');
-  const [timeOfDay, setTimeOfDay] = useState('');
   const location = useLocation();
 
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [greeting, setGreeting] = useState('');
+  const [timeOfDay, setTimeOfDay] =
+    useState<'morning' | 'afternoon' | 'evening'>('morning');
+
   useEffect(() => {
-    const hour = new Date().getHours();
-    
-    if (hour < 12) {
-      setGreeting('Good Morning');
-      setTimeOfDay('morning');
-    } else if (hour < 18) {
-      setGreeting('Good Afternoon');
-      setTimeOfDay('afternoon');
-    } else {
-      setGreeting('Good Evening');
-      setTimeOfDay('evening');
-    }
+    const updateTime = () => {
+      const now = new Date();
+      setCurrentTime(now);
+
+      const hour = now.getHours();
+      if (hour < 12) {
+        setGreeting('Good Morning');
+        setTimeOfDay('morning');
+      } else if (hour < 18) {
+        setGreeting('Good Afternoon');
+        setTimeOfDay('afternoon');
+      } else {
+        setGreeting('Good Evening');
+        setTimeOfDay('evening');
+      }
+    };
+
+    updateTime();
+    const interval = setInterval(updateTime, 60 * 1000);
+    return () => clearInterval(interval);
   }, []);
 
-  // Get page title based on current route
   const getPageTitle = () => {
-    switch(location.pathname) {
-      case '/': return 'Dashboard';
-      case '/calendar': return 'Calendar';
-      case '/journal': return 'Journal';
-      case '/news': return 'News';
-      case '/notes': return 'Notes';
-      case '/productivity': return 'Productivity';
-      default: return 'Dashboard';
+    switch (location.pathname) {
+      case '/':
+        return 'Dashboard';
+      case '/calendar':
+        return 'Calendar';
+      case '/journal':
+        return 'Journal';
+      case '/news':
+        return 'News';
+      case '/notes':
+        return 'Notes';
+      case '/productivity':
+        return 'Productivity';
+      default:
+        return 'Dashboard';
+    }
+  };
+
+  const getTimeOfDayColor = () => {
+    switch (timeOfDay) {
+      case 'morning':
+        return 'bg-[#FFD166]';
+      case 'afternoon':
+        return 'bg-[#EF476F]';
+      case 'evening':
+        return 'bg-[#118AB2]';
+      default:
+        return 'bg-[#06D6A0]';
     }
   };
 
   return (
     <div className="ml-20">
-      {/* Dynamic Background */}
-      <div className={`absolute inset-0 -z-10 transition-all duration-1000 ease-in-out ${
-        timeOfDay === 'morning' 
-          ? 'bg-gradient-to-br from-blue-50 via-cyan-50/30 to-white' 
-          : timeOfDay === 'afternoon'
-          ? 'bg-gradient-to-br from-amber-50/40 via-orange-50/20 to-white'
-          : 'bg-gradient-to-br from-indigo-50/30 via-violet-50/20 to-gray-50'
-      }`} />
-
-      {/* Subtle Grid Pattern */}
-      <div className="absolute inset-0 -z-10 opacity-5 bg-[linear-gradient(90deg,#80808012_1px,transparent_1px),linear-gradient(180deg,#80808012_1px,transparent_1px)] bg-[size:48px_48px]" />
-
-      <div className="max-w-[1800px] mx-auto px-6">
-        {/* Header with Page Navigation */}
-        <header className="pt-12 pb-8 px-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-baseline gap-4">
-              <h1 className="text-6xl font-light tracking-tight text-gray-900">
-                {greeting}
-              </h1>
-              <span className="text-6xl font-thin text-gray-400">,</span>
-              <h2 className="text-6xl font-thin text-gray-700">Miguel</h2>
+      <header className="p-6 border-b-4 border-black bg-white">
+        <div className="max-w-[1800px] mx-auto">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-baseline gap-3">
+              <h1 className="text-5xl font-black text-black">{greeting}</h1>
+              <span className="text-5xl font-black text-black">,</span>
+              <h2 className="text-5xl font-black text-black">Miguel</h2>
             </div>
-            
-            {/* Page Navigation */}
-            <div className="flex items-center gap-6">
-              <nav className="flex items-center gap-1 bg-white/80 backdrop-blur-sm rounded-2xl p-1.5 border border-gray-200/50 shadow-sm">
-                <NavLink to="/" label="Dashboard" />
-                <NavLink to="/calendar" label="Calendar" />
-                <NavLink to="/journal" label="Journal" />
-                <NavLink to="/news" label="News" />
-                <NavLink to="/notes" label="Notes" />
-                <NavLink to="/productivity" label="Productivity" />
-              </nav>
+
+            <div
+              className={`px-4 py-2 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-white ${getTimeOfDayColor()}`}
+            >
+              <div className="text-sm font-bold text-black">NOW</div>
+              <div className="text-xl font-black text-black">
+                {currentTime.toLocaleTimeString('en-US', {
+                  timeZone: 'Asia/Manila',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: true,
+                })}
+              </div>
             </div>
           </div>
-          
-          <div className="flex items-center justify-between mt-2">
-            <p className="text-gray-500 text-lg font-light tracking-wide">
-              {new Date().toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </p>
-            <span className="text-lg font-light text-gray-700">
-              {getPageTitle()}
-            </span>
-          </div>
-        </header>
 
-        {/* Main Content Area */}
-        <main className="pb-16">
+          <nav className="flex items-center justify-between pt-4">
+            <div className="flex items-center gap-1">
+              <NavLink to="/" label="Dashboard" color="#FFD166" />
+              <NavLink to="/calendar" label="Calendar" color="#EF476F" />
+              <NavLink to="/journal" label="Journal" color="#06D6A0" />
+              <NavLink to="/news" label="News" color="#118AB2" />
+              <NavLink to="/notes" label="Notes" color="#9D4EDD" />
+              <NavLink to="/productivity" label="Productivity" color="#FF9E6D" />
+            </div>
+            <div className="flex items-center gap-4">
+            </div>
+          </nav>
+        </div>
+      </header>
+
+      <main className="p-6 bg-[#FFFAF0]">
+        <div className="max-w-[1800px] mx-auto">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/calendar" element={<CalendarPage />} />
@@ -117,24 +136,39 @@ function MainContent() {
             <Route path="/notes" element={<NotesPage />} />
             <Route path="/productivity" element={<ProductivityPage />} />
           </Routes>
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }
 
-function NavLink({ to, label }: { to: string; label: string }) {
+function NavLink({
+  to,
+  label,
+  color,
+}: {
+  to: string;
+  label: string;
+  color: string;
+}) {
   const location = useLocation();
   const isActive = location.pathname === to;
 
   return (
     <Link
       to={to}
-      className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
-        isActive
-          ? 'bg-gray-900 text-white shadow-sm'
-          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-      }`}
+      style={{ ['--nav-color' as any]: color }}
+      className={`
+        relative px-5 py-3 font-bold border-2 border-black
+        transition-all duration-150 flex items-center gap-2
+        text-black no-underline
+        visited:text-black hover:text-black active:text-black focus:text-black
+        shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
+        ${isActive ? 'bg-[var(--nav-color)]' : 'bg-white'}
+        hover:bg-[var(--nav-color)]
+        hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
+        hover:translate-x-[2px] hover:translate-y-[2px]
+      `}
     >
       {label}
     </Link>

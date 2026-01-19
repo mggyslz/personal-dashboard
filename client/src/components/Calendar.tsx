@@ -80,10 +80,13 @@ export default function Calendar() {
 
   if (loading) {
     return (
-      <div className="bg-white/60 backdrop-blur-sm p-8 rounded-3xl border border-gray-200/50 shadow-sm">
+      <div className="border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 h-full">
         <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-          <div className="h-32 bg-gray-200 rounded"></div>
+          <div className="flex justify-between items-center">
+            <div className="h-6 rounded w-1/3 bg-gray-200"></div>
+            <div className="h-6 rounded w-16 bg-gray-200"></div>
+          </div>
+          <div className="h-32 rounded bg-gray-200"></div>
         </div>
       </div>
     );
@@ -107,20 +110,20 @@ export default function Calendar() {
     days.push(
       <div
         key={day}
-        className={`h-32 rounded-xl p-2 ${isToday ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50/50 border border-transparent'} hover:bg-gray-100/80 transition-colors overflow-hidden`}
+        className={`h-32 border-2 border-black p-2 ${isToday ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors overflow-hidden`}
       >
-        <div className={`text-sm font-light mb-1 ${isToday ? 'text-blue-600 font-medium' : 'text-gray-600'}`}>
+        <div className={`text-sm font-black mb-1 ${isToday ? 'text-black underline' : 'text-gray-700'}`}>
           {day}
         </div>
         <div className="space-y-1 overflow-y-auto max-h-20">
           {dayEvents.map(event => (
             <div
               key={event.id}
-              className="text-xs p-1 rounded bg-blue-100 text-blue-800 truncate hover:bg-blue-200 transition-colors cursor-pointer"
+              className="text-xs p-1 border border-black bg-white text-black truncate hover:bg-gray-100 transition-colors cursor-pointer"
               title={`${event.title} at ${formatTime(event.start)}`}
             >
-              <div className="font-medium truncate">{event.title}</div>
-              <div className="text-xs text-blue-600 font-light truncate">
+              <div className="font-black truncate">{event.title}</div>
+              <div className="text-xs text-gray-700 font-bold truncate">
                 {formatTime(event.start)}
               </div>
             </div>
@@ -131,38 +134,46 @@ export default function Calendar() {
   }
 
   return (
-    <div className="bg-white/60 backdrop-blur-sm p-8 rounded-3xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all">
+    <div className="border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-200 h-full bg-white">
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-2">
-          <CalendarIcon className="text-gray-400" size={20} strokeWidth={1.5} />
-          <h2 className="text-lg font-light text-gray-700">Calendar</h2>
+          <div className="p-2 border-2 border-black">
+            <CalendarIcon className="text-black" size={20} strokeWidth={2} />
+          </div>
+          <h2 className="text-xl font-black text-black">CALENDAR</h2>
+        </div>
+        <div className="px-3 py-1 border-2 border-black text-sm font-bold">
+          {currentDate.getFullYear()}
         </div>
       </div>
 
       <div className="flex justify-between items-center mb-4">
         <button
           onClick={() => changeMonth(-1)}
-          className="px-3 py-1 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 font-light"
+          className="px-3 py-1 border-2 border-black font-bold hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
         >
           ←
         </button>
-        <h3 className="font-light text-gray-700">
-          {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+        <h3 className="font-black text-black text-lg border-2 border-black px-4 py-1 bg-white">
+          {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase()}
         </h3>
         <button
           onClick={() => changeMonth(1)}
-          className="px-3 py-1 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 font-light"
+          className="px-3 py-1 border-2 border-black font-bold hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
         >
           →
         </button>
       </div>
 
-      <div className="grid grid-cols-7 gap-2">
-        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
-          <div key={i} className="text-center text-xs font-light text-gray-400 py-2">
+      <div className="grid grid-cols-7 gap-2 mb-4">
+        {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map((day, i) => (
+          <div key={i} className="text-center text-xs font-black text-black py-2 border-b-2 border-black">
             {day}
           </div>
         ))}
+      </div>
+
+      <div className="grid grid-cols-7 gap-2">
         {days}
       </div>
     </div>

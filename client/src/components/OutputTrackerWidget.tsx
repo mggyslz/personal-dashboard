@@ -30,21 +30,7 @@ export default function OutputTrackerWidget({
       pink: 'bg-pink-500',
       indigo: 'bg-indigo-500',
     };
-    return colorMap[color] || 'bg-gray-500';
-  };
-
-  const getDotColor = (color: string) => {
-    const colorMap: Record<string, string> = {
-      blue: 'bg-blue-400',
-      green: 'bg-green-400',
-      purple: 'bg-purple-400',
-      orange: 'bg-orange-400',
-      red: 'bg-red-400',
-      yellow: 'bg-yellow-400',
-      pink: 'bg-pink-400',
-      indigo: 'bg-indigo-400',
-    };
-    return colorMap[color] || 'bg-gray-400';
+    return colorMap[color] || 'bg-black';
   };
 
   const getOutputProgressPercentage = (total: number, target: number) => {
@@ -53,52 +39,49 @@ export default function OutputTrackerWidget({
   };
 
   return (
-    <a 
-      href="/productivity#output"
-      className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-gray-200/60 hover:border-gray-300/80 hover:shadow-sm transition-all cursor-pointer"
-    >
-      <div className="flex items-center justify-between mb-4">
+    <div className="border-2 border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-x-[2px] hover:-translate-y-[2px] transition-all duration-200">
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-gradient-to-br from-blue-100 to-blue-50 border border-blue-200/50">
-            <BarChart3 size={18} className="text-blue-600" />
+          <div className="p-2 border-2 border-black">
+            <BarChart3 size={20} className="text-black" />
           </div>
           <div>
-            <h3 className="text-base font-medium text-gray-800">Output</h3>
-            <p className="text-xs text-gray-500 mt-0.5">Daily progress</p>
+            <h3 className="text-lg font-black text-black">OUTPUT</h3>
+            <p className="text-sm text-gray-600 mt-0.5 font-bold">DAILY PROGRESS</p>
           </div>
         </div>
-        <span className="text-xs font-medium px-3 py-1.5 rounded-full bg-blue-100 text-blue-700">
-          {outputStreak} day{outputStreak !== 1 ? 's' : ''}
+        <span className="text-sm font-black px-3 py-1.5 border-2 border-blue-500 bg-blue-500 text-white">
+          {outputStreak} DAY{outputStreak !== 1 ? 'S' : ''}
         </span>
       </div>
       
-      <div className="grid grid-cols-2 gap-3 mb-5">
-        <div className="bg-gray-50/50 rounded-xl p-3 border border-gray-200/40">
-          <div className="text-2xl font-light text-gray-800 mb-1">{outputToday}</div>
-          <div className="text-xs text-gray-500">Today's output</div>
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="border-2 border-black bg-gray-50 p-4">
+          <div className="text-3xl font-black text-black mb-1">{outputToday}</div>
+          <div className="text-sm text-gray-600 font-bold">TODAY'S OUTPUT</div>
         </div>
-        <div className="bg-gray-50/50 rounded-xl p-3 border border-gray-200/40">
-          <div className="text-2xl font-light text-gray-800 mb-1">{outputTypes.length}</div>
-          <div className="text-xs text-gray-500">Types tracked</div>
+        <div className="border-2 border-black bg-gray-50 p-4">
+          <div className="text-3xl font-black text-black mb-1">{outputTypes.length}</div>
+          <div className="text-sm text-gray-600 font-bold">TYPES TRACKED</div>
         </div>
       </div>
       
-      <div className="space-y-3">
-        <div className="text-sm font-medium text-gray-800 mb-2">Daily Progress</div>
+      <div className="space-y-4">
+        <div className="text-sm font-black text-black">DAILY PROGRESS</div>
         {outputTypes.slice(0, 3).map((type, index) => {
           const percentage = getOutputProgressPercentage(type.todayTotal, type.target);
           return (
-            <div key={index} className="space-y-1.5">
+            <div key={index} className="space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${getDotColor(type.color)}`} />
-                  <span className="text-xs font-medium text-gray-700 truncate">{type.name}</span>
+                  <div className={`w-3 h-3 ${getProgressColor(type.color)} border-2 border-black`} />
+                  <span className="text-sm font-black text-black truncate">{type.name}</span>
                 </div>
-                <span className="text-xs text-gray-500">
+                <span className="text-sm text-gray-600 font-bold">
                   {type.todayTotal}/{type.target}
                 </span>
               </div>
-              <div className="h-1.5 bg-gray-200/60 rounded-full overflow-hidden">
+              <div className="h-3 bg-gray-200 border-2 border-black overflow-hidden">
                 <div 
                   className={`h-full transition-all duration-1000 ease-out ${getProgressColor(type.color)}`}
                   style={{ width: `${percentage}%` }}
@@ -110,19 +93,19 @@ export default function OutputTrackerWidget({
         
         {outputTypes.length > 3 && (
           <div className="text-center pt-2">
-            <span className="text-xs text-blue-600 hover:text-blue-800 font-medium">
-              +{outputTypes.length - 3} more types
+            <span className="text-sm text-blue-600 hover:text-blue-800 font-black">
+              +{outputTypes.length - 3} MORE TYPES
             </span>
           </div>
         )}
         
         {outputTypes.length === 0 && (
-          <div className="text-center py-4">
-            <div className="text-sm text-gray-400 mb-1">No output types configured</div>
-            <div className="text-xs text-gray-500">Add types to start tracking</div>
+          <div className="text-center py-4 border-2 border-dashed border-black">
+            <div className="text-sm text-gray-600 mb-1 font-bold">NO OUTPUT TYPES CONFIGURED</div>
+            <div className="text-xs text-gray-600 font-bold">ADD TYPES TO START TRACKING</div>
           </div>
         )}
       </div>
-    </a>
+    </div>
   );
 }

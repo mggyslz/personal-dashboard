@@ -133,32 +133,34 @@ class NotesController {
   }
 
 async summarize(req, res) {
-    try {
-      const { text, maxLength = 250 } = req.body; // Increased default maxLength for better rephrasing
+  let text, maxLength;
+  
+  try {
+    ({ text, maxLength = 250 } = req.body);
 
-      if (!text || text.trim().length === 0) {
-        return res.status(400).json({ error: 'Text is required for summarization' });
-      }
+    if (!text || text.trim().length === 0) {
+      return res.status(400).json({ error: 'Text is required for summarization' });
+    }
 
-      // Check if Ollama is available
-      const OLLAMA_ENABLED = process.env.OLLAMA_ENABLED === 'true';
-      const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
+    // Check if Ollama is available
+    const OLLAMA_ENABLED = process.env.OLLAMA_ENABLED === 'true';
+    const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
 
-      if (!OLLAMA_ENABLED) {
-        // Fallback to a simple algorithmic summary if Ollama is disabled
-        const summary = this.createSimpleSummary(text, maxLength);
-        return res.json({
-          summary,
-          originalLength: text.length,
-          summaryLength: summary.length,
-          readTimeSaved: Math.round((text.length - summary.length) / 1000)
-        });
-  	  }
+    if (!OLLAMA_ENABLED) {
+      // Fallback to a simple algorithmic summary if Ollama is disabled
+      const summary = this.createSimpleSummary(text, maxLength);
+      return res.json({
+        summary,
+        originalLength: text.length,
+        summaryLength: summary.length,
+        readTimeSaved: Math.round((text.length - summary.length) / 1000)
+      });
+    }
 
-      // Call Ollama Mistral for summarization
-      
-      // === UPDATED PROMPT HERE ===
-      const prompt = `
+    // Call Ollama Mistral for summarization
+    
+    // === UPDATED PROMPT HERE ===
+    const prompt = `
 Please rephrase the following notes to be exceptionally concise, clear, and easy to understand.
 Act as a personal assistant who is making the notes better. Do not just summarize; restructure the information for maximum clarity and retention.
 The final output must be approximately ${maxLength} characters or less.
@@ -170,48 +172,56 @@ ${text}
 
 Rephrased, Clear Notes:
 `;
-      // ===========================
 
-      console.log('Calling Ollama for rephrasing/clarification...');
-      
-      const response = await axios.post(`${OLLAMA_URL}/api/generate`, {
-        model: 'mistral',
-        prompt: prompt,
-        stream: false,
-        options: {
-          temperature: 0.4, // Slightly higher temp might encourage better rephrasing
-          top_p: 0.9,
-          max_tokens: Math.ceil(maxLength * 1.5)
-        }
-      }, {
-        timeout: 30000 // 30 second timeout
-      });
+    console.log('Calling Ollama for rephrasing/clarification...');
+    
+    const response = await axios.post(`${OLLAMA_URL}/api/generate`, {
+      model: 'mistral',
+      prompt: prompt,
+      stream: false,
+      options: {
+        temperature: 0.4,
+        top_p: 0.9,
+        max_tokens: Math.ceil(maxLength * 1.5)
+      }
+    }, {
+      timeout: 60000  // 60 second timeout
+    });
 
-      const summary = response.data.response.trim();
-      console.log('Notes rephrased successfully');
+    const summary = response.data.response.trim();
+    console.log('Notes rephrased successfully');
 
-      res.json({
-        summary,
-        originalLength: text.length,
-        summaryLength: summary.length,
-        readTimeSaved: Math.round((text.length - summary.length) / 1000)
-      });
+    res.json({
+      summary,
+      originalLength: text.length,
+      summaryLength: summary.length,
+      readTimeSaved: Math.round((text.length - summary.length) / 1000)
+    });
 
-    } catch (error) {
-      console.error('Rephrasing error:', error.message);
-      
-      // Fallback to simple summary on error
-      const summary = this.createSimpleSummary(text, maxLength);
-      
-      res.json({
-        summary,
-        originalLength: text.length,
-        summaryLength: summary.length,
-        readTimeSaved: Math.round((text.length - summary.length) / 1000),
-        note: 'AI rephrasing unavailable, using algorithmic summary'
-      });
-    }
-  }
+  } catch (error) {
+    console.error('Rephrasing error:', error.message);
+    
+    // IMPORTANT: Check if text variable exists before using it
+    if (!text) {
+      return res.status(400).json({ 
+        error: 'Text is required for summarization',
+        details: error.message 
+      });
+    }
+    
+    // Fallback to simple summary on error
+    const summary = this.createSimpleSummary(text, maxLength || 250);
+    
+    res.json({
+      summary,
+      originalLength: text.length,
+      summaryLength: summary.length,
+      readTimeSaved: Math.round((text.length - summary.length) / 1000),
+      note: 'AI rephrasing unavailable, using algorithmic summary',
+      error: error.message
+    });
+  }
+}
 
   // ... (Keep createSimpleSummary method) ...
   createSimpleSummary(text, maxLength) {

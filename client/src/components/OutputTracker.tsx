@@ -35,7 +35,7 @@ export default function OutputTracker() {
     name: '',
     unit: '',
     target: 1,
-    color: 'blue'
+    color: 'black'
   });
 
   const currentDate = new Date().toISOString().split('T')[0];
@@ -137,7 +137,7 @@ export default function OutputTracker() {
     try {
       const type = await api.createOutputType(newType);
       setOutputTypes(prev => [...prev, type]);
-      setNewType({ name: '', unit: '', target: 1, color: 'blue' });
+      setNewType({ name: '', unit: '', target: 1, color: 'black' });
       setSelectedType(type.name);
     } catch (error: any) {
       console.error('Error adding output type:', error);
@@ -193,54 +193,57 @@ export default function OutputTracker() {
 
   const getColorClasses = (color: string) => {
     const colorMap: Record<string, string> = {
-      blue: 'bg-blue-100/50 text-blue-700 border-blue-200/50',
-      green: 'bg-green-100/50 text-green-700 border-green-200/50',
-      purple: 'bg-purple-100/50 text-purple-700 border-purple-200/50',
-      orange: 'bg-orange-100/50 text-orange-700 border-orange-200/50',
-      red: 'bg-red-100/50 text-red-700 border-red-200/50',
-      yellow: 'bg-yellow-100/50 text-yellow-700 border-yellow-200/50',
-      pink: 'bg-pink-100/50 text-pink-700 border-pink-200/50',
-      indigo: 'bg-indigo-100/50 text-indigo-700 border-indigo-200/50',
+      'black': 'bg-white text-black border-2 border-black',
+      'blue': 'bg-blue-100 text-blue-900 border-2 border-blue-600',
+      'green': 'bg-green-100 text-green-900 border-2 border-green-600',
+      'purple': 'bg-purple-100 text-purple-900 border-2 border-purple-600',
+      'orange': 'bg-orange-100 text-orange-900 border-2 border-orange-600',
+      'red': 'bg-red-100 text-red-900 border-2 border-red-600',
+      'yellow': 'bg-yellow-100 text-yellow-900 border-2 border-yellow-600',
+      'pink': 'bg-pink-100 text-pink-900 border-2 border-pink-600',
+      'indigo': 'bg-indigo-100 text-indigo-900 border-2 border-indigo-600',
     };
-    return colorMap[color] || 'bg-gray-100/50 text-gray-700 border-gray-200/50';
+    return colorMap[color] || 'bg-white text-black border-2 border-black';
   };
 
   const getProgressColor = (color: string) => {
     const colorMap: Record<string, string> = {
-      blue: 'bg-blue-600',
-      green: 'bg-green-600',
-      purple: 'bg-purple-600',
-      orange: 'bg-orange-600',
-      red: 'bg-red-600',
-      yellow: 'bg-yellow-600',
-      pink: 'bg-pink-600',
-      indigo: 'bg-indigo-600',
+      'black': 'bg-black',
+      'blue': 'bg-blue-600',
+      'green': 'bg-green-600',
+      'purple': 'bg-purple-600',
+      'orange': 'bg-orange-600',
+      'red': 'bg-red-600',
+      'yellow': 'bg-yellow-600',
+      'pink': 'bg-pink-600',
+      'indigo': 'bg-indigo-600',
     };
-    return colorMap[color] || 'bg-gray-600';
+    return colorMap[color] || 'bg-black';
   };
 
   const todayEntries = entries.filter(e => e.date === currentDate);
   const todayTotalOutput = todayEntries.reduce((sum, entry) => sum + entry.count, 0);
 
   const colorOptions = [
-    { value: 'blue', label: 'Blue', className: 'bg-blue-500' },
-    { value: 'green', label: 'Green', className: 'bg-green-500' },
-    { value: 'purple', label: 'Purple', className: 'bg-purple-500' },
-    { value: 'orange', label: 'Orange', className: 'bg-orange-500' },
-    { value: 'red', label: 'Red', className: 'bg-red-500' },
-    { value: 'yellow', label: 'Yellow', className: 'bg-yellow-500' },
-    { value: 'pink', label: 'Pink', className: 'bg-pink-500' },
-    { value: 'indigo', label: 'Indigo', className: 'bg-indigo-500' },
+    { value: 'black', label: 'Black', className: 'bg-black' },
+    { value: 'blue', label: 'Blue', className: 'bg-blue-600' },
+    { value: 'green', label: 'Green', className: 'bg-green-600' },
+    { value: 'purple', label: 'Purple', className: 'bg-purple-600' },
+    { value: 'orange', label: 'Orange', className: 'bg-orange-600' },
+    { value: 'red', label: 'Red', className: 'bg-red-600' },
+    { value: 'yellow', label: 'Yellow', className: 'bg-yellow-600' },
+    { value: 'pink', label: 'Pink', className: 'bg-pink-600' },
+    { value: 'indigo', label: 'Indigo', className: 'bg-indigo-600' },
   ];
 
   if (isLoading) {
     return (
-      <div className="bg-white/60 backdrop-blur-sm p-8 rounded-3xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all">
+      <div className="border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-6 bg-gray-200/50 rounded w-1/3"></div>
+          <div className="h-6 bg-gray-200 rounded w-1/3"></div>
           <div className="space-y-3">
-            <div className="h-4 bg-gray-200/50 rounded"></div>
-            <div className="h-4 bg-gray-200/50 rounded w-5/6"></div>
+            <div className="h-4 bg-gray-200 rounded"></div>
+            <div className="h-4 bg-gray-200 rounded w-5/6"></div>
           </div>
         </div>
       </div>
@@ -249,72 +252,74 @@ export default function OutputTracker() {
 
   return (
     <>
-      {/* Main Component with Glassmorphism */}
-      <div className="bg-white/60 backdrop-blur-sm p-8 rounded-3xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all">
+      {/* Main Component with Neobrutalism Style */}
+      <div className="border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-200 bg-white">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <BarChart3 className="text-gray-400" size={20} strokeWidth={1.5} />
-            <h2 className="text-lg font-light text-gray-700">Output Tracker</h2>
+            <div className="p-2 border-2 border-black">
+              <BarChart3 className="text-black" size={20} strokeWidth={2} />
+            </div>
+            <h2 className="text-xl font-black text-black">OUTPUT TRACKER</h2>
           </div>
           
           <div className="flex items-center gap-4">
             <button
               onClick={() => setShowTypeManager(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-xl hover:bg-gray-900 transition-colors font-light"
+              className="flex items-center gap-2 px-4 py-2 border-2 border-black bg-black text-white hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all font-black"
             >
-              <Settings size={16} strokeWidth={1.5} />
-              Manage Types
+              <Settings size={16} strokeWidth={2} />
+              MANAGE TYPES
             </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Column */}
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* Stats Card */}
-            <div className="bg-gradient-to-br from-gray-50/30 to-gray-100/20 rounded-2xl border border-gray-200/50 p-6">
+            <div className="border-2 border-black bg-white p-6">
               <div className="grid grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-white/50 rounded-xl border border-gray-200/50">
-                  <div className="text-2xl font-light text-gray-800 mb-1">{todayTotalOutput}</div>
-                  <div className="text-sm text-gray-600 font-light">Today's Output</div>
+                <div className="text-center p-4 border-2 border-black">
+                  <div className="text-2xl font-black text-black mb-1">{todayTotalOutput}</div>
+                  <div className="text-sm text-black font-black">TODAY'S OUTPUT</div>
                 </div>
-                <div className="text-center p-4 bg-white/50 rounded-xl border border-gray-200/50">
-                  <div className="text-2xl font-light text-gray-800 mb-1">{streak}</div>
-                  <div className="text-sm text-gray-600 font-light">Day Streak</div>
+                <div className="text-center p-4 border-2 border-black">
+                  <div className="text-2xl font-black text-black mb-1">{streak}</div>
+                  <div className="text-sm text-black font-black">DAY STREAK</div>
                 </div>
-                <div className="text-center p-4 bg-white/50 rounded-xl border border-gray-200/50">
-                  <div className="text-2xl font-light text-gray-800 mb-1">{todayEntries.length}</div>
-                  <div className="text-sm text-gray-600 font-light">Entries Today</div>
+                <div className="text-center p-4 border-2 border-black">
+                  <div className="text-2xl font-black text-black mb-1">{todayEntries.length}</div>
+                  <div className="text-sm text-black font-black">ENTRIES TODAY</div>
                 </div>
               </div>
             </div>
 
             {/* Output Input Card */}
-            <div className="bg-white/50 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-6">
-              <h3 className="text-lg font-light text-gray-700 mb-4">Add Output</h3>
+            <div className="border-2 border-black bg-white p-6">
+              <h3 className="text-lg font-black text-black mb-4">ADD OUTPUT</h3>
               
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3 font-light">
-                    Output Type
+                  <label className="block text-sm font-black text-black mb-3">
+                    OUTPUT TYPE
                   </label>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {outputTypes.map((type) => (
                       <button
                         key={type.id}
                         onClick={() => setSelectedType(type.name)}
-                        className={`p-4 rounded-xl border transition-all text-left font-light ${getColorClasses(type.color)} ${
+                        className={`p-4 text-left transition-all font-black hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] ${
                           selectedType === type.name
-                            ? 'ring-2 ring-gray-800/20'
-                            : 'hover:bg-white/50'
+                            ? 'border-2 border-black bg-black text-white'
+                            : getColorClasses(type.color)
                         }`}
                       >
                         <div className="flex items-center gap-2 mb-1">
-                          <Hash size={16} strokeWidth={1.5} />
-                          <span className="font-medium text-sm">{type.name}</span>
+                          <Hash size={16} strokeWidth={2} />
+                          <span className="text-sm">{type.name}</span>
                         </div>
-                        <div className="text-xs text-gray-600">Target: {type.target} {type.unit}/day</div>
+                        <div className="text-xs text-black">TARGET: {type.target} {type.unit}/DAY</div>
                       </button>
                     ))}
                   </div>
@@ -322,13 +327,13 @@ export default function OutputTracker() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2 font-light">
-                      Quantity
+                    <label className="block text-sm font-black text-black mb-2">
+                      QUANTITY
                     </label>
                     <div className="flex items-center">
                       <button
                         onClick={() => setCount(Math.max(1, count - 1))}
-                        className="px-4 py-3 bg-gray-100/50 hover:bg-gray-200/50 text-gray-700 rounded-l-xl font-light"
+                        className="px-4 py-3 border-2 border-black bg-white text-black hover:bg-black hover:text-white transition-all font-black"
                       >
                         -
                       </button>
@@ -336,11 +341,11 @@ export default function OutputTracker() {
                         type="number"
                         value={count}
                         onChange={(e) => setCount(Math.max(1, parseInt(e.target.value) || 1))}
-                        className="flex-1 px-4 py-3 border-y border-gray-200/50 text-center focus:outline-none focus:ring-2 focus:ring-gray-200 bg-white/50 font-light"
+                        className="flex-1 px-4 py-3 border-y-2 border-black text-center focus:outline-none font-black"
                       />
                       <button
                         onClick={() => setCount(count + 1)}
-                        className="px-4 py-3 bg-gray-100/50 hover:bg-gray-200/50 text-gray-700 rounded-r-xl font-light"
+                        className="px-4 py-3 border-2 border-black bg-white text-black hover:bg-black hover:text-white transition-all font-black"
                       >
                         +
                       </button>
@@ -348,11 +353,11 @@ export default function OutputTracker() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2 font-light">
-                      Unit
+                    <label className="block text-sm font-black text-black mb-2">
+                      UNIT
                     </label>
-                    <div className="px-4 py-3 bg-white/50 border border-gray-200/50 rounded-xl">
-                      <span className="text-gray-700 font-light">
+                    <div className="px-4 py-3 border-2 border-black bg-white">
+                      <span className="text-black font-black">
                         {outputTypes.find(t => t.name === selectedType)?.unit || 'units'}
                       </span>
                     </div>
@@ -360,15 +365,15 @@ export default function OutputTracker() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 font-light">
-                    Notes (Optional)
+                  <label className="block text-sm font-black text-black mb-2">
+                    NOTES (OPTIONAL)
                   </label>
                   <input
                     type="text"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Brief description of what you produced..."
-                    className="w-full px-4 py-3 border border-gray-200/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-200 text-gray-800 placeholder-gray-400 font-light bg-white/50"
+                    className="w-full px-4 py-3 border-2 border-black focus:outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:translate-x-[-2px] focus:translate-y-[-2px] transition-all duration-200 text-black placeholder-gray-500 font-black"
                   />
                 </div>
 
@@ -376,14 +381,14 @@ export default function OutputTracker() {
                   <button
                     onClick={addOutputEntry}
                     disabled={!selectedType || count < 1}
-                    className={`px-8 py-3 rounded-xl font-light transition-all text-lg flex items-center gap-2 ${
+                    className={`px-8 py-3 border-2 font-black transition-all text-lg flex items-center gap-2 ${
                       selectedType && count > 0
-                        ? 'bg-gray-800 hover:bg-gray-900 text-white'
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        ? 'border-black bg-black text-white hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
+                        : 'border-gray-400 bg-gray-200 text-gray-500 cursor-not-allowed hover:translate-x-0 hover:translate-y-0 hover:shadow-none'
                     }`}
                   >
-                    <Plus size={20} strokeWidth={1.5} />
-                    Add Output Entry
+                    <Plus size={20} strokeWidth={2} />
+                    ADD OUTPUT ENTRY
                   </button>
                 </div>
               </div>
@@ -391,10 +396,10 @@ export default function OutputTracker() {
           </div>
 
           {/* Right Column */}
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* Progress Card */}
-            <div className="bg-white/50 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-6">
-              <h3 className="text-lg font-light text-gray-700 mb-6">Daily Progress</h3>
+            <div className="border-2 border-black bg-white p-6">
+              <h3 className="text-lg font-black text-black mb-6">DAILY PROGRESS</h3>
               
               <div className="space-y-6">
                 {outputTypes.map((type) => {
@@ -403,14 +408,14 @@ export default function OutputTracker() {
                     <div key={type.id}>
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full ${getProgressColor(type.color)}`} />
-                          <span className="text-sm font-medium text-gray-700 font-light">{type.name}</span>
+                          <div className={`w-2 h-2 ${getProgressColor(type.color)}`} />
+                          <span className="text-sm font-black text-black">{type.name}</span>
                         </div>
-                        <span className="text-sm text-gray-600 font-light">
+                        <span className="text-sm text-black font-black">
                           {stats.todayTotal} / {stats.target} {type.unit}
                         </span>
                       </div>
-                      <div className="h-2 bg-gray-200/50 rounded-full overflow-hidden">
+                      <div className="h-4 bg-white border-2 border-black overflow-hidden">
                         <div
                           className={`h-full ${getProgressColor(type.color)} transition-all duration-1000 ease-out`}
                           style={{ width: `${stats.percentage}%` }}
@@ -425,71 +430,73 @@ export default function OutputTracker() {
         </div>
       </div>
 
-      {/* Type Manager Modal */}
+      {/* Type Manager Modal - Neobrutalism Style */}
       {showTypeManager && (
         <div className="fixed inset-0 z-50">
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => {
+          {/* Background overlay */}
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => {
             setShowTypeManager(false);
             setEditingType(null);
-            setNewType({ name: '', unit: '', target: 1, color: 'blue' });
+            setNewType({ name: '', unit: '', target: 1, color: 'black' });
           }}></div>
           
+          {/* Modal container */}
           <div className="absolute inset-0 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl border border-gray-200/50 shadow-xl w-full max-w-3xl p-6 max-h-[80vh] overflow-y-auto">
+            <div className="bg-white border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] w-full max-w-3xl p-6 max-h-[80vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-gray-100/50 flex items-center justify-center border border-gray-200/50">
-                    <Settings className="text-gray-600" size={16} strokeWidth={1.5} />
+                  <div className="w-8 h-8 border-2 border-black flex items-center justify-center">
+                    <Settings className="text-black" size={16} strokeWidth={2} />
                   </div>
                   <div>
-                    <h3 className="text-lg font-light text-gray-800">Manage Output Types</h3>
+                    <h3 className="text-lg font-black text-black">MANAGE OUTPUT TYPES</h3>
                   </div>
                 </div>
                 <button
                   onClick={() => {
                     setShowTypeManager(false);
                     setEditingType(null);
-                    setNewType({ name: '', unit: '', target: 1, color: 'blue' });
+                    setNewType({ name: '', unit: '', target: 1, color: 'black' });
                   }}
-                  className="p-1.5 hover:bg-gray-100/50 rounded-lg transition-colors text-gray-500"
+                  className="p-1.5 border-2 border-black hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all text-black"
                 >
-                  <X size={20} strokeWidth={1.5} />
+                  <X size={20} strokeWidth={2} />
                 </button>
               </div>
 
               <div className="space-y-8">
                 {/* Current Types */}
                 <div>
-                  <h4 className="text-sm font-light text-gray-600 uppercase tracking-wider mb-4">
-                    Current Types ({outputTypes.length})
+                  <h4 className="text-sm font-black text-black uppercase tracking-wider mb-4">
+                    CURRENT TYPES ({outputTypes.length})
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {outputTypes.map((type) => (
                       <div
                         key={type.id}
-                        className={`p-4 rounded-xl border ${getColorClasses(type.color)}`}
+                        className={`p-4 border-2 ${getColorClasses(type.color)}`}
                       >
                         <div className="flex justify-between items-start mb-2">
                           <div>
-                            <div className="font-medium text-lg font-light">{type.name}</div>
-                            <div className="text-sm text-gray-600 mt-1 font-light">
-                              Target: {type.target} {type.unit}/day
+                            <div className="text-lg font-black">{type.name}</div>
+                            <div className="text-sm text-black mt-1 font-black">
+                              TARGET: {type.target} {type.unit}/DAY
                             </div>
                           </div>
                           <div className="flex gap-2">
                             <button
                               onClick={() => setEditingType({ ...type })}
-                              className="p-1 text-gray-500 hover:text-blue-600 transition-colors"
+                              className="p-1 border-2 border-black bg-white text-black hover:bg-black hover:text-white transition-all"
                               title="Edit type"
                             >
-                              <Edit2 size={16} />
+                              <Edit2 size={16} strokeWidth={2} />
                             </button>
                             <button
                               onClick={() => deleteOutputType(type.id, type.name)}
-                              className="p-1 text-gray-500 hover:text-red-600 transition-colors"
+                              className="p-1 border-2 border-red-600 bg-white text-red-600 hover:bg-red-600 hover:text-white transition-all"
                               title="Delete type"
                             >
-                              <Trash2 size={16} />
+                              <Trash2 size={16} strokeWidth={2} />
                             </button>
                           </div>
                         </div>
@@ -499,16 +506,16 @@ export default function OutputTracker() {
                 </div>
 
                 {/* Add/Edit Form */}
-                <div className="bg-gray-50/50 rounded-2xl border border-gray-200/50 p-6">
-                  <h3 className="text-lg font-light text-gray-700 mb-6">
-                    {editingType ? 'Edit Output Type' : 'Add New Output Type'}
+                <div className="border-2 border-black bg-white p-6">
+                  <h3 className="text-lg font-black text-black mb-6">
+                    {editingType ? 'EDIT OUTPUT TYPE' : 'ADD NEW OUTPUT TYPE'}
                   </h3>
                   
                   <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2 font-light">
-                          Type Name *
+                        <label className="block text-sm font-black text-black mb-2">
+                          TYPE NAME *
                         </label>
                         <input
                           type="text"
@@ -518,14 +525,14 @@ export default function OutputTracker() {
                               ? setEditingType({ ...editingType, name: e.target.value })
                               : setNewType({ ...newType, name: e.target.value })
                           }
-                          placeholder="e.g., Code Commits"
-                          className="w-full px-4 py-3 border border-gray-200/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-200 text-gray-800 placeholder-gray-400 font-light bg-white/50"
+                          placeholder="e.g., CODE COMMITS"
+                          className="w-full px-4 py-3 border-2 border-black focus:outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:translate-x-[-2px] focus:translate-y-[-2px] transition-all duration-200 text-black placeholder-gray-500 font-black"
                         />
                       </div>
                       
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2 font-light">
-                          Unit *
+                        <label className="block text-sm font-black text-black mb-2">
+                          UNIT *
                         </label>
                         <input
                           type="text"
@@ -535,16 +542,16 @@ export default function OutputTracker() {
                               ? setEditingType({ ...editingType, unit: e.target.value })
                               : setNewType({ ...newType, unit: e.target.value })
                           }
-                          placeholder="e.g., commits"
-                          className="w-full px-4 py-3 border border-gray-200/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-200 text-gray-800 placeholder-gray-400 font-light bg-white/50"
+                          placeholder="e.g., COMMITS"
+                          className="w-full px-4 py-3 border-2 border-black focus:outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:translate-x-[-2px] focus:translate-y-[-2px] transition-all duration-200 text-black placeholder-gray-500 font-black"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2 font-light">
-                          Daily Target *
+                        <label className="block text-sm font-black text-black mb-2">
+                          DAILY TARGET *
                         </label>
                         <div className="flex items-center">
                           <button
@@ -555,7 +562,7 @@ export default function OutputTracker() {
                                 setNewType({ ...newType, target: newType.target - 1 });
                               }
                             }}
-                            className="px-4 py-3 bg-gray-100/50 hover:bg-gray-200/50 text-gray-700 rounded-l-xl font-light"
+                            className="px-4 py-3 border-2 border-black bg-white text-black hover:bg-black hover:text-white transition-all font-black"
                           >
                             -
                           </button>
@@ -570,7 +577,7 @@ export default function OutputTracker() {
                                 setNewType({ ...newType, target: value });
                               }
                             }}
-                            className="flex-1 px-4 py-3 border-y border-gray-200/50 text-center focus:outline-none focus:ring-2 focus:ring-gray-200 bg-white/50 font-light"
+                            className="flex-1 px-4 py-3 border-y-2 border-black text-center focus:outline-none font-black"
                           />
                           <button
                             onClick={() => {
@@ -580,7 +587,7 @@ export default function OutputTracker() {
                                 setNewType({ ...newType, target: newType.target + 1 });
                               }
                             }}
-                            className="px-4 py-3 bg-gray-100/50 hover:bg-gray-200/50 text-gray-700 rounded-r-xl font-light"
+                            className="px-4 py-3 border-2 border-black bg-white text-black hover:bg-black hover:text-white transition-all font-black"
                           >
                             +
                           </button>
@@ -588,8 +595,8 @@ export default function OutputTracker() {
                       </div>
                       
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2 font-light">
-                          Color
+                        <label className="block text-sm font-black text-black mb-2">
+                          COLOR
                         </label>
                         <div className="grid grid-cols-4 gap-2">
                           {colorOptions.map((color) => (
@@ -602,10 +609,10 @@ export default function OutputTracker() {
                                   setNewType({ ...newType, color: color.value });
                                 }
                               }}
-                              className={`p-2 rounded-lg border ${color.className} ${
+                              className={`p-2 border-2 ${color.className} ${
                                 (editingType ? editingType.color : newType.color) === color.value
-                                  ? 'ring-2 ring-gray-800'
-                                  : 'border-gray-200/50'
+                                  ? 'border-black ring-2 ring-black'
+                                  : 'border-black'
                               }`}
                               title={color.label}
                             />
@@ -618,9 +625,9 @@ export default function OutputTracker() {
                       {editingType && (
                         <button
                           onClick={() => setEditingType(null)}
-                          className="px-6 py-3 bg-gray-100/50 hover:bg-gray-200/50 text-gray-700 rounded-xl font-light transition-colors border border-gray-200/50"
+                          className="px-6 py-3 border-2 border-black bg-white text-black hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all font-black"
                         >
-                          Cancel
+                          CANCEL
                         </button>
                       )}
                       <button
@@ -634,17 +641,17 @@ export default function OutputTracker() {
                             ? !editingType.name.trim() || !editingType.unit.trim()
                             : !newType.name.trim() || !newType.unit.trim()
                         }
-                        className={`px-6 py-3 rounded-xl font-light transition-colors ${
+                        className={`px-6 py-3 border-2 font-black transition-all ${
                           editingType
                             ? (editingType.name.trim() && editingType.unit.trim()
-                                ? 'bg-gray-800 hover:bg-gray-900 text-white'
-                                : 'bg-gray-300 text-gray-500 cursor-not-allowed')
+                                ? 'border-black bg-black text-white hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
+                                : 'border-gray-400 bg-gray-200 text-gray-500 cursor-not-allowed hover:translate-x-0 hover:translate-y-0 hover:shadow-none')
                             : (newType.name.trim() && newType.unit.trim()
-                                ? 'bg-gray-800 hover:bg-gray-900 text-white'
-                                : 'bg-gray-300 text-gray-500 cursor-not-allowed')
+                                ? 'border-black bg-black text-white hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
+                                : 'border-gray-400 bg-gray-200 text-gray-500 cursor-not-allowed hover:translate-x-0 hover:translate-y-0 hover:shadow-none')
                         }`}
                       >
-                        {editingType ? 'Update Type' : 'Add Type'}
+                        {editingType ? 'UPDATE TYPE' : 'ADD TYPE'}
                       </button>
                     </div>
                   </div>

@@ -190,12 +190,12 @@ export default function MITDaily() {
 
   if (isLoading) {
     return (
-      <div className="bg-white/60 backdrop-blur-sm p-8 rounded-3xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all">
+      <div className="border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-6 bg-gray-200/50 rounded w-1/3"></div>
+          <div className="h-6 bg-gray-200 rounded w-1/3"></div>
           <div className="space-y-3">
-            <div className="h-4 bg-gray-200/50 rounded"></div>
-            <div className="h-4 bg-gray-200/50 rounded w-5/6"></div>
+            <div className="h-4 bg-gray-200 rounded"></div>
+            <div className="h-4 bg-gray-200 rounded w-5/6"></div>
           </div>
         </div>
       </div>
@@ -204,40 +204,46 @@ export default function MITDaily() {
 
   return (
     <div className="space-y-6">
-      {/* Main Component with Glassmorphism */}
-      <div className="bg-white/60 backdrop-blur-sm p-8 rounded-3xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all">
+      {/* Main Component with Neobrutalism Style */}
+      <div className="border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-200 bg-white">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <Target className="text-gray-400" size={20} strokeWidth={1.5} />
-            <h2 className="text-lg font-light text-gray-700">Most Important Task</h2>
+            <div className="p-2 border-2 border-black">
+              <Target className="text-black" size={20} strokeWidth={2} />
+            </div>
+            <h2 className="text-xl font-black text-black">MOST IMPORTANT TASK</h2>
           </div>
           
           <div className="flex items-center gap-4">
             <button
               onClick={() => setShowStatsModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100/50 border border-gray-200/50 text-gray-600 rounded-xl hover:bg-gray-200/50 transition-colors font-light"
+              className="flex items-center gap-2 px-4 py-2 border-2 border-black bg-black text-white hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all font-black"
             >
-              <BarChart3 size={16} strokeWidth={1.5} />
-              Stats
+              <BarChart3 size={16} strokeWidth={2} />
+              STATS
             </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Task Area */}
           <div className="lg:col-span-2 space-y-6">
             {/* Task Card */}
-            <div className="bg-white/50 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-6">
+            <div className="border-2 border-black bg-white p-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <Calendar size={20} strokeWidth={1.5} className="text-gray-400" />
-                  <span className="text-lg font-light text-gray-700">{currentDate}</span>
+                  <div className="p-2 border-2 border-black">
+                    <Calendar size={20} strokeWidth={2} className="text-black" />
+                  </div>
+                  <span className="text-lg font-black text-black">{currentDate}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Flame size={20} strokeWidth={1.5} className="text-red-500" />
-                  <span className="font-light text-gray-800">
-                    {streakStats?.current_streak || 0} day streak
+                  <div className="p-2 border-2 border-red-600 bg-red-100">
+                    <Flame size={20} strokeWidth={2} className="text-red-900" />
+                  </div>
+                  <span className="font-black text-black">
+                    {streakStats?.current_streak || 0} DAY STREAK
                   </span>
                 </div>
               </div>
@@ -245,47 +251,49 @@ export default function MITDaily() {
               {!isSubmitted ? (
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-lg font-light text-gray-700 mb-3">
-                      What is your Most Important Task today?
+                    <label className="block text-lg font-black text-black mb-3">
+                      WHAT IS YOUR MOST IMPORTANT TASK TODAY?
                     </label>
                     <textarea
                       value={task}
                       onChange={(e) => setTask(e.target.value)}
                       placeholder="Define the single task that will make today successful..."
-                      className="w-full h-40 p-4 bg-white/50 border border-gray-200/50 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-gray-200 text-gray-800 placeholder-gray-400 font-light"
+                      className="w-full h-40 p-4 bg-white border-2 border-black focus:outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:translate-x-[-2px] focus:translate-y-[-2px] transition-all duration-200 resize-none text-black placeholder-gray-500 font-bold"
                     />
                   </div>
                   <div className="flex justify-end">
                     <button
                       onClick={handleSubmitTask}
                       disabled={!task.trim()}
-                      className={`px-8 py-3 rounded-xl font-light transition-all text-lg ${
+                      className={`px-8 py-3 border-2 font-black transition-all text-lg ${
                         task.trim()
-                          ? 'bg-gray-800 hover:bg-gray-900 text-white'
-                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          ? 'border-black bg-black text-white hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
+                          : 'border-gray-400 bg-gray-200 text-gray-500 cursor-not-allowed hover:translate-x-0 hover:translate-y-0 hover:shadow-none'
                       }`}
                     >
-                      Set Today's MIT
+                      SET TODAY'S MIT
                     </button>
                   </div>
                 </div>
               ) : todayTask && (
                 <div className="space-y-6">
-                  <div className="p-6 bg-gradient-to-r from-gray-50/30 to-gray-100/20 rounded-2xl border border-gray-200/50">
+                  <div className="p-6 bg-yellow-100 border-2 border-black">
                     <div className="flex items-start gap-4">
-                      <Target size={24} strokeWidth={1.5} className="text-gray-600 mt-1 flex-shrink-0" />
+                      <div className="p-2 border-2 border-black bg-white flex-shrink-0">
+                        <Target size={24} strokeWidth={2} className="text-black" />
+                      </div>
                       <div>
-                        <h3 className="text-lg font-medium text-gray-800 mb-2 font-light">Today's Most Important Task</h3>
-                        <p className="text-gray-800 text-lg font-light leading-relaxed">{todayTask.task}</p>
+                        <h3 className="text-lg font-black text-black mb-2">TODAY'S MOST IMPORTANT TASK</h3>
+                        <p className="text-black text-lg font-bold leading-relaxed">{todayTask.task}</p>
                       </div>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className={`w-3 h-3 rounded-full ${todayTask.completed ? 'bg-green-500' : 'bg-gray-400'}`} />
-                      <span className={`font-light ${todayTask.completed ? 'text-green-700' : 'text-gray-700'}`}>
-                        {todayTask.completed ? 'Task Completed' : 'Task Pending'}
+                      <div className={`w-4 h-4 border-2 ${todayTask.completed ? 'border-green-600 bg-green-500' : 'border-black bg-gray-300'}`} />
+                      <span className={`font-black ${todayTask.completed ? 'text-green-900' : 'text-black'}`}>
+                        {todayTask.completed ? 'TASK COMPLETED' : 'TASK PENDING'}
                       </span>
                     </div>
                     
@@ -293,25 +301,25 @@ export default function MITDaily() {
                       {!todayTask.completed ? (
                         <button
                           onClick={markComplete}
-                          className="px-6 py-3 bg-gray-800 hover:bg-gray-900 text-white rounded-xl font-light transition-colors flex items-center gap-2"
+                          className="px-6 py-3 border-2 border-black bg-black text-white hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all font-black flex items-center gap-2"
                         >
-                          <CheckCircle size={18} strokeWidth={1.5} />
-                          Mark Complete
+                          <CheckCircle size={18} strokeWidth={2} />
+                          MARK COMPLETE
                         </button>
                       ) : (
                         <button
                           onClick={markIncomplete}
-                          className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-xl font-light transition-colors flex items-center gap-2"
+                          className="px-6 py-3 border-2 border-black bg-gray-800 text-white hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all font-black flex items-center gap-2"
                         >
-                          <XCircle size={18} strokeWidth={1.5} />
-                          Mark Incomplete
+                          <XCircle size={18} strokeWidth={2} />
+                          MARK INCOMPLETE
                         </button>
                       )}
                       <button
                         onClick={resetTask}
-                        className="px-6 py-3 bg-gray-100/50 hover:bg-gray-200/50 text-gray-700 rounded-xl font-light transition-colors border border-gray-200/50"
+                        className="px-6 py-3 border-2 border-black bg-white text-black hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all font-black"
                       >
-                        Change Task
+                        CHANGE TASK
                       </button>
                     </div>
                   </div>
@@ -320,12 +328,14 @@ export default function MITDaily() {
             </div>
 
             {/* Philosophy Section */}
-            <div className="p-6 bg-gradient-to-r from-gray-50/20 to-gray-100/10 rounded-2xl border border-gray-200/50">
+            <div className="p-6 bg-blue-100 border-2 border-black">
               <div className="flex items-start gap-4">
-                <TrendingUp size={20} strokeWidth={1.5} className="text-gray-500 mt-0.5 flex-shrink-0" />
+                <div className="p-2 border-2 border-black bg-white flex-shrink-0">
+                  <TrendingUp size={20} strokeWidth={2} className="text-black" />
+                </div>
                 <div>
-                  <h4 className="text-sm font-light text-gray-800 mb-1">MIT Philosophy</h4>
-                  <p className="text-sm font-light text-gray-600 leading-relaxed">
+                  <h4 className="text-sm font-black text-black mb-1">MIT PHILOSOPHY</h4>
+                  <p className="text-sm text-black font-bold leading-relaxed">
                     The Most Important Task method emphasizes that accomplishing one significant task 
                     is more valuable than completing many trivial ones. This approach trains decision-making 
                     and prioritization skills, focusing on impact rather than activity.
@@ -336,12 +346,14 @@ export default function MITDaily() {
           </div>
 
           {/* Streak Sidebar */}
-          <div className="bg-white/50 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-6">
+          <div className="border-2 border-black bg-white p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-light text-gray-700">Streak Overview</h3>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Award size={16} />
-                <span className="font-light">Longest: {streakStats?.longest_streak || 0} days</span>
+              <h3 className="text-lg font-black text-black">STREAK OVERVIEW</h3>
+              <div className="flex items-center gap-2 text-sm text-black">
+                <div className="p-1 border-2 border-black">
+                  <Award size={14} strokeWidth={2} />
+                </div>
+                <span className="font-black">LONGEST: {streakStats?.longest_streak || 0} DAYS</span>
               </div>
             </div>
             
@@ -349,20 +361,22 @@ export default function MITDaily() {
             <div className="space-y-8">
               <div className="text-center">
                 <div className="flex items-center justify-center gap-3 mb-2">
-                  <Flame size={24} className="text-red-500" />
-                  <div className="text-4xl font-light text-gray-800">{streakStats?.current_streak || 0}</div>
+                  <div className="p-2 border-2 border-red-600 bg-red-100">
+                    <Flame size={24} strokeWidth={2} className="text-red-900" />
+                  </div>
+                  <div className="text-4xl font-black text-black">{streakStats?.current_streak || 0}</div>
                 </div>
-                <div className="text-sm text-gray-600 mb-4 font-light">Current Streak</div>
+                <div className="text-sm text-black mb-4 font-black">CURRENT STREAK</div>
                 
                 {/* Streak Progress */}
                 <div className="mb-4">
-                  <div className="flex justify-between text-xs text-gray-500 mb-1 font-light">
-                    <span>Progress</span>
+                  <div className="flex justify-between text-xs text-black mb-1 font-black">
+                    <span>PROGRESS</span>
                     <span>{streakStats?.streak_percentage || 0}%</span>
                   </div>
-                  <div className="h-2 bg-gray-200/50 rounded-full overflow-hidden">
+                  <div className="h-4 bg-white border-2 border-black overflow-hidden">
                     <div 
-                      className="h-full bg-gradient-to-r from-gray-800 to-gray-900 transition-all duration-1000"
+                      className="h-full bg-black transition-all duration-1000"
                       style={{ width: `${streakStats?.streak_percentage || 0}%` }}
                     />
                   </div>
@@ -370,34 +384,48 @@ export default function MITDaily() {
                 
                 {/* Streak Calendar Heatmap */}
                 <div className="mt-6">
-                  <div className="flex items-center gap-2 text-sm text-gray-700 mb-3 font-light">
-                    <CalendarDays size={16} />
-                    <span>Last 30 Days</span>
+                  <div className="flex items-center gap-2 text-sm text-black mb-3 font-black">
+                    <div className="p-1 border-2 border-black">
+                      <CalendarDays size={14} strokeWidth={2} />
+                    </div>
+                    <span>LAST 30 DAYS</span>
                   </div>
                   <div className="grid grid-cols-7 gap-1">
                     {getStreakHeatmap().map((day, index) => (
                       <div
                         key={index}
-                        className={`aspect-square rounded-sm ${
+                        className={`aspect-square border ${
                           day.completed === true
-                            ? 'bg-gray-800'
+                            ? 'border-black bg-black'
                             : day.completed === false
-                            ? 'bg-red-400'
+                            ? 'border-red-600 bg-red-400'
                             : day.has_task
-                            ? 'bg-gray-300'
-                            : 'bg-gray-100'
+                            ? 'border-black bg-gray-300'
+                            : 'border-gray-400 bg-gray-100'
                         } ${
-                          day.date === currentDate ? 'ring-2 ring-gray-400' : ''
+                          day.date === currentDate ? 'ring-2 ring-black' : ''
                         }`}
                         title={`${day.date}: ${day.completed === true ? 'Completed' : day.completed === false ? 'Not completed' : 'No task'}`}
                       />
                     ))}
                   </div>
-                  <div className="flex justify-between text-xs text-gray-500 mt-2 font-light">
-                    <span>Completed</span>
-                    <span>Missed</span>
-                    <span>No Task</span>
-                    <span>Today</span>
+                  <div className="flex justify-between text-xs text-black mt-2 font-black">
+                    <span className="flex items-center gap-1">
+                      <div className="w-3 h-3 border border-black bg-black"></div>
+                      DONE
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <div className="w-3 h-3 border border-red-600 bg-red-400"></div>
+                      MISSED
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <div className="w-3 h-3 border border-black bg-gray-300"></div>
+                      TASK
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <div className="w-3 h-3 ring-2 ring-black"></div>
+                      TODAY
+                    </span>
                   </div>
                 </div>
               </div>
@@ -406,90 +434,96 @@ export default function MITDaily() {
         </div>
       </div>
 
-      {/* Stats Modal */}
+      {/* Stats Modal - Neobrutalism Style */}
       {showStatsModal && streakStats && (
         <div className="fixed inset-0 z-50">
           {/* Background overlay */}
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowStatsModal(false)}></div>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowStatsModal(false)}></div>
           
           {/* Modal container */}
           <div className="absolute inset-0 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl border border-gray-200/50 shadow-xl w-full max-w-3xl p-6 max-h-[80vh] overflow-y-auto">
+            <div className="bg-white border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] w-full max-w-3xl p-6 max-h-[80vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-gray-100/50 flex items-center justify-center border border-gray-200/50">
-                    <BarChart3 className="text-gray-600" size={16} strokeWidth={1.5} />
+                  <div className="w-8 h-8 border-2 border-black flex items-center justify-center">
+                    <BarChart3 className="text-black" size={16} strokeWidth={2} />
                   </div>
                   <div>
-                    <h3 className="text-lg font-light text-gray-800">MIT Statistics</h3>
+                    <h3 className="text-lg font-black text-black">MIT STATISTICS</h3>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowStatsModal(false)}
-                  className="p-1.5 hover:bg-gray-100/50 rounded-lg transition-colors text-gray-500"
+                  className="p-1.5 border-2 border-black hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all text-black"
                 >
-                  <XCircle size={20} strokeWidth={1.5} />
+                  <XCircle size={20} strokeWidth={2} />
                 </button>
               </div>
               
               <div className="space-y-8">
                 {/* Streak Summary */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="bg-gradient-to-br from-gray-50/30 to-gray-100/20 p-6 rounded-2xl border border-gray-200/50">
+                  <div className="p-6 bg-yellow-100 border-2 border-black">
                     <div className="flex items-center gap-3 mb-4">
-                      <Flame size={24} className="text-red-500" />
-                      <h3 className="text-lg font-light text-gray-800">Current Streak</h3>
+                      <div className="p-2 border-2 border-red-600 bg-red-100">
+                        <Flame size={24} strokeWidth={2} className="text-red-900" />
+                      </div>
+                      <h3 className="text-lg font-black text-black">CURRENT STREAK</h3>
                     </div>
-                    <div className="text-5xl font-light text-gray-900 mb-2">
+                    <div className="text-5xl font-black text-black mb-2">
                       {streakStats.current_streak}
                     </div>
-                    <p className="text-sm text-gray-600 font-light">days in a row</p>
+                    <p className="text-sm text-black font-black">DAYS IN A ROW</p>
                   </div>
                   
-                  <div className="bg-gradient-to-br from-gray-50/30 to-gray-100/20 p-6 rounded-2xl border border-gray-200/50">
+                  <div className="p-6 bg-blue-100 border-2 border-black">
                     <div className="flex items-center gap-3 mb-4">
-                      <Award size={24} className="text-gray-600" />
-                      <h3 className="text-lg font-light text-gray-800">Longest Streak</h3>
+                      <div className="p-2 border-2 border-black bg-white">
+                        <Award size={24} strokeWidth={2} className="text-black" />
+                      </div>
+                      <h3 className="text-lg font-black text-black">LONGEST STREAK</h3>
                     </div>
-                    <div className="text-5xl font-light text-gray-900 mb-2">
+                    <div className="text-5xl font-black text-black mb-2">
                       {streakStats.longest_streak}
                     </div>
-                    <p className="text-sm text-gray-600 font-light">all-time record</p>
+                    <p className="text-sm text-black font-black">ALL-TIME RECORD</p>
                   </div>
                   
-                  <div className="bg-gradient-to-br from-gray-50/30 to-gray-100/20 p-6 rounded-2xl border border-gray-200/50">
+                  <div className="p-6 bg-green-100 border-2 border-black">
                     <div className="flex items-center gap-3 mb-4">
-                      <TrendingUp size={24} className="text-gray-600" />
-                      <h3 className="text-lg font-light text-gray-800">Consistency</h3>
+                      <div className="p-2 border-2 border-black bg-white">
+                        <TrendingUp size={24} strokeWidth={2} className="text-black" />
+                      </div>
+                      <h3 className="text-lg font-black text-black">CONSISTENCY</h3>
                     </div>
-                    <div className="text-5xl font-light text-gray-900 mb-2">
+                    <div className="text-5xl font-black text-black mb-2">
                       {streakStats.streak_percentage}%
                     </div>
-                    <p className="text-sm text-gray-600 font-light">of last 30 days</p>
+                    <p className="text-sm text-black font-black">OF LAST 30 DAYS</p>
                   </div>
                 </div>
 
                 {/* Weekly Performance */}
                 <div>
-                  <h3 className="text-lg font-light text-gray-700 mb-4 pb-2 border-b border-gray-200/50">
-                    Weekly Completion Rates
+                  <h3 className="text-lg font-black text-black mb-4 pb-2 border-b-2 border-black">
+                    WEEKLY COMPLETION RATES
                   </h3>
                   <div className="space-y-4">
                     {streakStats.weekly_stats.slice(0, 8).map((week) => (
-                      <div key={week.week_number} className="p-4 bg-gray-50/30 rounded-xl border border-gray-200/50">
+                      <div key={week.week_number} className="p-4 bg-white border-2 border-black">
                         <div className="flex justify-between items-center mb-2">
-                          <span className="font-light text-gray-700">Week {week.week_number}</span>
-                          <span className="font-light text-gray-800">{week.completion_rate}%</span>
+                          <span className="font-black text-black">WEEK {week.week_number}</span>
+                          <span className="font-black text-black">{week.completion_rate}%</span>
                         </div>
                         <div className="flex items-center gap-3">
-                          <div className="flex-1 h-2 bg-gray-200/50 rounded-full overflow-hidden">
+                          <div className="flex-1 h-4 bg-white border-2 border-black overflow-hidden">
                             <div 
-                              className="h-full bg-gray-800 transition-all duration-1000"
+                              className="h-full bg-black transition-all duration-1000"
                               style={{ width: `${week.completion_rate}%` }}
                             />
                           </div>
-                          <span className="text-sm text-gray-600 font-light">
-                            {week.completed_days}/{week.total_days} days
+                          <span className="text-sm text-black font-black">
+                            {week.completed_days}/{week.total_days} DAYS
                           </span>
                         </div>
                       </div>
@@ -499,26 +533,26 @@ export default function MITDaily() {
 
                 {/* Monthly Stats */}
                 <div>
-                  <h3 className="text-lg font-light text-gray-700 mb-4 pb-2 border-b border-gray-200/50">
-                    Monthly Performance
+                  <h3 className="text-lg font-black text-black mb-4 pb-2 border-b-2 border-black">
+                    MONTHLY PERFORMANCE
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {streakStats.monthly_stats.slice(0, 6).map((month) => (
-                      <div key={month.month} className="p-4 bg-white/50 rounded-xl border border-gray-200/50">
+                      <div key={month.month} className="p-4 bg-white border-2 border-black">
                         <div className="flex justify-between items-start mb-3">
                           <div>
-                            <h4 className="font-light text-gray-800">{month.month}</h4>
-                            <p className="text-sm text-gray-600 mt-1 font-light">
-                              {month.completed_tasks} of {month.total_tasks} tasks completed
+                            <h4 className="font-black text-black">{month.month}</h4>
+                            <p className="text-sm text-black mt-1 font-bold">
+                              {month.completed_tasks} OF {month.total_tasks} TASKS COMPLETED
                             </p>
                           </div>
-                          <div className="text-2xl font-light text-gray-800">
+                          <div className="text-2xl font-black text-black">
                             {month.completion_rate}%
                           </div>
                         </div>
-                        <div className="h-2 bg-gray-200/50 rounded-full overflow-hidden">
+                        <div className="h-4 bg-white border-2 border-black overflow-hidden">
                           <div 
-                            className="h-full bg-gradient-to-r from-gray-800 to-gray-900 transition-all duration-1000"
+                            className="h-full bg-gradient-to-r from-black to-gray-900 transition-all duration-1000"
                             style={{ width: `${month.completion_rate}%` }}
                           />
                         </div>

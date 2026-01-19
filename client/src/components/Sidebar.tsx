@@ -6,36 +6,31 @@ import {
   Code,
   Settings,
 } from 'lucide-react';
-
 import { SiOpenai, SiSpotify, SiGithub } from 'react-icons/si';
 
 const socialLinks = [
-  { icon: MessageCircle, url: 'https://www.messenger.com/e2ee/t/7717579328294432/', label: 'Messenger', hover: 'group-hover:text-blue-600' },
-  { icon: Facebook, url: 'https://facebook.com', label: 'Facebook', hover: 'group-hover:text-blue-700' },
-  { icon: Instagram, url: 'https://instagram.com', label: 'Instagram', hover: 'group-hover:text-pink-600' },
-  { icon: Youtube, url: 'https://youtube.com', label: 'YouTube', hover: 'group-hover:text-red-600' },
-  { icon: Code, url: 'https://leetcode.com/u/miggymiggyimperialcea/', label: 'LeetCode', hover: 'group-hover:text-orange-600' },
-  { icon: SiOpenai, url: 'https://chat.openai.com', label: 'ChatGPT', hover: 'group-hover:text-purple-600' },
-  { icon: SiSpotify, url: 'https://open.spotify.com', label: 'Spotify', hover: 'group-hover:text-green-600' },
-  { icon: SiGithub, url: 'https://github.com/mggyslz', label: 'GitHub', hover: 'group-hover:text-black' },
+  { icon: MessageCircle, url: 'https://www.messenger.com/e2ee/t/7717579328294432/', label: 'Messenger', color: 'bg-blue-500' },
+  { icon: Facebook, url: 'https://facebook.com', label: 'Facebook', color: 'bg-blue-600' },
+  { icon: Instagram, url: 'https://instagram.com', label: 'Instagram', color: 'bg-pink-600' },
+  { icon: Youtube, url: 'https://youtube.com', label: 'YouTube', color: 'bg-red-600' },
+  { icon: Code, url: 'https://leetcode.com/u/miggymiggyimperialcea/', label: 'LeetCode', color: 'bg-orange-500' },
+  { icon: SiOpenai, url: 'https://chat.openai.com', label: 'ChatGPT', color: 'bg-green-500' },
+  { icon: SiSpotify, url: 'https://open.spotify.com', label: 'Spotify', color: 'bg-green-400' },
+  { icon: SiGithub, url: 'https://github.com/mggyslz', label: 'GitHub', color: 'bg-gray-800' },
 ];
 
 export default function Sidebar() {
   return (
     <aside className="fixed left-0 top-0 h-screen w-20 z-50">
       {/* Background */}
-      <div className="absolute inset-0 backdrop-blur-xl bg-white/20 border-r border-white/40" />
+      <div className="absolute inset-0 bg-white border-r-2 border-black" />
 
       {/* Content */}
       <div className="relative h-full flex flex-col items-center py-6">
-        {/* Brand */}
+        {/* Brand - Red only */}
         <div className="mb-8">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center shadow-lg overflow-hidden">
-            <img 
-              src="/favicon.ico" 
-              alt="MZ Logo" 
-              className="w-full h-full object-cover"
-            />
+          <div className="w-12 h-12 border-2 border-black bg-red-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center overflow-hidden hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] transition-all duration-150">
+            <div className="font-black text-lg">MZ</div>
           </div>
         </div>
 
@@ -51,14 +46,13 @@ export default function Sidebar() {
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group relative p-3 rounded-2xl hover:bg-white/30 transition-all duration-200 hover:scale-105"
-                  title={link.label}
+                  className={`group relative w-12 h-12 border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] transition-all duration-150`}
                 >
-                  <Icon className={`w-[22px] h-[22px] text-gray-500 transition-colors ${link.hover}`} />
-                  {/* Tooltip */}
-                  <span className="absolute left-full ml-4 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                    {link.label}
-                  </span>
+                  {/* Colored background on hover */}
+                  <div className={`absolute inset-0 ${link.color} opacity-0 group-hover:opacity-100 transition-opacity duration-150`} />
+                  
+                  {/* Icon */}
+                  <Icon className="w-5 h-5 text-black group-hover:text-white transition-colors duration-150 relative z-10" />
                 </a>
               );
             })}
@@ -67,11 +61,8 @@ export default function Sidebar() {
 
         {/* Settings */}
         <div className="mt-auto">
-          <button className="group relative p-3 rounded-2xl hover:bg-white/30 transition-all hover:scale-105">
-            <Settings className="w-[22px] h-[22px] text-gray-600 group-hover:text-gray-900" />
-            <span className="absolute left-full ml-4 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-              Settings
-            </span>
+          <button className="group w-12 h-12 border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,1)] active:translate-x-[4px] active:translate-y-[4px] hover:bg-black transition-all duration-150">
+            <Settings className="w-5 h-5 text-black group-hover:text-white transition-colors duration-150" />
           </button>
         </div>
       </div>
